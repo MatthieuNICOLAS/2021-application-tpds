@@ -361,7 +361,7 @@ Nodes use an anti-entropy mechanism to synchronise in a pairwise manner, by dete
 Our \emph{rename} operation helps RenamableLogootSplit to reduce the overhead of nodes replica.
 This operation reassigns arbitrary identifiers to elements.
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \subfloat[Selecting the new identifier of the first element]{
         \begin{tikzpicture}
@@ -442,7 +442,7 @@ However, since identifiers were modified by the concurrent \emph{rename} operati
 As described by this example, applying naively concurrent updates would result in inconsistencies.
 It is thus necessary to handle concurrent operations to \emph{rename} operations in a particular manner.
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \begin{tikzpicture}
         \path
@@ -481,7 +481,7 @@ Then it computes the counterpart of \id{i}{B0}{0}\id{f}{A0}{0} in the renamed st
 Finally, node A prepends it to the given id to generate the renamed id: \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
 By reassigning this id to the concurrently added element, node A is able to insert it in its state while preserving the intended order.
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \begin{tikzpicture}
         \path
@@ -554,7 +554,104 @@ Meanwhile, nodes can offload it onto the disk as it is only required to handle c
 
 \label{sec:distributed-rls}
 
-\subsection{TODO}
+\subsection{Concurrent \emph{rename} operations}
+
+We now consider scenarios with concurrent \emph{rename} operations.
+\autoref{fig:conflicting-rename-operations} depicts such one.
+This figure expands the scenario previously described in \autoref{fig:concurrent-insert-rename-fixed}.
+
+\begin{figure*}[t!]
+    \centering
+    \begin{tikzpicture}
+        \path
+            node {\textbf{A}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+            to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
+            to ++(0:\widthepoch) node[block, fill=mydarkblue,
+            label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                ]{HE}
+            to ++(0:\widthblock) node[letter, fill=mylightblue,
+                    label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                ] {L}
+            to ++(0:\widthletter) node[block, fill=mydarkblue,
+                    label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                ] (S1A-right) {LO}
+            to ++ (0:5 * \widthletter) node[epoch] (S2A-left) {\epoch{B2}}
+            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                        ]{HE}
+            to ++(0:\widthblock) node[letter, fill=mylightblue,
+                    label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                ] {L}
+            to ++(0:\widthletter) node[block, fill=mydarkblue,
+                    label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                ] {LO};
+
+        \path
+            to ++(270:2) node {\textbf{B}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+            to ++(0:\widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S0B-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S1B-left) {\epoch{B2}}
+            to ++(0:\widthepoch) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] (S1B-right) {HELLO}
+            to ++ (0:6.5 * \widthletter) node[epoch] (S2B-left) {\epoch{A1}}
+            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ]  {HELLO};
+
+
+        \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \draw[dotted] (S1A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S2A-left);
+        \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S1B-left);
+        \draw[dotted] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S2B-left);
+
+        \draw[dashed, ->, thick, shorten >= 3] (S0B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left.west);
+        \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- (S2A-left.west);
+        \draw[dashed, ->, thick, shorten >= 3] (S1A-right.east) -- (S2B-left.west);
+
+    \end{tikzpicture}
+    \caption{Concurrent \emph{rename} operations leading to divergent states}
+    \label{fig:conflicting-rename-operations}
+\end{figure*}
+
+After broadcasting its \emph{insert} operation, node B performs a \emph{rename} operation on its state.
+This operation reassigns new identifiers to every element based on the id of the first element of the sequence (\id{i}{B0}{0}), its node id (\textbf{B}) and current sequence number (\emph{2}).
+This operation also introduces a new epoch : \epoch{B2}.
+Since node A's \emph{rename} operation was not yet delivered to node B at that moment, both \emph{rename} operations are concurrent.
+
+Node A and B then synchronise : each node applies the other one's \emph{rename} operation.
+However, although they applied the same set of operation, their resulting states diverge.
+The identifiers attached to every element as well as the current epoch are now different.
+While the content of both sequences is still identical at that moment, the divergence will only widen.
+Subsequent operations will rely on these divergent identifiers to express at which position to insert new elements or which ones to remove.
+The same operations will thus produce different outputs on each copy.
+
+The divergence depicted in \autoref{fig:conflicting-rename-operations} occurs since the proposed \emph{rename} operation is not commutative with itself.
+As concurrent operations may be delivered and applied in different orders to each nodes, conflicts may arise as a result.
+Nodes have to solve these conflicts to ensure the convergence of their state.
+
+To this end, we propose the following approach : nodes effectively apply only one \emph{rename} operation from a set of concurrent \emph{rename} operations.
+The insight behind this approach is that \emph{rename} operations are system operations : they have no effect on the document content and they do not carry any user intention.
+Therefore nodes can ignore several \emph{rename} operations from a set of concurrent \emph{rename} ones without disturbing the user experience.
+Thus, as long as every nodes apply one same \emph{rename} operation from the set of concurrent \emph{rename} ones, they will be able to benefit from its effects while avoiding conflicts.
+
+We define the one \emph{rename} operation that nodes apply from a set of concurrent \emph{rename} operations the \emph{primary} one.
+Other operations from the set are called \emph{secondary} ones.
+
+To make this approach feasible, we have to address two issues.
+First, nodes have to be able to select the \emph{primary rename} operation to apply from a set of concurrent ones.
+In order to avoid performance issues due to coordination, nodes should select this operation in a coordination-free manner, \ie solely using data from the set of concurrent \emph{rename} operations.
+We propose such a mechanism in \autoref{sec:priority}.
+Second, nodes have to able to revert the effect of applied \emph{rename} operations.
+As nodes have only a partial knowledge of the system and of the issued operations, they may apply one \emph{rename} operation at a moment only to receive afterward a concurrent \emph{rename} operation which is deemed as the new \emph{primary} one.
+We present a corresponding algorithm in \autoref{sec:reverting-rename-op}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
@@ -760,7 +857,7 @@ Since in that case node B would have to transform operations to apply them to \e
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
 Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \subfloat[Execution]{
         \begin{tikzpicture}
@@ -918,7 +1015,7 @@ Further work to formally prove its correctness should be undertaken.
 
 \paragraph{Memory overhead}
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \includegraphics[width=\columnwidth]{img/snapshot-sizes.pdf}
     \caption{Evolution of the size of the document}
@@ -949,7 +1046,7 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
 
 \paragraph{Integration times of standard operations}
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
     \centering
     \subfloat[Local operations]{
         \includegraphics[width=0.9\columnwidth]{img/integration-time-boxplot-local-operations-without-outliers.pdf}
