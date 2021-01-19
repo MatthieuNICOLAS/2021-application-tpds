@@ -34,9 +34,7 @@
 \def\algorithmautorefname{Algorithm} % \autoref
 \def\myruleautorefname{Rule} % \autoref
 
-\usepackage{algorithmic}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{algpseudocode}
 
 % algorithmic.sty was written by Peter Williams and Rogerio Brito.
 % This package provides an algorithmic environment fo describing algorithms.
@@ -507,35 +505,35 @@ By reassigning this id to the concurrently added element, node A is able to inse
 
 \begin{figure}
     \begin{algorithmic}
-        \REQUIRE id, renamedBlocks, nId, nSeq
-        \ENSURE renamedId
+        \Function {renameId}{id, renamedBlocks, nId, nSeq}
 
-        % \Statex \LeftComment{$\trm{id}$ is the identifier to rename}
-        % \Statex \LeftComment{$\trm{renamedBlocks}$ is the former state}
-        % \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
-        % \Statex \LeftComment{$\trm{nSeq}$ is $\trm{node~seq}$ of the node which issued the \emph{rename} op}\\
+            % \Statex \LeftComment{$\trm{id}$ is the identifier to rename}
+            % \Statex \LeftComment{$\trm{renamedBlocks}$ is the former state}
+            % \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
+            % \Statex \LeftComment{$\trm{nSeq}$ is $\trm{node~seq}$ of the node which issued the \emph{rename} op}\\
 
-        \STATE length $\gets$ renamedBlocks.length
-        \STATE firstId $\gets$ idBegin(renamedBlocks[0])
-        \STATE lastId $\gets$ idEnd(renamedBlocks[length - 1])
+            \State length $\gets$ renamedBlocks.length
+            \State firstId $\gets$ idBegin(renamedBlocks[0])
+            \State lastId $\gets$ idEnd(renamedBlocks[length - 1])
 
-        \STATE pos $\gets$ position(firstId)
-        \STATE newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
-        \STATE newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
+            \State pos $\gets$ position(firstId)
+            \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
+            \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
 
-        \IF{firstId < id \AND id < lastId}
-            \STATE pred $\gets$ findPredecessor(id, renamedBlocks)
-            \STATE indexOfPred $\gets$ findIndex(pred, renamedBlocks)
-            \STATE newPred $\gets$ \new~Id(pos, nId, nSeq, indexOfPred)
-            \RETURN concat(newPredecessor, id)
-        \ELSIF{lastId < id \AND id < newLastId}
-            \RETURN concat(newLastId, id)
-        \ELSIF{newFirstId < id \AND id < firstId}
-            \STATE predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
-            \RETURN concat(predOfNewFirstId, id)
-        \ELSE
-            \RETURN id \COMMENT{Return the identifier unchanged as it does not conflict with the rename op}
-        \ENDIF
+            \If{firstId < id \textbf{and} id < lastId}
+                \State pred $\gets$ findPredecessor(id, renamedBlocks)
+                \State indexOfPred $\gets$ findIndex(pred, renamedBlocks)
+                \State newPred $\gets$ \new~Id(pos, nId, nSeq, indexOfPred)
+                \State \Return concat(newPredecessor, id)
+            \ElsIf{lastId < id \textbf{and} id < newLastId}
+                \State \Return concat(newLastId, id)
+            \ElsIf{newFirstId < id \textbf{and} id < firstId}
+                \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
+                \State \Return concat(predOfNewFirstId, id)
+            \Else
+                \State \Return id \Comment{Return the identifier unchanged as it does not conflict with the rename op}
+            \EndIf
+        \EndFunction
     \end{algorithmic}
     \caption{Rename concurrently generated identifier}
     \label{alg:renameId}
@@ -692,7 +690,9 @@ To do so, nodes use \autoref{alg:revertRenameId}.
 
 \begin{figure}
     \begin{algorithmic}
-        \RETURN tail
+        \Function{revertRenameId}{}
+            \State \Return tail
+        \EndFunction
     \end{algorithmic}
     \caption{Revert rename identifier}
     \label{alg:revertRenameId}
