@@ -349,6 +349,8 @@ This layer is thus used to deliver messages to the application exactly-once.
 The layer also ensures that \emph{remove} operations are delivered after corresponding \emph{insert} operations.
 Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronise in a pairwise manner, by detecting and re-exchanging lost operations.
 
+\mnnote{TODO? : Ajouter une sous-section présentant les propriétés que doit respecter l'opération \emph{rename} (déterminisme, commutativité, respect de l'intention de l'utilisateur)}
+
 \section{RenamableLogootSplit in centralised settings}
 \label{sec:centralised-rls}
 
@@ -597,6 +599,8 @@ Nodes need it until each of them can no longer issue concurrent operations to th
 In other words, nodes can safely garbage collect the former state once the \emph{rename} operation became causally stable \cite{10.1007/978-3-662-43352-2_11}.
 Meanwhile, nodes can offload it onto the disk as it is only required to handle concurrent operations.
 
+\mnnote{TODO? : Ajouter une sous-section sur la stratégie de renommage. À ce stade, me permettrait d'introduire le requirement de performance (temps d'intégration, mais aussi consommation en bande-passante ou même taille de la structure en mémoire). Permettrait aussi de faire le lien avec \autoref{sec:evaluation}.}
+
 \section{RenamableLogootSplit in distributed settings}
 
 \label{sec:distributed-rls}
@@ -612,13 +616,13 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
     \begin{tikzpicture}
         \path
             node {\textbf{A}}
-            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
-            to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-            to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
-            to ++(0:5 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{A1}}
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
-            label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
+                ] (S0A) {HELO}
+            to ++(0:7 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
                 ]{HE}
             to ++(0:\widthblock) node[letter, fill=mylightblue,
                     label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
@@ -648,13 +652,13 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S1B-right) {HELLO}
-            to ++ (0:6.5 * \widthletter) node[epoch] (S2B-left) {\epoch{A1}}
+            to ++ (0:7 * \widthletter) node[epoch] (S2B-left) {\epoch{A1}}
             to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ]  {HELLO};
 
 
-        \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \draw[dotted] (S0A) -- (S1A-left);
         \draw[dotted] (S1A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S2A-left);
         \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S1B-left);
         \draw[dotted] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S2B-left);
@@ -703,12 +707,19 @@ We present a corresponding algorithm in \autoref{sec:reverting-rename-op}.
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-We define \emph{priority}, a total order relation between epochs.
-This relation enables nodes to designate the \emph{primary rename} operation from a set of concurrent ones, but also the current epoch from the set of all issued \emph{rename} operations.
+As stated in \autoref{sec:dealing-with-concurrent-updates}, nodes build and maintain the \emph{epoch chain}, a data structure ordering epochs according to their \emph{parent-child} relation, as they receive \emph{rename} operations.
+Using the \emph{epoch chain}, nodes determine their current epoch as the latest one.
+However, in case of concurrent \emph{rename} operations, this data structure is no longer suitable as several epochs may share the same parent epoch.
+Epochs now form the \emph{epoch tree}.
+Several epochs may be considered as the latest ones.
+To converge, every node should eventually select the same epoch as the \emph{primary} one.
 
-To define the \emph{priority} relation, we may actually choose different strategies.
-In this work, we use the lexicographical order on the epoch identifiers as the \emph{priority} relation.
-An epoch identifier is obtained by concatening the \emph{node id} and \emph{node sequence number} of the author of the \emph{rename} operation to the current epoch identifier at the time.
+To this end, we define \emph{priority}, a total order relation between epochs.
+The goal of this relation is to enable nodes to designate the \emph{primary rename} operation from a set of concurrent ones, but also the current epoch from the set of all issued \emph{rename} operations, in a coordination-free manner.
+
+To define the \emph{priority} relation, we may actually select different strategies.
+In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
+\mnnote{TODO: Ajouter et présenter figure sur l'\emph{epoch tree} et la relation \emph{priority} correspondant à l'exemple de la figure \autoref{fig:conflicting-rename-operations}}
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
@@ -720,10 +731,6 @@ Upon the reception of a \emph{rename} operation, nodes first have to determine i
 To do so, they compare their current epoch to the new one using the \emph{priority} relation.
 If the new epoch is indeed the new \emph{primary} one, nodes have then to determine if they applied concurrent and conflicting \emph{rename} operations previously.
 To this end, nodes use the \emph{epoch tree}.
-
-Epochs are introduced by \emph{rename} operations, themselves issued from given epochs.
-We can thus establish the \emph{parent} relation between epochs.
-Using this relation, nodes are each able to build the \emph{epoch tree}.
 
 Using the \emph{epoch tree}, nodes are able to determine if their current epoch is the \emph{parent} of the new \emph{primary} one.
 If that is not the case, it means that they applied one or several concurrent \emph{rename} operations.
@@ -1009,6 +1016,8 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
 \mnnote{TODO: Marquer comme GC \epoch{A1} et \epoch{A8} via \autoref{rule:gc-concurrent-primary-epoch} et \epoch{0} via \autoref{rule:gc-root} de l'epoch tree de A dans la \autoref{fig:GC-epoch-trees-step-2}}
 
 \section{Evaluation}
+
+\label{sec:evaluation}
 
 \subsection{Simulations and benchmarks}
 
