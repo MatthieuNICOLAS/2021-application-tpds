@@ -97,7 +97,7 @@
     letter/.style={common, minimum width=\widthletter},
     block/.style={common, minimum width=\widthblock},
     epoch/.style={letter, rounded rectangle, rounded rectangle east arc=0pt, minimum width=\widthepoch},
-    op/.style={draw, circle, minimum size=2em},
+    op/.style={draw, circle, minimum size=2.7em},
     causalop/.style={op, double=white, inner sep=2pt},
     cross/.style={
         path picture={
@@ -658,12 +658,12 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
                 ]  {HELLO};
 
 
-        \draw[dotted] (S0A) -- (S1A-left);
+        \draw[dotted] (S0A) -- node[above, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left);
         \draw[dotted] (S1A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S2A-left);
         \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S1B-left);
         \draw[dotted] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S2B-left);
 
-        \draw[dashed, ->, thick, shorten >= 3] (S0B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left.west);
+        \draw[dashed, ->, thick, shorten >= 3] (S0B-right.east) -- (S1A-left.west);
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- (S2A-left.west);
         \draw[dashed, ->, thick, shorten >= 3] (S1A-right.east) -- (S2B-left.west);
 
@@ -702,7 +702,7 @@ In order to avoid performance issues due to coordination, nodes should select th
 We propose such a mechanism in \autoref{sec:priority}.
 Second, nodes have to able to revert the effect of applied \emph{rename} operations.
 As nodes have only a partial knowledge of the system and of the issued operations, they may apply one \emph{rename} operation at a moment only to receive afterward a concurrent \emph{rename} operation which is deemed as the new \emph{primary} one.
-We present a corresponding algorithm in \autoref{sec:reverting-rename-op}.
+We present a corresponding algorithm in \autoref{sec:applying-primary-rename-op}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
@@ -719,7 +719,61 @@ The goal of this relation is to enable nodes to designate the \emph{primary rena
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
-\mnnote{TODO: Ajouter et présenter figure sur l'\emph{epoch tree} et la relation \emph{priority} correspondant à l'exemple de la figure \autoref{fig:conflicting-rename-operations}}
+\autoref{fig:priority-example} provides an example of its use.
+
+\begin{figure}[t!]
+    \centering
+    \subfloat[State of A's \emph{epoch tree} at (1)]{
+        \begin{tikzpicture}
+            \path
+                node[op] (e0) {\epoch{0}}
+                to ++(270:1.5) node[op] (eA1) {\epoch{A1}};
+
+            \draw[thick] (e0) -- (eA1);
+        \end{tikzpicture}
+        \label{fig:priority-example-step-1-A}}
+    \hfil
+    \subfloat[State of B's \emph{epoch tree} at (1)]{
+        \begin{tikzpicture}
+            \path
+                node[op] (e0) {\epoch{0}}
+                to ++(270:1.5) node[op] (eB2) {\epoch{B2}};
+
+            \draw[thick] (e0) -- (eB2);
+        \end{tikzpicture}
+        \label{fig:priority-example-step-1-B}}
+    \hfil
+    \subfloat[State of both \emph{epoch trees} at (2)]{
+        \begin{tikzpicture}
+            \path
+                node[op] (e0) {\epoch{0}}
+                to ++(225:1.5) node[op] (eA1) {\epoch{A1}};
+            \path
+                to ++(315:1.5) node[op] (eB2) {\epoch{B2}};
+
+            \draw[thick] (e0) -- (eA1);
+            \draw[thick] (e0) -- (eB2);
+        \end{tikzpicture}
+        \label{fig:priority-example-step-2}}
+    \caption{Evolution of \emph{epoch trees} during the scenario of \autoref{fig:conflicting-rename-operations}}
+    \label{fig:priority-example}
+\end{figure}
+\mnnote{TODO: Faire apparaître la relation \emph{priority} entre les epochs ainsi que l'epoch courante dans \autoref{fig:priority-example}}
+
+This figure displays the evolution of node A and B's \emph{epoch trees} during the execution of \autoref{fig:conflicting-rename-operations}'s scenario.
+Initially, both nodes are only aware of their own \emph{rename} operation.
+Node A's (resp. node B's) \emph{epoch tree} is thus only composed of the epochs \epoch{0} and \epoch{A1} (resp. \epoch{B2}).
+Using the \emph{priority} relation, both nodes order epochs to determine the current one.
+According to the lexicographical order on the path of epochs in the \emph{epoch tree}, node A (resp. node B) establishes that \epoch{0} < \epoch{0}\epoch{A1} (resp. \epoch{0} < \epoch{0}\epoch{B2}).
+Therefore node A selects \epoch{A1} as its current epoch while node B picks \epoch{B2}.
+
+Then, both nodes synchronise and their \emph{epoch trees} converge.
+Using the \emph{priority} relation, they are able to decide which \emph{rename} operation to deem as the \emph{primary} one in a coordination-free manner.
+Nodes establish that \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{B2}.
+Therefore, they choose \epoch{B2} as the new \emph{primary} and current epoch.
+As \epoch{B2} was already node B's current epoch, node B does not rename its state upon the reception of the \emph{rename} operation to \epoch{A1}.
+On the other hand, node A has to \emph{rename} its state from \epoch{A1} to \epoch{B2}.
+We explain how node A does it in \autoref{sec:applying-primary-rename-op}.
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
@@ -727,20 +781,16 @@ This topic will be further discussed in \autoref{sec:designing-more-effective-pr
 
 \subsection{Applying \emph{primary rename} operations}
 
-Upon the reception of a \emph{rename} operation, nodes first have to determine if its introduce the new \emph{primary} epoch.
-To do so, they compare their current epoch to the new one using the \emph{priority} relation.
-If the new epoch is indeed the new \emph{primary} one, nodes have then to determine if they applied concurrent and conflicting \emph{rename} operations previously.
+\label{sec:applying-primary-rename-op}
+
+Upon the reception of a \emph{rename} operation introducing the new \emph{primary epoch}, nodes have then to determine if they applied concurrent and conflicting \emph{rename} operations previously.
 To this end, nodes use the \emph{epoch tree}.
 
 Using the \emph{epoch tree}, nodes are able to determine if their current epoch is the \emph{parent} of the new \emph{primary} one.
 If that is not the case, it means that they applied one or several concurrent \emph{rename} operations.
 
-In order to switch to the new \emph{primary} epoch, nodes first revert the effects of these concurrent \emph{rename} operations.
+In order to switch to the new \emph{primary} epoch, nodes first revert the effects of concurrent \emph{rename} operations.
 To establish which operations to revert, nodes identify the \ac{LCA} of their current epoch and of the new \emph{primary} one.
-
-\subsection{Reverting \emph{rename} operations}
-\label{sec:reverting-rename-op}
-
 Nodes have to revert \emph{rename} operations applied since the \ac{LCA} epoch between their current epoch and the new primary one, in the reverse order.
 To do so, nodes use \autoref{alg:revertRenameId}.
 
@@ -880,7 +930,7 @@ Once node A reverted its state to the LCA epoch (\epoch{0}) using \autoref{alg:r
 
 \subsection{Garbage collection of \emph{former states}}
 
-As explained in \cite{nicolas:hal-02526724} and \autoref{sec:reverting-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state to switch to a new \emph{primary} epoch.
+As explained in \cite{nicolas:hal-02526724} and \autoref{sec:applying-primary-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state to switch to a new \emph{primary} epoch.
 However, once nodes become aware that some epochs can not possibly be required anymore to apply future operations, they can garbage collect these epochs and their corresponding \emph{rename} operations.
 We propose the two following rules to enable nodes to identify unnecessary epochs :
 
@@ -1196,7 +1246,7 @@ We will discuss further this topic in \autoref{sec:postponing-transition-to-new-
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
 
-As explained in \autoref{sec:reverting-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
+As explained in \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
 Nodes may receive such operations given 2 different cases :
 \begin{enumerate*}[label=(\roman*)]
     \item nodes have recently issued \emph{rename} operations
