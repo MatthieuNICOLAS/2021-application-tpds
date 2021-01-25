@@ -773,7 +773,7 @@ Nodes establish that \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{B2}.
 Therefore, they choose \epoch{B2} as the new \emph{primary} and current epoch.
 As \epoch{B2} was already node B's current epoch, node B does not rename its state upon the reception of the \emph{rename} operation to \epoch{A1}.
 On the other hand, node A has to \emph{rename} its state from \epoch{A1} to \epoch{B2}.
-We explain how node A does it in \autoref{sec:applying-primary-rename-op}.
+We explain how node A proceeds in \autoref{sec:applying-primary-rename-op}.
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
@@ -796,14 +796,52 @@ To do so, nodes use \autoref{alg:revertRenameId}.
 
 \begin{figure}
     \begin{algorithmic}
-        \Function{revertRenameId}{}
-            \State \Return tail
+        \Function{revRenId}{id, renamedIds, nId, nSeq}
+            % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
+            % \Statex \LeftComment{$renamedIds}$ is the former state shared by the \emph{rename} op}
+            % \Statex \LeftComment{$nId}$ is $node~id}$ of the node which issued the \emph{rename} op}
+            % \Statex \LeftComment{$nSeq}$ is $node~seq}$ of the node which issued the \emph{rename} op}
+            % \\
+            \State length $\gets$ renamedIds.length
+            \State firstId $\gets$ renamedIds[0]
+            \State lastId $\gets$ renamedIds[length - 1]
+            \State pos $\gets$ getPosition(firstId)
+            \\
+            \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
+            \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
+            \\
+            \If{id < newFirstId}
+                \State \Return revRenIdLessThanNewFirstId(id, firstId, newFirstId)
+            \ElsIf{isRenamedId(id, pos, nId, nSeq, length)}
+                \State index $\gets$ getFirstOffset(id)
+                \State \Return renamedIds[index]
+            \ElsIf{newLastId < id}
+                \State \Return revRenIdGreaterThanNewLastId(id, lastId)
+            \Else
+                \State index $\gets$ getFirstOffset(id)
+                \State \Return revRenIdfromPredId(id, renamedIds, index)
+            \EndIf
+        \EndFunction
+        \\
+        \Function{revRenIdfromPredId}{id, renamedIds, index}
+            \State predId $\gets$ renamedIds[index]
+            \State succId $\gets$ renamedIds[index + 1]
+            \State tail $\gets$ getTail(id, 1)
+            \\
+            \If{tail < predId}
+                \State \Return concat(predId, MIN\_TUPLE, tail)
+            \ElsIf{succId < tail}
+                \State offset $\gets$ getLastOffset(succId) - 1
+                \State predOfSuccId $\gets$ createIdFromBase(succId, offset)
+                \State \Return concat(predOfSuccId, MAX\_TUPLE, tail)
+            \Else
+                \State \Return tail
+            \EndIf
         \EndFunction
     \end{algorithmic}
     \caption{Revert rename identifier}
     \label{alg:revertRenameId}
 \end{figure}
-\mnnote{TODO : Ré-écrire revertRenameId()}
 
 The goals of \autoref{alg:revertRenameId} are the following :
 \begin{enumerate*}[label=(\roman*)]
@@ -1359,13 +1397,82 @@ The conclusion goes here.
 
 
 \appendices
-\section{Proof of the First Zonklar Equation}
-Appendix one text goes here.
+\section{Algorithms for centralised settings}
+
+\mnnote{TODO: Décomposer et mettre en annexe l'algo de \autoref{alg:renameId}}
 
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
-\section{}
-Appendix two text goes here.
+\section{Algorithms for distributed settings}
+
+\begin{figure}
+    \begin{algorithmic}
+        \Function{renIdFromIndex}{pos, nId, nSeq, index}
+            \State \Return \new~Id(pos, nId, nSeq, index)
+        \EndFunction
+        \\
+        \Function{renIdLessThanFirstId}{id, firstId, newFirstId}
+            \State offset $\gets$ getLastOffset(firstId) - 1
+            \State predOfFirstId $\gets$ createIdFromBase(firstId, offset)
+            \State prefix $\gets$ concat(predOfFirstId, MAX\_TUPLE)
+            \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
+
+            \If{isPrefix(prefix, id)}
+                \State tail $\gets$ getTail(id, prefix.length)
+                \State \Return concat(predNewFirstId, tail)
+            \ElsIf{id < newFirstId}
+                \State \Return id
+            \Else
+                \State \Return concat(predNewFirstId, id)
+            \EndIf
+        \EndFunction
+        \\
+        \Function{renIdGreaterThanLastId}{id, lastId, newLastId}
+            \State prefix $\gets$ concat(lastId, MIN\_TUPLE)
+
+            \If{isPrefix(prefix, id)}
+                \State tail $\gets$ getTail(id, prefix.length)
+                \State \Return tail
+            \ElsIf{newLastId < id}
+                \State \Return id
+            \Else
+                % \State \LeftComment{lastId} < id} < newLastId}$}
+                \State \Return concat(newLastId, id)
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+    \caption{Remaining functions to rename identifier}
+\end{figure}
+
+
+\begin{figure}
+    \begin{algorithmic}
+        \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
+            \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
+            \If{predNewFirstId < id}
+                \State tail $\gets$ getTail(id, 1)
+                \If{tail < firstId}
+                    \State \Return tail
+                \Else
+                    \State offset $\gets$ getLastOffset(firstId)
+                    \State predFirstId $\gets$ createIdFromBase(firstId, offset)
+                    \State \Return concat(predFirstId, MAX\_TUPLE, tail)
+                \EndIf
+            \Else
+                \State \Return id
+            \EndIf
+        \EndFunction
+        \\
+        \Function{revRenIdGreaterThanNewLastId}{id, lastId}
+            \If{id < lastId}
+                \State \Return concat(lastId, MIN\_TUPLE, id)
+            \Else
+                \State \Return id
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+    \caption{Remaining functions to revert identifier renaming}
+\end{figure}
 
 \section*{Acknowledgments}
 
