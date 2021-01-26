@@ -53,6 +53,7 @@
 \usepackage{booktabs} % \toprule, \midrule, \cmidrule, \bottomrule
 \usepackage[inline]{enumitem} % \begin{enumerate*} \end{enumerate*}
 \usepackage{tikz} % \begin{tikzpicture} \end{tikzpicture}
+\usetikzlibrary{calc}
 \usetikzlibrary{shapes.misc}
 
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
@@ -67,6 +68,7 @@
 
 % \usepackage{url}
 \usepackage{hyperref}
+\hypersetup{hidelinks}
 
 \usepackage[draft,inline,nomargin,index]{fixme}
 \fxsetup{theme=colorsig,mode=multiuser,inlineface=\itshape,envface=\itshape}
@@ -639,7 +641,7 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
                 ] {L}
             to ++(0:\widthletter) node[block, fill=mydarkblue,
                     label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                ] {LO};
+                ] (S2A-right) {LO};
 
         \path
             to ++(270:2) node {\textbf{B}}
@@ -657,6 +659,11 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ]  {HELLO};
 
+        \path
+            to ($(S1A-left)!0.5!(S1A-right)$)
+            to ++(90:1.5) node{(1)}
+            to ($(S2A-left)!0.5!(S2A-right)$)
+            to ++(90:1.5) node{(2)};
 
         \draw[dotted] (S0A) -- node[above, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left);
         \draw[dotted] (S1A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S2A-left);
@@ -727,9 +734,10 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
         \begin{tikzpicture}
             \path
                 node[op] (e0) {\epoch{0}}
-                to ++(270:1.5) node[op] (eA1) {\epoch{A1}};
+                to ++(270:1.5) node[op, red] (eA1) {\epoch{A1}};
 
             \draw[thick] (e0) -- (eA1);
+            \draw[->, >=stealth, dashed, thick, red] (eA1.60) -- (e0.300);
         \end{tikzpicture}
         \label{fig:priority-example-step-1-A}}
     \hfil
@@ -737,9 +745,10 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
         \begin{tikzpicture}
             \path
                 node[op] (e0) {\epoch{0}}
-                to ++(270:1.5) node[op] (eB2) {\epoch{B2}};
+                to ++(270:1.5) node[op, red] (eB2) {\epoch{B2}};
 
             \draw[thick] (e0) -- (eB2);
+            \draw[->, >=stealth, dashed, thick, red] (eA1.120) -- (e0.240);
         \end{tikzpicture}
         \label{fig:priority-example-step-1-B}}
     \hfil
@@ -749,20 +758,22 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
                 node[op] (e0) {\epoch{0}}
                 to ++(225:1.5) node[op] (eA1) {\epoch{A1}};
             \path
-                to ++(315:1.5) node[op] (eB2) {\epoch{B2}};
+                to ++(315:1.5) node[op, red] (eB2) {\epoch{B2}};
 
             \draw[thick] (e0) -- (eA1);
             \draw[thick] (e0) -- (eB2);
+            \draw[->, >=stealth, dashed, thick, red] (eB2.180) -- (eA1.0) -- (e0.270);
         \end{tikzpicture}
         \label{fig:priority-example-step-2}}
     \caption{Evolution of \emph{epoch trees} during the scenario of \autoref{fig:conflicting-rename-operations}}
     \label{fig:priority-example}
 \end{figure}
-\mnnote{TODO: Faire apparaître la relation \emph{priority} entre les epochs ainsi que l'epoch courante dans \autoref{fig:priority-example}}
 
 This figure displays the evolution of node A and B's \emph{epoch trees} during the execution of \autoref{fig:conflicting-rename-operations}'s scenario.
+Red dashed arrows represents the order between epochs according to the \emph{priority} relation while current epochs are displayed as red nodes.
+
 Initially, both nodes are only aware of their own \emph{rename} operation.
-Node A's (resp. node B's) \emph{epoch tree} is thus only composed of the epochs \epoch{0} and \epoch{A1} (resp. \epoch{B2}).
+Node A's (resp. node B's) \emph{epoch tree} is thus only composed of the epochs \epoch{0} and \epoch{A1} (resp. \epoch{0} and \epoch{B2}).
 Using the \emph{priority} relation, both nodes order epochs to determine the current one.
 According to the lexicographical order on the path of epochs in the \emph{epoch tree}, node A (resp. node B) establishes that \epoch{0} < \epoch{0}\epoch{A1} (resp. \epoch{0} < \epoch{0}\epoch{B2}).
 Therefore node A selects \epoch{A1} as its current epoch while node B picks \epoch{B2}.
@@ -782,6 +793,8 @@ This topic will be further discussed in \autoref{sec:designing-more-effective-pr
 \subsection{Applying \emph{primary rename} operations}
 
 \label{sec:applying-primary-rename-op}
+
+\mnnote{TODO: Retravailler contenu de cette sous-section pour prendre en compte les modifications effectuées dans les sections précédentes, améliorer la figure utilisée et développer certains aspects (propriétés de \emph{revertRenameId()}, propriétés du couple \emph{renameId()} - \emph{revertRenameId()}, MàJ de \emph{renameId()} en conséquence)}
 
 Upon the reception of a \emph{rename} operation introducing the new \emph{primary epoch}, nodes have then to determine if they applied concurrent and conflicting \emph{rename} operations previously.
 To this end, nodes use the \emph{epoch tree}.
