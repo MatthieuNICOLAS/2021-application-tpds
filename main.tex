@@ -17,7 +17,8 @@
 \definecolor{pdflinkcolor}{rgb}{0,0,0}
 \definecolor{light}{gray}{.85}
 \definecolor{vlight}{gray}{.95}
-\definecolor{darkgreen}{rgb}{0.0, 0.2, 0.13}
+\definecolor{darkgreen}{RGB}{77,172,38}
+\definecolor{darkblue}{RGB}{5,113,176}
 \definecolor{mydarkblue}{RGB}{116,173,209}
 \definecolor{mydarkblueid}{RGB}{83,154,198}
 \definecolor{mylightblue}{RGB}{171,217,233}
@@ -101,6 +102,8 @@
     epoch/.style={letter, rounded rectangle, rounded rectangle east arc=0pt, minimum width=\widthepoch},
     op/.style={draw, circle, minimum size=2.7em},
     causalop/.style={op, double=white, inner sep=2pt},
+    gc-rule-1/.style={dashed, thick, darkblue},
+    gc-rule-2/.style={densely dotted, thick, darkgreen},
     cross/.style={
         path picture={
             \draw[mydarkred, very thick]
@@ -892,18 +895,21 @@ The \autoref{fig:revertRenameId} illustrates such a scenario.
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S0B-right) {HELLO}
-            to ++ (0:8 * \widthletter) node[epoch] (S1B-left) {\epoch{B2}}
+            to ++ (0:7.5 * \widthletter) node (S1B) {}
+            to ++ (0:5 * \widthletter) node[epoch] (S2B-left) {\epoch{B2}}
             to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ]  {HELLO};
 
         \draw[dotted] (S0A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S1A);
-        \draw[dotted] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1B-left);
+        \draw[dotted] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1B);
 
         \draw[dashed, thick] (S0B-right.east) -- (S1A.east);
         \draw[dashed, ->, thick, shorten >= 3] (S1A) -- node[above, align=center] {\emph{undo rename to \epoch{A1}}} (S2A-left);
         \draw[dashed, ->, thick, shorten >= 3] (S2A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S3A-left);
-        \draw[dashed, ->, thick, shorten >= 3] (S0A-right.east) -- (S1B-left.west);
+
+        \draw[dashed, thick] (S0A-right.east) -- (S1B.east);
+        \draw[dashed, ->, thick, shorten >= 3] (S1B) -- node[below, align=center] {\emph{ignore rename to \epoch{A1}}} (S2B-left);
 
     \end{tikzpicture}
     \caption{Handling concurrent \emph{rename} operations}
@@ -936,9 +942,10 @@ This new version is presented in \autoref{alg:updated-rename-id}.
 
 \subsection{Garbage collection of \emph{former states}}
 
-As explained in \cite{nicolas:hal-02526724} and \autoref{sec:applying-primary-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state to switch to a new \emph{primary} epoch.
+As explained in \autoref{sec:dealing-with-concurrent-updates} and \autoref{sec:applying-primary-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state from their current epoch to the new \emph{primary} one.
 However, once nodes become aware that some epochs can not possibly be required anymore to apply future operations, they can garbage collect these epochs and their corresponding \emph{rename} operations.
-We propose the two following rules to enable nodes to identify unnecessary epochs :
+But, in systems which allow the generation of concurrent \emph{rename} operations, nodes can not solely rely on causal stability of \emph{rename} operations to determine which operations can be garbage collected.
+Therefore, we propose the two following rules to enable nodes to identify unnecessary epochs :
 
 \begin{myrule}
     \label{rule:gc-concurrent-primary-epoch}
@@ -952,19 +959,23 @@ We propose the two following rules to enable nodes to identify unnecessary epoch
 
 \autoref{fig:GC-epochs} illustrates a use case of \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}.
 In \autoref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
+The operations shown in \autoref{fig:GC-execution} are solely \emph{rename} operations, as only these operations are relevant to the problem at hand.
 In \autoref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
 In \autoref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by each other.
+Epochs introduced by causally stable \emph{rename} operations are represented in \emph{epoch trees} using double circles.
+The \emph{origin} epoch \epoch{0} is considered as causally stable from the beginning by design.
+Epochs that are deemed no longer necessary by \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root} are respectively displayed as blue dashed nodes and green dotted nodes.
 
 Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, \epoch{B2} becomes causally stable.
 From this point, node A knows that every node switched to this epoch at least.
-Therefore nodes can no longer issue operations from \epoch{e0}, \epoch{A1} or \epoch{A8}.
+Therefore nodes can no longer issue operations from \epoch{0}, \epoch{A1} or \epoch{A8}.
 Thus these epochs and the \emph{rename} operations enabling nodes to switch between them can now be garbage collected.
 \autoref{rule:gc-concurrent-primary-epoch} enables node A to garbage collect epochs \epoch{A8} then \epoch{A1}.
 Then \autoref{rule:gc-root} enables node A to garbage collect \epoch{0} and the \emph{renaming} operation to switch to \epoch{B2}.
 
-On the other hand, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
+On the other hand, upon the reception of the \emph{rename} operation introducing \epoch{A1}, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
 Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
-Since in that case node B would have to transform operations to apply them to \epoch{B7}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B7} and their corresponding \emph{rename} operations.
+Since in that case node B would have to transform operations to apply them to \epoch{B8}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B8} and their corresponding \emph{rename} operations.
 
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
 Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
@@ -1019,13 +1030,13 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
                 node {\textbf{A}}
                 to ++(270:1) node[causalop] (AeA0) {\epoch{0}}
                 to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
-                to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
+                to ++(270:1.5) node[op, red] (AeA8) {\epoch{A8}};
 
             \path
                 to ++(0:3) node {\textbf{B}}
                 to ++(270:1) node[causalop] (BeB0) {\epoch{0}}
                 to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
-                to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
+                to ++(270:1.5) node[op, red] (BeB7) {\epoch{B7}};
 
 
             \draw[thick] (AeA0) -- (AeA1) -- (AeA8);
@@ -1036,40 +1047,40 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
         \end{tikzpicture}
         \label{fig:GC-epoch-trees-step-1}}
     \hfil
-    \subfloat[States of respective epoch trees at (2)s]{
+    \subfloat[States of respective epoch trees at (2)]{
         \begin{tikzpicture}
             \path
                 node {\textbf{A}}
-                to ++(270:1) node[causalop] (Ae0) {\epoch{0}}
-                to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
-                to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
+                to ++(270:1) node[op, gc-rule-2] (Ae0) {\epoch{0}}
+                to ++(225:1.5) node[op, gc-rule-1] (AeA1) {\epoch{A1}}
+                to ++(270:1.5) node[op, gc-rule-1] (AeA8) {\epoch{A8}};
             \path
                 to ++(270:1)
-                to ++(315:1.5) node[causalop] (AeB2) {\epoch{B2}};
+                to ++(315:1.5) node[causalop] (AeB2) {\epoch{B2}}
+                to ++(270:1.5) node[op, red] (AeA9) {\epoch{A9}};
 
             \path
                 to ++(0:4) node {\textbf{B}}
                 to ++(270:1) node[causalop] (Be0) {\epoch{0}}
                 to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
-                to ++(270:1.5) node[op] (BeB7) {\epoch{B7}};
+                to ++(270:1.5) node[op] (BeB7) {\epoch{B7}}
+                to ++(270:1.5) node[op, red] (BeB8) {\epoch{B8}};
             \path
                 to ++(0:4)
                 to ++(270:1)
                 to ++(225:1.5) node[causalop] (BeA1) {\epoch{A1}};
 
 
-            \draw[thick] (Ae0) -- (AeA1) -- (AeA8) (Ae0) -- (AeB2);
-            \draw[thick] (Be0) -- (BeB2) -- (BeB7) (Be0) -- (BeA1);
-            \draw[->, dashed, thick, red] (AeB2.180) -- (AeA8.45) -- (AeA1.315) (AeA1.0) -- (Ae0.270);
-            \draw[->, dashed, thick, red] (BeB7.130) -- (BeB2.225) (BeB2.180) -- (BeA1.0) -- (Be0.270);
+            \draw[thick] (Ae0) -- (AeA1) -- (AeA8) (Ae0) -- (AeB2) -- (AeA9);
+            \draw[thick] (Be0) -- (BeB2) -- (BeB7) -- (BeB8) (Be0) -- (BeA1);
+            \draw[->, dashed, thick, red] (AeA9.135) -- (AeB2.225) (AeB2.180) -- (AeA8.45) -- (AeA1.315) (AeA1.0) -- (Ae0.270);
+            \draw[->, dashed, thick, red] (BeB8.135) -- (BeB7.225) (BeB7.135) -- (BeB2.225) (BeB2.180) -- (BeA1.0) -- (Be0.270);
 
         \end{tikzpicture}
         \label{fig:GC-epoch-trees-step-2}}
     \caption{Garbage collecting epochs and corresponding \emph{former states}}
     \label{fig:GC-epochs}
 \end{figure}
-
-\mnnote{TODO: Marquer comme GC \epoch{A1} et \epoch{A8} via \autoref{rule:gc-concurrent-primary-epoch} et \epoch{0} via \autoref{rule:gc-root} de l'epoch tree de A dans la \autoref{fig:GC-epoch-trees-step-2}}
 
 \section{Evaluation}
 
