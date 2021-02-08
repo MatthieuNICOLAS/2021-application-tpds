@@ -929,7 +929,10 @@ If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the 
 
 Once node A reverted its state to the LCA epoch \epoch{0} using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch \epoch{B2} using \autoref{alg:renameId}.
 
-\mnnote{TODO: Expliquer qu'en fonction de la relation \emph{priority} choisie, peut être amenée à rejouer un renommage qu'on avait annulé précédemment. Dans ce cas, pour assurer la convergence, le couple (renameId, revertRenameId) doivent être des fonctions inverses. On doit donc proposer une nouvelle version de renameId pour gérer correctement les identifiants insérés après le renommage initial. Cette nouvelle version se trouve en annexe.}
+According to the \emph{priority} relation used, nodes may have to redo previously undo \emph{rename} operations.
+In order to ensure the convergence in such cases, \autoref{alg:renameId} and \autoref{alg:revertRenameId} must be inverse functions.
+We thus have to propose a new version of \autoref{alg:renameId}, in particular to rename correctly ids assigned to elements inserted causally after the \emph{rename} operation.
+This new version is presented in \autoref{alg:updated-rename-id}.
 
 \subsection{Garbage collection of \emph{former states}}
 
@@ -1435,6 +1438,7 @@ The conclusion goes here.
         \EndFunction
     \end{algorithmic}
     \caption{Updated algorithms to rename identifier}
+    \label{alg:updated-rename-id}
 \end{figure}
 
 
