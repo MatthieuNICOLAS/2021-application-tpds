@@ -141,7 +141,8 @@
 % note need leading \protect in front of \\ to get a newline within \thanks as
 % \\ is fragile and will error, could use \hfil\break instead.
 E-mail: \{matthieu.nicolas, gerald.oster, olivier.perrin\}@loria.fr.}% <-this % stops an unwanted space
-\thanks{Manuscript received ???; revised ???.}}
+}% <- À supprimer le jour où on réintroduit le \thanks
+% \thanks{Manuscript received ???; revised ???.}}
 
 % The paper headers
 %\markboth{Journal of \LaTeX\ Class Files,~Vol.~14, No.~8, August~2015}%
@@ -330,12 +331,18 @@ It is thus necessary to address the previously highlighted issues.
 \label{sec:proposition}
 
 We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers approach: \emph{RenamableLogootSplit} (RLS) \cite{nicolas:hal-01932552,nicolas:hal-02526724}.
+\mnnote{
+    TODO: Ajouter que cette structure de donnée permet aux noeud d'ajouter et retirer des éléments au sein de la séquence.
+    Les modifications prennent la forme d'opérations qui sont immédiatement appliquées sur la copie locale du noeud.
+    Ces opérations sont ensuite envoyées de manière asynchrone aux autres noeuds pour qu'ils intègrent à leur tour les modifications.
+}
 
 To address the limitations of LogootSplit, we embed in the data structure a renaming mechanism.
 The purpose of this mechanism is to reassign shorter identifiers to elements and to group them into blocks to minimise the memory overhead of the whole sequence.
 
 To avoid costly and blocking consensus algorithms, we instead adopt the \emph{optimistic replication} \cite{10.1145/1057977.1057980} approach for our mechanism.
 Nodes perform renaming without any coordination.
+\mnnote{TODO: Reformuler pour indiquer que le mécanisme de renommage prend aussi la forme d'une opération, l'opération \emph{rename}.}
 However, this operation is not intrinsically commutative with others.
 If conflicts arise, we use \emph{Operational Transformations} (OT) \cite{10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
 
@@ -356,10 +363,10 @@ Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronis
 
 \mnnote{TODO? : Ajouter une sous-section présentant les propriétés que doit respecter l'opération \emph{rename} (déterminisme, commutativité, respect de l'intention de l'utilisateur)}
 
-\section{RenamableLogootSplit in centralised settings}
+\section{RenamableLogootSplit without concurrent \emph{rename} operations}
 \label{sec:centralised-rls}
 
-\subsection{\emph{rename} operation}
+\subsection{Proposed \emph{rename} operation}
 
 \label{sec:rename-op}
 
@@ -391,7 +398,7 @@ This operation reassigns arbitrary identifiers to elements.
                 to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
                 to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {0};
+                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {O};
 
                 \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
             \end{tikzpicture}
@@ -606,7 +613,7 @@ Meanwhile, nodes can offload it onto the disk as it is only required to handle c
 
 \mnnote{TODO? : Ajouter une sous-section sur la stratégie de renommage. À ce stade, me permettrait d'introduire le requirement de performance (temps d'intégration, mais aussi consommation en bande-passante ou même taille de la structure en mémoire). Permettrait aussi de faire le lien avec \autoref{sec:evaluation}.}
 
-\section{RenamableLogootSplit in distributed settings}
+\section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
 \label{sec:distributed-rls}
 
@@ -1185,6 +1192,11 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
 \end{figure}
 
 Next, we compared the evolution of integration times of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents.
+\mnnote{
+    TODO: Expliquer que conceptuellement, on peut décomposer l'exécution locale d'une modification en la génération d'une opération correspondante puis en son application sur la copie locale (Ref possible à pure operation-based CRDT).
+    Mais que pour des raisons de performances nous fusionnions dans notre implémentation les étapes de génération de l'opération et de son application dans le cas d'une modification locale.
+    Nous distinguons donc les opérations dites \emph{local} et les opérations dites \emph{remote}.
+}
 \autoref{fig:evolution-integration-time-insert} displays the results.
 
 In these figures, orange boxplots correspond to integration times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents.
