@@ -230,7 +230,7 @@ I wish you the best of success.
 
 To deterministically solve conflicts and ensure convergence of all nodes, \acp{CRDT} rely on metadata.
 In the context of Sequence \acp{CRDT}, two different approaches were proposed, both trying to minimise the overhead introduced.
-The first one \cite{oster:inria-00108523, ROH2011354,briot:hal-01343941} attaches fixed size identifiers to each element in the sequence and uses them to represent the sequence as a linked list.
+The first one \cite{oster:inria-00108523, Weiss_2007, ROH2011354,briot:hal-01343941} attaches fixed size identifiers to each element in the sequence and uses them to represent the sequence as a linked list.
 The downside of this approach is an ever growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
 The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom2013,nedelec_2013_lseq,doi:10.1002/cpe.4108} avoids the need of tombstones by attaching identifiers from a dense totally ordered set to elements.
 Elements are ordered into the sequence by comparing their respective identifiers.
@@ -331,20 +331,18 @@ It is thus necessary to address the previously highlighted issues.
 \label{sec:proposition}
 
 We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers approach: \emph{RenamableLogootSplit} (RLS) \cite{nicolas:hal-01932552,nicolas:hal-02526724}.
-\mnnote{
-    TODO: Ajouter que cette structure de donnée permet aux noeud d'ajouter et retirer des éléments au sein de la séquence.
-    Les modifications prennent la forme d'opérations qui sont immédiatement appliquées sur la copie locale du noeud.
-    Ces opérations sont ensuite envoyées de manière asynchrone aux autres noeuds pour qu'ils intègrent à leur tour les modifications.
-}
+This data structure allows nodes to insert or remove elements into a replicated sequence.
+Nodes' updates take the form of operations that are immediately applied to nodes' replicas.
+Operations are then broadcast asynchronously to other nodes so that they also integrate updates.
 
 To address the limitations of LogootSplit, we embed in the data structure a renaming mechanism.
 The purpose of this mechanism is to reassign shorter identifiers to elements and to group them into blocks to minimise the memory overhead of the whole sequence.
 
 To avoid costly and blocking consensus algorithms, we instead adopt the \emph{optimistic replication} \cite{10.1145/1057977.1057980} approach for our mechanism.
 Nodes perform renaming without any coordination.
-\mnnote{TODO: Reformuler pour indiquer que le mécanisme de renommage prend aussi la forme d'une opération, l'opération \emph{rename}.}
+This new feature is designed as an additional type of operation : the \emph{rename} one.
 However, this operation is not intrinsically commutative with others.
-If conflicts arise, we use \emph{Operational Transformations} (OT) \cite{10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
+If conflicts arise, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66963,10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
 
 \subsection{System Model}
 
