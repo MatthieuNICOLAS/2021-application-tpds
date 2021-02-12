@@ -32,8 +32,12 @@
 \usepackage{amsmath}
 \interdisplaylinepenalty=2500
 \newtheorem{myrule}{Rule}
+\newtheorem{property}{Property}
+\newtheorem{subproperty}{Property}[property]
 \def\algorithmautorefname{Algorithm} % \autoref
 \def\myruleautorefname{Rule} % \autoref
+\def\propertyautorefname{Property} % \autoref
+\def\subpropertyautorefname{Subproperty}
 
 \usepackage{algpseudocode}
 
@@ -334,6 +338,7 @@ We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers a
 This data structure allows nodes to insert or remove elements into a replicated sequence.
 Nodes' updates take the form of operations that are immediately applied to nodes' replicas.
 Operations are then broadcast asynchronously to other nodes so that they also integrate updates.
+RenamableLogootSplit ensures the \ac{SEC} property \cite{shapiro_2011_crdt} : nodes which apply the same set of operations reach the same state, without further communications required.
 
 To address the limitations of LogootSplit, we embed in the data structure a renaming mechanism.
 The purpose of this mechanism is to reassign shorter identifiers to elements and to group them into blocks to minimise the memory overhead of the whole sequence.
@@ -359,7 +364,63 @@ This layer is thus used to deliver messages to the application exactly-once.
 The layer also ensures that \emph{remove} operations are delivered after corresponding \emph{insert} operations.
 Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronise in a pairwise manner, by detecting and re-exchanging lost operations.
 
-\mnnote{TODO? : Ajouter une sous-section présentant les propriétés que doit respecter l'opération \emph{rename} (déterminisme, commutativité, respect de l'intention de l'utilisateur)}
+\subsection{Definition of the \emph{rename} operation}
+
+The purpose of the \emph{rename} operation is to reassign new identifiers to elements of the replicated sequence, but it must not alter its content.
+Since identifiers are metadata used by the data structure solely for conflict resolution, users are unaware of their existence.
+\emph{Rename} operations are thus system operations : they are issued and applied by nodes behind the scenes, without any user initiative.
+
+In order to ensure the \ac{SEC} property of the replicated sequence, we define several safety properties that the \emph{rename} operation must respect.
+These properties, which are mainly inspired by those presented in \cite{zawirski:hal-01248197}, are as follows:
+
+\begin{property}(Determinism)
+    \emph{Rename} operations are applied by each node without any coordination.
+    To ensure that each node reaches eventually the same state, a given \emph{rename} operation must always output the same new identifier for a given identifier.
+\end{property}
+
+\begin{property}(User-intention Preservation)
+    Although the \emph{rename} operations itself has no user intention attached, it must not conflict with users actions.
+    Notably, \emph{rename} operations must not cancel or alter the outcome, from users' points of view, of \emph{insert} and \emph{remove} operations.
+\end{property}
+
+\begin{property}(Well-formed Sequence)
+    The replicated sequence must be well-formed.
+    Applying a \emph{rename} operation to a well-formed sequence must then output a well-formed sequence.
+    We define a replicated sequence as well-formed if it meets the following conditions:
+    \begin{itemize}[noitemsep]
+        \item[~]
+        \begin{subproperty}(Unicity Preservation)
+            Each identifier must be unique.
+            Thus, for a given \emph{rename} operation, each identifier should be mapped to a distinct new identifier.
+        \end{subproperty}
+        \item[~]
+        \begin{subproperty}(Order Preservation)
+            The elements of the sequence must be sorted with regards to their identifiers.
+            Therefore, the existing order between initial identifiers must be preserved by the \emph{rename} operation.
+        \end{subproperty}
+    \end{itemize}
+\end{property}
+
+\begin{property}(Commutativity with Concurrent Operations)
+    \label{prop:commutativity}
+    Concurrent operations may be delivered in different orders to each node.
+    To ensure the convergence of nodes, the order of application of a set of concurrent operations should not have any impact on the resulting state.
+    The \emph{rename} operation must then be commutative with any other concurrent operation.
+\end{property}
+
+In the case of the \emph{rename} operation, \autoref{prop:commutativity} is particularly difficult to achieve.
+This is due to the fact that \emph{rename} operations modify identifiers assigned to elements.
+However, other operations such as \emph{insert} and \emph{remove} ones rely on these identifiers to specify where to insert elements or which ones to remove.
+\emph{Rename} operations are thus intrinsically incompatible with concurrent \emph{insert} and \emph{remove} ones.
+Likewise, concurrent \emph{rename} operations may reassign different identifiers to given elements.
+\emph{Rename} operations are hence not commutative.
+Therefore, it is required to design and use conflict resolution strategies to apply concurrent operations to \emph{rename} ones.
+
+For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
+In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
+This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operation.
+Then, in \autoref{sec:distributed-rls}, we remove this assumption to allow concurrent \emph{rename} operations.
+We present our approach to make the \emph{rename} operation commutative with itself to deal with this scenario.
 
 \section{RenamableLogootSplit without concurrent \emph{rename} operations}
 \label{sec:centralised-rls}
@@ -940,7 +1001,7 @@ If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the 
 
 Once node A reverted its state to the LCA epoch \epoch{0} using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch \epoch{B2} using \autoref{alg:renameId}.
 
-According to the \emph{priority} relation used, nodes may have to redo previously undo \emph{rename} operations.
+According to the \emph{priority} relation used, nodes may have to redo previously undone \emph{rename} operations.
 In order to ensure the convergence in such cases, \autoref{alg:renameId} and \autoref{alg:revertRenameId} must be inverse functions.
 We thus have to propose a new version of \autoref{alg:renameId}, in particular to rename correctly ids assigned to elements inserted causally after the \emph{rename} operation.
 This new version is presented in \autoref{alg:updated-rename-id}.
