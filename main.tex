@@ -418,7 +418,7 @@ Therefore, it is required to design and use conflict resolution strategies to ap
 
 For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
 In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
-This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operation.
+This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operations.
 Then, in \autoref{sec:distributed-rls}, we remove this assumption to allow concurrent \emph{rename} operations.
 We present our approach to make the \emph{rename} operation commutative with itself to deal with this scenario.
 
@@ -1239,23 +1239,25 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
 
 \begin{figure}[t!]
     \centering
-    \subfloat[Local operations]{
+    \subfloat[Local updates]{
         \includegraphics[width=0.9\columnwidth]{img/integration-time-boxplot-local-operations-without-outliers.pdf}
         \label{fig:evolution-integration-time-local-insert}}
     \hfil
-    \subfloat[Remote operations]{
+    \subfloat[Remote updates]{
         \includegraphics[width=0.9\columnwidth]{img/integration-time-boxplot-remote-operations-without-outliers.pdf}
         \label{fig:evolution-integration-time-remote-insert}}
     \caption{Integration time of standard operations}
     \label{fig:evolution-integration-time-insert}
 \end{figure}
 
-Next, we compared the evolution of integration times of respectively local and remote operations on LogootSplit and RenamableLogootSplit documents.
-\mnnote{
-    TODO: Expliquer que conceptuellement, on peut décomposer l'exécution locale d'une modification en la génération d'une opération correspondante puis en son application sur la copie locale (Ref possible à pure operation-based CRDT).
-    Mais que pour des raisons de performances nous fusionnions dans notre implémentation les étapes de génération de l'opération et de son application dans le cas d'une modification locale.
-    Nous distinguons donc les opérations dites \emph{local} et les opérations dites \emph{remote}.
-}
+Next, we compared the evolution of integration times of operations on LogootSplit and RenamableLogootSplit documents.
+Conceptually, local updates can be decomposed as presented in \cite{baquero2017pure} in the two following steps :
+\begin{enumerate*}[label=(\roman*)]
+    \item the generation of the corresponding operation
+    \item the application of the resulting operation on the local replica.
+\end{enumerate*}
+However, for performance reasons, we merged these two steps in our implementation.
+We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
 \autoref{fig:evolution-integration-time-insert} displays the results.
 
 In these figures, orange boxplots correspond to integration times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents.
@@ -1317,6 +1319,7 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 \end{table}
 
 Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
+As before, we distinguish performances of \emph{local} and \emph{remote} updates.
 The results are displayed in \autoref{tab:evolution-integration-time-rename}.
 
 The main outcome of these measures shows that \emph{rename} operations are expensive when compared to others.
