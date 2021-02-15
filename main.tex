@@ -639,34 +639,31 @@ By reassigning this id to the concurrently added element, node A is able to inse
 
 \begin{figure}
     \begin{algorithmic}
-        \Function {renameId}{id, renamedBlocks, nId, nSeq}
-
-            % \Statex \LeftComment{$\trm{id}$ is the identifier to rename}
-            % \Statex \LeftComment{$\trm{renamedBlocks}$ is the former state}
-            % \Statex \LeftComment{$\trm{nId}$ is $\trm{node~id}$ of the node which issued the \emph{rename} op}
-            % \Statex \LeftComment{$\trm{nSeq}$ is $\trm{node~seq}$ of the node which issued the \emph{rename} op}\\
-
+        \Function {renameId}{id, renamedIds, nId, nSeq}
             \State length $\gets$ renamedBlocks.length
             \State firstId $\gets$ idBegin(renamedBlocks[0])
             \State lastId $\gets$ idEnd(renamedBlocks[length - 1])
-
             \State pos $\gets$ position(firstId)
-            \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
-            \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
-
-            \If{firstId < id \textbf{and} id < lastId}
-                \State pred $\gets$ findPredecessor(id, renamedBlocks)
-                \State indexOfPred $\gets$ findIndex(pred, renamedBlocks)
-                \State newPred $\gets$ \new~Id(pos, nId, nSeq, indexOfPred)
-                \State \Return concat(newPredecessor, id)
-            \ElsIf{lastId < id \textbf{and} id < newLastId}
-                \State \Return concat(newLastId, id)
-            \ElsIf{newFirstId < id \textbf{and} id < firstId}
-                \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
-                \State \Return concat(predOfNewFirstId, id)
+            \\
+            \If{id < firstId}
+                \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
+                \State \Return renIdLessThanFirstId(id, newFirstId)
+            \ElsIf{id $\in$ renameIds}
+                \State index $\gets$ findIndex(id, renamedIds)
+                \State \Return \new~Id(pos, nId, nSeq, index)
+            \ElsIf{lastId < id}
+                \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
+                \State \Return renIdGreaterThanLastId(id, newLastId)
             \Else
-                \State \Return id \Comment{Return the identifier unchanged as it does not conflict with the rename op}
+                \State \Return renIdFromPredId(id, renamedIds, pos, nId, nSeq)
             \EndIf
+        \EndFunction
+        \\
+        \Function {renIdFromPredId}{id, renamedIds, pos, nId, nSeq}
+            \State index $\gets$ findIndexOfPred(id, renamedIds)
+            \State newPredId $\gets$ \new~Id(pos, nId, nSeq, index)
+            \\
+            \State \Return concat(newPredId, id)
         \EndFunction
     \end{algorithmic}
     \caption{Rename concurrently generated identifier}
@@ -1487,13 +1484,38 @@ Another research trail to explore is to study data types to determine which ones
 \appendices
 \section{Algorithms for centralised settings}
 
-\mnnote{TODO: Décomposer et mettre en annexe l'algo de \autoref{alg:renameId}}
+\begin{figure}[h!]
+    \begin{algorithmic}
+        \Function{renIdLessThanFirstId}{id, newFirstId}
+        \If{id < newFirstId}
+            \State \Return id
+        \Else
+            \State pos $\gets$ position(newFirstId)
+            \State nId $\gets$ nodeId(newFirstId)
+            \State nSeq $\gets$ nodeSeq(newFirstId)
+            \State predNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
+            \\
+            \State \Return concat(predNewFirstId, id)
+            \EndIf
+        \EndFunction
+        \\
+        \Function{renIdGreaterThanLastId}{id, newLastId}
+            \If{id < newLastId}
+                \State \Return concat(newLastId, id)
+            \Else
+                \State \Return id
+            \EndIf
+        \EndFunction
+    \end{algorithmic}
+    \caption{Remaining algorithms to rename an identifier}
+    \label{alg:updated-rename-id}
+\end{figure}
 
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
 \section{Algorithms for distributed settings}
 
-\begin{figure}
+\begin{figure}[h!]
     \begin{algorithmic}
         \Function{renIdfromPredId}{id, renamedIds, nId, nSeq}
             \State index $\gets$ findIndexOfPred(id, renamedIds)
@@ -1521,10 +1543,6 @@ Another research trail to explore is to study data types to determine which ones
             \EndIf
             \\
             \State \Return concat(newPredId, id)
-        \EndFunction
-        \\
-        \Function{renIdFromIndex}{pos, nId, nSeq, index}
-            \State \Return \new~Id(pos, nId, nSeq, index)
         \EndFunction
         \\
         \Function{renIdLessThanFirstId}{id, firstId, newFirstId}
@@ -1557,12 +1575,12 @@ Another research trail to explore is to study data types to determine which ones
             \EndIf
         \EndFunction
     \end{algorithmic}
-    \caption{Updated algorithms to rename identifier}
+    \caption{Updated algorithms to rename an identifier}
     \label{alg:updated-rename-id}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[h!]
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
             \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
@@ -1588,7 +1606,7 @@ Another research trail to explore is to study data types to determine which ones
             \EndIf
         \EndFunction
     \end{algorithmic}
-    \caption{Remaining functions to revert identifier renaming}
+    \caption{Remaining functions to revert an identifier renaming}
 \end{figure}
 
 \section*{Acknowledgments}
