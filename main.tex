@@ -183,7 +183,19 @@ E-mail: \{matthieu.nicolas, gerald.oster, olivier.perrin\}@loria.fr.}% <-this % 
 % in the abstract or keywords.
 \IEEEtitleabstractindextext{%
 \begin{abstract}
-The abstract goes here.
+To achieve high availability, large-scale distributed systems have to replicate data and to minimise coordination between nodes.
+For these purposes, literature and industry increasingly adopt \acfp{CRDT} to design systems.
+\acp{CRDT} are new specifications for existing data types, e.g. the Set or the Sequence.
+While \acp{CRDT} display the same behaviour as previous specifications in sequential executions, they actually shine in distributed executions as they are designed to natively support concurrent modifications.
+To this end, \acp{CRDT} embed in their specification conflict-resolution mechanisms.
+These mechanisms usually rely on identifiers attached to elements of the data structure to resolve conflicts in a deterministic and coordination-free manner.
+Identifiers have to comply with several constraints, such as being unique or belonging to a dense total order.
+These constraints may hinder the identifiers’ size from being bounded.
+As a result, identifiers tend to grow as the system progresses.
+This increase deepens the overhead of the \ac{CRDT} over time, leading to performance issues.
+To address this issue in the context of real-time collaborative editing, we propose a new Sequence \ac{CRDT} which embeds a renaming mechanism.
+It enables nodes to reassign shorter identifiers to elements in an uncoordinated manner.
+Experimental results demonstrate that this mechanism decreases the overhead of the replicated data structure and eventually minimises it.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
