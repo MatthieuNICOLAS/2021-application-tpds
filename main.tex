@@ -565,7 +565,7 @@ Additionally, nodes tag every operation with their current epoch at the time the
 Upon the reception of an operation, nodes compare the operation epoch to their current one.
 If they differ, nodes have to transform the operation before applying it.
 Nodes determine against which \emph{rename} operations to transform the received operation by computing the path between the operation epoch and their current one using the \emph{epoch chain}.
-\mnnote{TODO : Ajouter que les opérations doivent être livrées après l'opération \emph{rename} qui introduit leur epoch}
+For this purpose, it is required to add the following rule to existing constraints upon the delivery of operations : operations must now be delivered after the \emph{rename} operation which introduced their epoch.
 
 Nodes use \autoref{alg:renameId} to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
 This algorithm maps identifiers from a given epoch to corresponding ones in the next epoch.
