@@ -72,14 +72,34 @@
    pages={162–173}
 }
 
-@inproceedings{Nicolaescu_2016,
+@inproceedings{Nicolaescu2015Yjs,
   author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
-  year = {2016},
-  month = {11},
-  pages = {39-49},
-  title = {Near Real-Time Peer-to-Peer Shared Editing on Extensible Data Types},
-  doi = {10.1145/2957276.2957310}
+  title = {{Yjs}: A Framework for Near Real-Time {P2P} Shared Editing on Arbitrary Data Types},
+  booktitle = {15th International Conference on Web Engineering},
+  series = {ICWE 2015},
+  year = {2015},
+  month = jun,
+  publisher = {Springer LNCS volume 9114},
+  pages = {675--678},
+  doi = {10.1007/978-3-319-19890-3_55},
+  url = {http://dbis.rwth-aachen.de/~derntl/papers/preprints/icwe2015-preprint.pdf},
+  keywords = {systems, Yjs}
 }
+
+@inproceedings{Nicolaescu2016YATA,
+  author = {Nicolaescu, Petru and Jahns, Kevin and Derntl, Michael and Klamma, Ralf},
+  title = {Near Real-Time Peer-to-Peer Shared Editing on Extensible Data Types},
+  booktitle = {19th International Conference on Supporting Group Work},
+  series = {GROUP 2016},
+  year = {2016},
+  pages = {39--49},
+  publisher = {ACM},
+  month = nov,
+  doi = {10.1145/2957276.2957310},
+  pdf = {https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types},
+  keywords = {text-editing, Yjs}
+}
+
 
 @article{Kleppmann_2017,
   title={A Conflict-Free Replicated JSON Datatype},
@@ -310,6 +330,275 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   HAL_VERSION = {v2},
 }
 
+% Éditeurs collaboratifs à base de CRDTs
+% --------
+
+@inproceedings{Nedelec2016CRATE,
+  author = {N{\'e}delec, Brice and Molli, Pascal and Mostefaoui, Achour},
+  title = {{CRATE}: Writing Stories Together with our Browsers},
+  booktitle = {25th International World Wide Web Conference},
+  series = {WWW 2016},
+  year = {2016},
+  pages = {231--234},
+  publisher = {ACM},
+  month = apr,
+  doi = {10.1145/2872518.2890539},
+  pdf = {https://hal.archives-ouvertes.fr/hal-01303333},
+  keywords = {text-editing, LSEQ}
+}
+
+@inproceedings{nicolas:hal-01655438,
+  TITLE = {{MUTE: A Peer-to-Peer Web-based Real-time Collaborative Editor}},
+  AUTHOR = {Nicolas, Matthieu and Elvinger, VIctorien and Oster, G{\'e}rald and Ignat, Claudia-Lavinia and Charoy, Fran{\c c}ois},
+  URL = {https://hal.inria.fr/hal-01655438},
+  BOOKTITLE = {{ECSCW 2017 - 15th European Conference on Computer-Supported Cooperative Work}},
+  ADDRESS = {Sheffield, United Kingdom},
+  PUBLISHER = {{EUSSET}},
+  SERIES = {Proceedings of 15th European Conference on Computer-Supported Cooperative Work - Panels, Posters and Demos},
+  VOLUME = {1},
+  NUMBER = {3},
+  PAGES = {1-4},
+  YEAR = {2017},
+  MONTH = Aug,
+  DOI = {10.18420/ecscw2017\_p5},
+  PDF = {https://hal.inria.fr/hal-01655438/file/Nicolasetal2017.pdf},
+  HAL_ID = {hal-01655438},
+  HAL_VERSION = {v1},
+}
+
+% Autres applications construites à base de CRDTs
+% --------
+
+% Riak
+@misc{RiakKV,
+  title = {{Riak KV}},
+  author = {Riak},
+  url = {http://riak.com/}
+}
+@misc{RiakDataTypes,
+  title = {{Riak KV Data Types}},
+  author = {Riak},
+  url = {https://docs.riak.com/riak/kv/latest/developing/data-types/index.html}
+}
+
+@inproceedings{riak2010,
+  author = {Klophaus, Rusty},
+  year = {2010},
+  month = {10},
+  pages = {},
+  title = {Riak Core: building distributed applications without shared state},
+  journal = {In: ACM SIGPLAN Commercial Users Functional Programming},
+  doi = {10.1145/1900160.1900176}
+}
+
+@inproceedings{Brown2014Riak,
+  author = {Brown, Russell and Cribbs, Sean and Meiklejohn, Christopher and Elliott, Sam},
+  title = {{Riak DT Map}: A Composable, Convergent Replicated Dictionary},
+  booktitle = {1st Workshop on Principles and Practice of Eventual Consistency},
+  series = {PaPEC 2014},
+  year = {2014},
+  month = apr,
+  articleno = {1},
+  publisher = {ACM},
+  doi = {10.1145/2596631.2596633},
+  pdf = {https://pages.lip6.fr/syncfree/attachments/article/46/WP3-report.pdf#page=31},
+  keywords = {systems, composition}
+}
+
+@inproceedings{Brown2016bigsets,
+  author = {Brown, Russell and Lakhani, Zeeshan and Place, Paul},
+  title = {Big(Ger) Sets: Decomposed Delta {CRDT} Sets in {Riak}},
+  booktitle = {2nd Workshop on the Principles and Practice of Consistency for Distributed Data},
+  series = {PaPoC 2016},
+  year = {2016},
+  month = apr,
+  articleno = {5},
+  publisher = {ACM},
+  doi = {10.1145/2911151.2911156},
+  eprint = {1605.06424},
+  keywords = {set-crdt, systems, composition}
+}
+
+% Swiftcloud - rapport de recherche
+@misc{zawirski2013swiftcloud,
+  title={SwiftCloud: Fault-Tolerant Geo-Replication Integrated all the Way to the Client Machine},
+  author={Marek Zawirski and Annette Bieniusa and Valter Balegas and Sérgio Duarte and Carlos Baquero and Marc Shapiro and Nuno Preguiça},
+  year={2013},
+  eprint={1310.3107},
+  archivePrefix={arXiv},
+  primaryClass={cs.DC}
+}
+
+% Swiftcloud - Workshop
+@inproceedings{swiftcloud2014,
+  author={N. {Preguiça} and M. {Zawirski} and A. {Bieniusa} and S. {Duarte} and V. {Balegas} and C. {Baquero} and M. {Shapiro}},
+  booktitle={2014 IEEE 33rd International Symposium on Reliable Distributed Systems Workshops},
+  title={SwiftCloud: Fault-Tolerant Geo-Replication Integrated all the Way to the Client Machine},
+  year={2014},
+  volume={},
+  number={},
+  pages={30-33},
+  doi={10.1109/SRDSW.2014.33}
+}
+
+% Swiftcloud - Middleware
+@inproceedings{Zawirski2015SwiftCloud,
+  author = {Zawirski, Marek and Pregui{\c c}a, Nuno and Duarte, S{\'e}rgio and Bieniusa, Annette and Balegas, Valter and Shapiro, Marc},
+  title = {Write Fast, Read in the Past: Causal Consistency for Client-side Applications},
+  booktitle = {16th Annual Middleware Conference},
+  year = {2015},
+  month = dec,
+  publisher = {ACM/IFIP/USENIX},
+  pages = {75--87},
+  doi = {10.1145/2814576.2814733},
+  pdf = {http://lip6.fr/Marc.Shapiro/papers/write-fast-read-past-middleware-2015.pdf},
+  keywords = {systems, SwiftCloud}
+}
+
+% Lasp
+@inproceedings{Meiklejohn2015Lasp2,
+  author = {Meiklejohn, Christopher and Van Roy, Peter},
+  title = {{Lasp}: A Language for Distributed, Coordination-free Programming},
+  booktitle = {17th International Symposium on Principles and Practice of Declarative Programming},
+  series = {PPDP 2015},
+  year = {2015},
+  month = jul,
+  publisher = {ACM},
+  pages = {184--195},
+  doi = {10.1145/2790449.2790525},
+  pdf = {https://www.info.ucl.ac.be/~pvr/ppdp-2015-cr.pdf},
+  keywords = {computation, systems}
+}
+
+@inproceedings{vanderLinde2017Legion,
+  author = {van der Linde, Albert and Fouto, Pedro and Leit{\~a}o, Jo{\~a}o and Pregui{\c c}a, Nuno and Casti{\~n}eira, Santiago and Bieniusa, Annette},
+  title = {{Legion}: Enriching Internet Services with Peer-to-Peer Interactions},
+  booktitle = {26th International Conference on World Wide Web},
+  series = {WWW 2017},
+  year = {2017},
+  month = apr,
+  publisher = {ACM},
+  pages = {283--292},
+  doi = {10.1145/3038912.3052673},
+  pdf = {http://novasys.di.fct.unl.pt/~alinde/publications/fp0964-vanderlinde.pdf},
+  keywords = {systems, Legion}
+}
+
+@misc{AntidoteDB,
+  title = {{AntidoteDB: A planet scale, highly available, transactional database}},
+  author = {The SyncFree Consortium},
+  url = {http://antidoteDB.eu/}
+}
+
+@misc{AntidoteDBDataTypes,
+  title = {{Datatypes in Antidote}},
+  author = {The SyncFree Consortium},
+  url = {https://antidotedb.gitbook.io/documentation/architecture/datatypes}
+}
+
+% Cure - Se base sur AntidoteDB
+@inproceedings{Akkoorath2016Cure,
+  author = {Akkoorath, Deepthi Devaki and Tomsic, Alejandro Z. and Bravo, Manuel and Li, Zhongmiao and Crain, Tyler and Bieniusa, Annette and Pregui{\c c}a, Nuno and Shapiro, Marc},
+  title = {{Cure}: Strong Semantics Meets High Availability and Low Latency},
+  booktitle = {36th IEEE International Conference on Distributed Computing Systems},
+  series = {ICDCS 2016},
+  year = {2016},
+  month = jun,
+  publisher = {IEEE},
+  pages = {405--414},
+  doi = {10.1109/ICDCS.2016.98},
+  pdf = {https://pages.lip6.fr/Marc.Shapiro/papers/Cure-final-ICDCS16.pdf},
+  keywords = {systems, Cure, Antidote}
+}
+
+% Redis
+@misc{RedisEnterprise,
+  title = {{Redis Enterprise}},
+  author = {Redis Labs},
+  url = {https://redislabs.com/redis-enterprise/}
+}
+
+@misc{RedisEnterpriseActiveActiveGeoDistribution,
+  title = {{Active-Active Geo-Distribution (CRDTs-Based}},
+  author = {redis Labs},
+  url = {https://www.redislabs.com/redis-enterprise/technology/active-active-geo-distribution/}
+}
+
+% Local-First Software
+@inproceedings{10.1145/3359591.3359737,
+  author = {Kleppmann, Martin and Wiggins, Adam and van Hardenberg, Peter and McGranaghan, Mark},
+  title = {Local-First Software: You Own Your Data, in Spite of the Cloud},
+  year = {2019},
+  isbn = {9781450369954},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3359591.3359737},
+  doi = {10.1145/3359591.3359737},
+  booktitle = {Proceedings of the 2019 ACM SIGPLAN International Symposium on New Ideas, New Paradigms, and Reflections on Programming and Software},
+  pages = {154–178},
+  numpages = {25},
+  keywords = {data ownership, CRDTs, mobile computing, peer-to-peer communication, collaboration software},
+  location = {Athens, Greece},
+  series = {Onward! 2019}
+}
+
+@inproceedings{vanHardenberg2020PushPin,
+  author = {van Hardenberg, Peter and Kleppmann, Martin},
+  title = {{PushPin}: Towards Production-Quality Peer-to-Peer Collaboration},
+  booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
+  series = {PaPoC 2020},
+  year = {2020},
+  month = apr,
+  publisher = {ACM},
+  articleno = {10},
+  doi = {10.1145/3380787.3393683},
+  pdf = {https://martin.kleppmann.com/papers/pushpin-papoc20.pdf},
+  keywords = {systems, usability, PushPin}
+}
+
+% Anna - Conf
+@INPROCEEDINGS{Anna2018,
+  author={C. {Wu} and J. {Faleiro} and Y. {Lin} and J. {Hellerstein}},
+  booktitle={2018 IEEE 34th International Conference on Data Engineering (ICDE)},
+  title={Anna: A KVS for Any Scale},
+  year={2018},
+  volume={},
+  number={},
+  pages={401-412},
+  doi={10.1109/ICDE.2018.00044}}
+
+% Anna - Journal
+@ARTICLE{Anna2021,
+  author={C. {Wu} and J. M. {Faleiro} and Y. {Lin} and J. M. {Hellerstein}},
+  journal={IEEE Transactions on Knowledge and Data Engineering},
+  title={Anna: A KVS for Any Scale},
+  year={2021},
+  volume={33},
+  number={2},
+  pages={344-358},
+  doi={10.1109/TKDE.2019.2898401}
+}
+
+% CScript
+@article{DePorre2020cscript,
+  author = {De Porre, Kevin and Myter, Florian and Scholliers, Christophe and Gonzalez Boix, Elisa},
+  title = {{CScript}: A distributed programming language for building mixed-consistency applications},
+  journal = {Journal of Parallel and Distributed Computing volume 144},
+  pages = {109-123},
+  year = {2020},
+  month = oct,
+  issn = {0743-7315},
+  doi = {10.1016/j.jpdc.2020.05.010},
+  pdf = {http://soft.vub.ac.be/Publications/2020/vub-tr-soft-20-04.pdf},
+  keywords = {computation, composition, systems, CScript}
+}
+
+@misc{Concordant,
+  title = {{Concordant}},
+  author = {Concordant},
+  url = {http://www.concordant.io/}
+}
+
 % Metadata overhead
 % --------
 
@@ -394,24 +683,6 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   publisher="Springer Berlin Heidelberg",
   address="Berlin, Heidelberg",
   pages="126--140"
-}
-
-% Local-First Software
-@inproceedings{10.1145/3359591.3359737,
-  author = {Kleppmann, Martin and Wiggins, Adam and van Hardenberg, Peter and McGranaghan, Mark},
-  title = {Local-First Software: You Own Your Data, in Spite of the Cloud},
-  year = {2019},
-  isbn = {9781450369954},
-  publisher = {Association for Computing Machinery},
-  address = {New York, NY, USA},
-  url = {https://doi.org/10.1145/3359591.3359737},
-  doi = {10.1145/3359591.3359737},
-  booktitle = {Proceedings of the 2019 ACM SIGPLAN International Symposium on New Ideas, New Paradigms, and Reflections on Programming and Software},
-  pages = {154–178},
-  numpages = {25},
-  keywords = {data ownership, CRDTs, mobile computing, peer-to-peer communication, collaboration software},
-  location = {Athens, Greece},
-  series = {Onward! 2019}
 }
 
 % Optimistic Replication
