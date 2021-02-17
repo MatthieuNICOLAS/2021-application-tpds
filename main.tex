@@ -85,6 +85,8 @@
 \newcommand{\eg}{e.g. }
 \newcommand{\ie}{i.e. }
 
+\newcommand{\headerparagraph}[1]{\textbf{\emph{#1}}\quad}
+
 \newcommand{\inbb}[1]{\in \mathbb{#1}}
 \newcommand{\mathlist}[2]{\set{#1_i \in #2}_{i \inbb{N}}}
 \newcommand{\new}{\textbf{new}}
@@ -246,7 +248,7 @@ I wish you the best of success.
 
 To deterministically solve conflicts and ensure convergence of all nodes, \acp{CRDT} rely on metadata.
 In the context of Sequence \acp{CRDT}, two different approaches were proposed, both trying to minimise the overhead introduced.
-The first one \cite{oster:inria-00108523, Weiss_2007, ROH2011354,briot:hal-01343941} attaches fixed size identifiers to each element in the sequence and uses them to represent the sequence as a linked list.
+The first one \cite{oster:inria-00108523, Weiss_2007, ahmednacer:inria-00629503, ROH2011354, briot:hal-01343941} attaches fixed size identifiers to each element in the sequence and uses them to represent the sequence as a linked list.
 The downside of this approach is an ever growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
 The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom2013,nedelec_2013_lseq,doi:10.1002/cpe.4108} avoids the need of tombstones by attaching identifiers from a dense totally ordered set to elements.
 Elements are ordered into the sequence by comparing their respective identifiers.
@@ -1203,8 +1205,8 @@ Code, benchmarks and results are available at: \url{https://github.com/coast-tea
 
 \subsection{Results}
 
-\paragraph{Convergence}
-
+\headerparagraph{Convergence}
+%
 We first proceeded to verify the convergence of nodes states at the end of simulations.
 For each simulation, we compared the final state of every nodes using their respective snapshots.
 We were able to confirm that nodes converged without any communication other than operations, thus satisfying the \ac{SEC} consistency model.
@@ -1213,7 +1215,10 @@ This result sets a first milestone in the validation of the correctness of Renam
 It is however only empirical.
 Further work to formally prove its correctness should be undertaken.
 
-\paragraph{Memory overhead}
+\headerparagraph{Memory overhead}
+%
+We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
+We present the obtained results in \autoref{fig:evolution-document-size}.
 
 \begin{figure}[t!]
     \centering
@@ -1221,9 +1226,6 @@ Further work to formally prove its correctness should be undertaken.
     \caption{Evolution of the size of the document}
     \label{fig:evolution-document-size}
 \end{figure}
-
-We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
-We present the obtained results in \autoref{fig:evolution-document-size}.
 
 For each plot displayed in \autoref{fig:evolution-document-size}, we represent 4 different data.
 The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red solid line corresponds to the size of the whole LogootSplit document.
@@ -1244,7 +1246,19 @@ To summarise the results presented, the renaming mechanism introduces a temporar
 But the overhead will eventually subsides once the system becomes quiescent and \emph{rename} operations become causally stable.
 In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until causal stability is achieved to address the temporary memory overhead.
 
-\paragraph{Integration times of standard operations}
+\headerparagraph{Integration times of standard operations}
+%
+Next, we compared the evolution of integration times of standard operations, \ie \emph{insert} and \emph{remove} operations, on LogootSplit and RenamableLogootSplit documents.
+Since both types of operation share the same time complexity, we used solely \emph{insert} oness in our benchmarks.
+We do however distinguish \emph{local} and \emph{remote} updates.
+Conceptually, local updates can be decomposed as presented in \cite{baquero2017pure} in the two following steps :
+\begin{enumerate*}[label=(\roman*)]
+    \item the generation of the corresponding operation
+    \item the application of the resulting operation on the local replica.
+\end{enumerate*}
+However, for performance reasons, we merged these two steps in our implementation.
+We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
+\autoref{fig:evolution-integration-time-insert} displays the results.
 
 \begin{figure}[t!]
     \centering
@@ -1258,18 +1272,6 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
     \caption{Integration time of standard operations}
     \label{fig:evolution-integration-time-insert}
 \end{figure}
-
-Next, we compared the evolution of integration times of standard operations, \ie \emph{insert} and \emph{remove} operations, on LogootSplit and RenamableLogootSplit documents.
-Since both types of operation share the same time complexity, we used solely \emph{insert} oness in our benchmarks.
-We do however distinguish \emph{local} and \emph{remote} updates.
-Conceptually, local updates can be decomposed as presented in \cite{baquero2017pure} in the two following steps :
-\begin{enumerate*}[label=(\roman*)]
-    \item the generation of the corresponding operation
-    \item the application of the resulting operation on the local replica.
-\end{enumerate*}
-However, for performance reasons, we merged these two steps in our implementation.
-We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
-\autoref{fig:evolution-integration-time-insert} displays the results.
 
 In these figures, orange boxplots correspond to integration times on LogootSplit documents while blue ones correspond to times on RenamableLogootSplit documents.
 While both are initially equivalent, integration times on RenamableLogootSplit documents are then reduced when compared to LogootSplit ones once \emph{rename} operations have been applied.
@@ -1288,7 +1290,11 @@ Despite this overhead, RenamableLogootSplit achieves better performances than Lo
 As the distance between both epochs increases, it leads to cases presenting worse performances than LogootSplit ones since the overhead is multiplied.
 Nonetheless, the renaming mechanism reduces the integration times of the majority of operations, \ie the operations issued between two rounds of \emph{rename} operations.
 
-\paragraph{Integration time of \emph{rename} operation}
+\headerparagraph{Integration time of \emph{rename} operation}
+%
+Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
+As before, we distinguish performances of \emph{local} and \emph{remote} updates.
+The results are displayed in \autoref{tab:evolution-integration-time-rename}.
 
 \begin{table}[t!]
     \centering
@@ -1328,10 +1334,6 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
         \end{tabular}
     }
 \end{table}
-
-Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
-As before, we distinguish performances of \emph{local} and \emph{remote} updates.
-The results are displayed in \autoref{tab:evolution-integration-time-rename}.
 
 The main outcome of these measures shows that \emph{rename} operations are expensive when compared to others.
 Local \emph{rename} operations take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones may last seconds if delayed for too long.
