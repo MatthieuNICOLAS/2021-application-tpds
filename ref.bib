@@ -101,7 +101,7 @@
 }
 
 
-@article{Kleppmann_2017,
+@article{jsoncrdt2017,
   title={A Conflict-Free Replicated JSON Datatype},
   volume={28},
   ISSN={1045-9219},
@@ -276,7 +276,7 @@
   doi       = {10.4108/icst.collaboratecom.2013.254123},
 }
 
-@inproceedings{nedelec_2013_lseq,
+@inproceedings{lseq2013,
   title = {{LSEQ:} an adaptive structure for sequences in distributed collaborative editing},
   author = {Nédelec, Brice and
            Molli, Pascal and
@@ -291,7 +291,7 @@
 }
 
 % LSEQ++
-@article{doi:10.1002/cpe.4108,
+@article{lseq2017,
 author = {Nédelec, Brice and Molli, Pascal and Mostéfaoui, Achour},
 title = {A scalable sequence encoding for collaborative editing},
 journal = {Concurrency and Computation: Practice and Experience},
@@ -347,7 +347,7 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   keywords = {text-editing, LSEQ}
 }
 
-@inproceedings{nicolas:hal-01655438,
+@inproceedings{MUTE2017,
   TITLE = {{MUTE: A Peer-to-Peer Web-based Real-time Collaborative Editor}},
   AUTHOR = {Nicolas, Matthieu and Elvinger, VIctorien and Oster, G{\'e}rald and Ignat, Claudia-Lavinia and Charoy, Fran{\c c}ois},
   URL = {https://hal.inria.fr/hal-01655438},
@@ -364,6 +364,23 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   PDF = {https://hal.inria.fr/hal-01655438/file/Nicolasetal2017.pdf},
   HAL_ID = {hal-01655438},
   HAL_VERSION = {v1},
+}
+
+% Implémentations de CRDTs
+% --------
+
+% Automerge
+@misc{automerge,
+  title = {{Automerge: data structures for building collaborative applications in Javascript}},
+  author = {Automerge},
+  url = {https://github.com/automerge/automerge}
+}
+
+% Yjs
+@misc{yjsimplem,
+  title = {{Yjs: A CRDT framework with a powerful abstraction of shared data}},
+  author = {Yjs},
+  url = {https://github.com/yjs/yjs}
 }
 
 % Autres applications construites à base de CRDTs
@@ -525,7 +542,7 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
 }
 
 % Local-First Software
-@inproceedings{10.1145/3359591.3359737,
+@inproceedings{localfirstsoftware2019,
   author = {Kleppmann, Martin and Wiggins, Adam and van Hardenberg, Peter and McGranaghan, Mark},
   title = {Local-First Software: You Own Your Data, in Spite of the Cloud},
   year = {2019},
@@ -542,7 +559,7 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   series = {Onward! 2019}
 }
 
-@inproceedings{vanHardenberg2020PushPin,
+@inproceedings{pushpin2020,
   author = {van Hardenberg, Peter and Kleppmann, Martin},
   title = {{PushPin}: Towards Production-Quality Peer-to-Peer Collaboration},
   booktitle = {7th Workshop on Principles and Practice of Consistency for Distributed Data},
@@ -685,26 +702,6 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   pages="126--140"
 }
 
-% Optimistic Replication
-@article{10.1145/1057977.1057980,
-  author = {Saito, Yasushi and Shapiro, Marc},
-  title = {Optimistic Replication},
-  year = {2005},
-  issue_date = {March 2005},
-  publisher = {Association for Computing Machinery},
-  address = {New York, NY, USA},
-  volume = {37},
-  number = {1},
-  issn = {0360-0300},
-  url = {https://doi.org/10.1145/1057977.1057980},
-  doi = {10.1145/1057977.1057980},
-  journal = {ACM Comput. Surv.},
-  month = mar,
-  pages = {42–81},
-  numpages = {40},
-  keywords = {distributed systems, disconnected operation, optimistic techniques, Replication, large scale systems}
-}
-
 % CAP Theorem
 @inproceedings{brewer_2000_podc,
   author = {Brewer, Eric A.},
@@ -751,6 +748,26 @@ eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4108},
   month = dec,
   pages = {172–182},
   numpages = {11}
+}
+
+% Optimistic Replication + EC
+@article{10.1145/1057977.1057980,
+  author = {Saito, Yasushi and Shapiro, Marc},
+  title = {Optimistic Replication},
+  year = {2005},
+  issue_date = {March 2005},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {37},
+  number = {1},
+  issn = {0360-0300},
+  url = {https://doi.org/10.1145/1057977.1057980},
+  doi = {10.1145/1057977.1057980},
+  journal = {ACM Comput. Surv.},
+  month = mar,
+  pages = {42–81},
+  numpages = {40},
+  keywords = {distributed systems, disconnected operation, optimistic techniques, Replication, large scale systems}
 }
 
 % CCI properties (Causality, Convergence, Intention)
