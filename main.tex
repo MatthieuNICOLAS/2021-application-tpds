@@ -234,7 +234,7 @@ CRDTs, real-time collaborative editing, eventual consistency, memory-wise optimi
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
 \IEEEPARstart{W}{hen} creating distributed systems, designers have to make a tradeoff between consistency and latency \cite{pacelc2012}.
-Many systems choose to favour latency and thus adopt \emph{optimistic replication} techniques \cite{10.1145/1057977.1057980}.
+Many systems choose to favour latency and thus adopt optimistic replication techniques \cite{10.1145/1057977.1057980}.
 This approach ensures the high availability of the system, even in case of network partitions.
 To this end, it relaxes consistency constraints and minimises coordination between nodes.
 In this model, every node owns a copy of the data, can modify it and then propagate updates to others.
@@ -275,10 +275,15 @@ This novel data structure embeds a renaming mechanism into its specification.
 The renaming mechanism allows the data structure to punctually reduce its metadata and to minimise it eventually.
 While this kind of approach has been proposed in previous work \cite{letia:hal-01248270,zawirski:hal-01248197}, RenamableLogootSplit differs as its renaming mechanism does not require synchronous coordination.
 
-% - Déroulé du papier
-\mnnote{
-    TODO: Rédiger paragraphe présentant la structure du papier.
-}
+This paper is organised as follows:
+Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their evergrowing overhead.
+Section \ref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
+Section \ref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
+Then Section \ref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
+Section \ref{sec:evaluation} presents the experimental evaluation of Renamable to which we proceeded and the obtained results.
+Section \ref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations can make.
+Section \ref{sec:related-work} compares our approach to related work.
+Finally Section \ref{sec:conclusion} summarises our work and introduces possible future work.
 
 % needed in second column of first page if using \IEEEpubid
 %\IEEEpubidadjcol
@@ -1431,6 +1436,7 @@ This strategy introduces a slight computational overhead for each \emph{insert} 
 In return, the strategy reduces the probability of erroneously integrating \emph{rename} operations as \emph{primary} ones.
 
 \section{Related work}
+\label{sec:related-work}
 
 Several works were proposed to address our problem of growth of identifiers in variable-size identifiers Sequence \acp{CRDT}.
 We present in this section the most relevant ones.
@@ -1482,6 +1488,7 @@ The resulting system would reset the sequence's metadata periodically using \emp
 This would also enable to reduce the frequency of \emph{rename} operations, decreasing the system computations overall.
 
 \section{Conclusions and future work}
+\label{sec:conclusion}
 
 In this paper, we introduced a novel Sequence \ac{CRDT} belonging to the variable-size identifiers approach: RenamableLogootSplit.
 This new data structure embeds a renaming mechanism in its specification.
