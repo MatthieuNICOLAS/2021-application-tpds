@@ -34,7 +34,7 @@
 \newtheorem{myrule}{Rule}
 \newtheorem{property}{Property}
 \newtheorem{subproperty}{Property}[property]
-\def\algorithmautorefname{Algorithm} % \autoref
+\def\myalgorithmautorefname{Algorithm} % \autoref
 \def\myruleautorefname{Rule} % \autoref
 \def\propertyautorefname{Property} % \autoref
 \def\subpropertyautorefname{Subproperty}
@@ -70,6 +70,13 @@
 \let\MYoriglatexcaption\caption
 \renewcommand{\caption}[2][\relax]{\MYoriglatexcaption[#2]{#2}}
 \fi
+
+\usepackage{newfloat}
+\DeclareFloatingEnvironment[
+    fileext = los,
+    listname = {List of algorithms},
+    name = Alg
+]{myalgorithm}
 
 % \usepackage{url}
 \usepackage{hyperref}
@@ -280,7 +287,7 @@ Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and 
 Section \ref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
 Section \ref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
 Then Section \ref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
-Section \ref{sec:evaluation} presents the experimental evaluation of Renamable to which we proceeded and the obtained results.
+Section \ref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit to which we proceeded and the obtained results.
 Section \ref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations can make.
 Section \ref{sec:related-work} compares our approach to related work.
 Finally Section \ref{sec:conclusion} summarises our work and introduces possible future work.
@@ -636,7 +643,7 @@ Then it computes the counterpart of \id{i}{B0}{0}\id{f}{A0}{0} in the renamed st
 Finally, node A prepends it to the given id to generate the renamed id: \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
 By reassigning this id to the concurrently added element, node A is able to insert it in its state while preserving the intended order.
 
-\begin{figure}
+\begin{myalgorithm}
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
             \State length $\gets$ renamedBlocks.length
@@ -667,7 +674,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
     \end{algorithmic}
     \caption{Rename concurrently generated identifier}
     \label{alg:renameId}
-\end{figure}
+\end{myalgorithm}
 
 \begin{figure*}[t!]
     \centering
@@ -929,7 +936,7 @@ The goals of \autoref{alg:revertRenameId} are the following:
     \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
 
-\begin{figure}
+\begin{myalgorithm}
     \begin{algorithmic}
         \Function{revRenId}{id, renamedIds, nId, nSeq}
             % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
@@ -976,7 +983,7 @@ The goals of \autoref{alg:revertRenameId} are the following:
     \end{algorithmic}
     \caption{Revert rename identifier}
     \label{alg:revertRenameId}
-\end{figure}
+\end{myalgorithm}
 
 Upon the reception of a \emph{rename} operation introducing a concurrent but primary epoch to their current one, nodes have first to determine which \emph{rename} operations to revert.
 To this end, nodes use the \emph{epoch tree}.
@@ -1532,7 +1539,7 @@ Another research trail to explore is to study data types to determine which ones
 \appendices
 \section{Algorithms for centralised settings}
 
-\begin{figure}[h!]
+\begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function{renIdLessThanFirstId}{id, newFirstId}
         \If{id < newFirstId}
@@ -1556,14 +1563,13 @@ Another research trail to explore is to study data types to determine which ones
         \EndFunction
     \end{algorithmic}
     \caption{Remaining algorithms to rename an identifier}
-    \label{alg:updated-rename-id}
-\end{figure}
+\end{myalgorithm}
 
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
 \section{Algorithms for distributed settings}
 
-\begin{figure}[h!]
+\begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function{renIdfromPredId}{id, renamedIds, nId, nSeq}
             \State index $\gets$ findIndexOfPred(id, renamedIds)
@@ -1625,10 +1631,10 @@ Another research trail to explore is to study data types to determine which ones
     \end{algorithmic}
     \caption{Updated algorithms to rename an identifier}
     \label{alg:updated-rename-id}
-\end{figure}
+\end{myalgorithm}
 
 
-\begin{figure}[h!]
+\begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
             \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
@@ -1655,7 +1661,7 @@ Another research trail to explore is to study data types to determine which ones
         \EndFunction
     \end{algorithmic}
     \caption{Remaining functions to revert an identifier renaming}
-\end{figure}
+\end{myalgorithm}
 
 \section*{Acknowledgments}
 
