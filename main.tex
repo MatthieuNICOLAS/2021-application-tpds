@@ -388,10 +388,14 @@ Additionally, as the lifetime of the replicated sequence increases, the number o
 Indeed, several constraints on identifier generation prevent nodes from adding new elements to existing blocks.
 For example, only the node that generated the block can append or prepend elements to it.
 These limitations cause the generation of new blocks.
-Since no mechanism to merge blocks a posteriori is provided, the sequence ends up fragmented into many blocks.
-The efficiency of the data structure decreases as each block introduces its own overhead.
+The sequence ends up fragmented into many blocks of only few characters each.
+However no mechanism to merge blocks a posteriori is provided.
+The efficiency of the data structure hence decreases as each block introduces its own overhead.
 
-In our benchmarks, we measure that the content eventually represents less than 1\% of the data structure size, the remaining 99\% being metadata.
+In order to measure the overhead introduced, we proceeded to benchmarks.
+We present obtained results in \autoref{fig:evolution-document-size}.
+We measured that content, represented as the blue dashed line, eventually represents less than 1\% of the whole data structure size, displayed as the red line.
+Remaining 99\% of the data structure hence correspond to metadata.
 It is thus necessary to address the previously highlighted issues.
 
 \section{Overview}
