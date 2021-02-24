@@ -562,12 +562,17 @@ To converge, other nodes have to rename their state identically.
 However, they can not simply replace their current state with the new renamed one.
 Indeed, they may have performed concurrent updates on their states.
 In order not to discard these updates, nodes have to process the \emph{rename} operation themselves.
-To this end, the node issuing the \emph{rename} operation broadcasts its former state to others.
+To this end, the node issuing the \emph{rename} operation broadcasts its \emph{former state} to others.
 Using this state, other nodes compute the new identifier of each renamed identifier.
 As for concurrently inserted identifiers, we will explain in \autoref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
 
-To limit bandwidth consumption of \emph{rename} operations, we propose a compression technique to broadcast only necessary components to uniquely identify blocks instead of whole identifiers.
+To limit bandwidth consumption of \emph{rename} operations, we propose the following compression technique.
+Node may broadcast only necessary components to uniquely identify blocks instead of whole identifiers.
+Indeed, an identifier can be uniquely identified from the \emph{node identifier}, \emph{node sequence number} and \emph{offset} of its last tuple.
+A block can therefore be uniquely identified from these components and its length.
 This reduces the data to send to a fixed amount per block.
+To decompress the received operation, nodes browse their current state and log of concurrent \emph{remove} operations.
+This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
 Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
 \mnnote{QUESTION : Développer ce paragraphe en une sous-section de \autoref{sec:discussion} ? Je pourrais préciser les différents aspects du mécanisme de compression et de décompression (éléments permettant d'identifier un bloc de manière unique, algorithme de décompression, modèle de cohérence requis...)}
 
@@ -843,13 +848,17 @@ First, nodes have to be able to select the \emph{primary rename} operation to ap
 In order to avoid performance issues due to coordination, nodes should select this operation in a coordination-free manner, \ie solely using data from the set of concurrent \emph{rename} operations.
 We propose such a mechanism in \autoref{sec:priority}.
 Second, nodes have to able to revert the effect of applied \emph{rename} operations.
-As nodes have only a partial knowledge of the system and of the issued operations, they may apply one \emph{rename} operation at a moment only to receive afterward a concurrent \emph{rename} operation which is deemed as the new \emph{primary} one.
+Upon the reception of \emph{rename} operations, nodes can only rely on their current knowledge to make decisions.
+However, nodes have only partial knowledge of the state of the system and of the operations issued at a given time.
+They may thus consider a received \emph{rename} operation as the \emph{primary} one and apply it, only to learn a few moments later that there is a concurrent \emph{rename} operation with higher priority.
+In that case, nodes have to revert mistakenly applied \emph{rename} operations to apply the correct \emph{primary} one eventually.
 We present a corresponding algorithm in \autoref{sec:applying-primary-rename-op}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-As stated in \autoref{sec:dealing-with-concurrent-updates}, nodes build and maintain the \emph{epoch chain}, a data structure ordering epochs according to their \emph{parent-child} relation, as they receive \emph{rename} operations.
+As stated in \autoref{sec:dealing-with-concurrent-updates}, nodes build and maintain the \emph{epoch chain} from received \emph{rename} operations.
+This data structure orders epochs according to their \emph{parent-child} relation.
 Using the \emph{epoch chain}, nodes determine their current epoch as the latest one.
 However, in case of concurrent \emph{rename} operations, this data structure is no longer suitable as several epochs may share the same parent epoch.
 Epochs now form the \emph{epoch tree}.
