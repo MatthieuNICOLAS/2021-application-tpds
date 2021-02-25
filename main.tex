@@ -1269,6 +1269,10 @@ Code, benchmarks and results are available at: \url{https://github.com/coast-tea
 
 \subsection{Results}
 
+Using generated snapshots, we performed several benchmarks.
+These benchmarks evaluate RenamableLogootSplit's performances and compare them to LogootSplit's ones.
+Results are presented and analysed below.
+
 \headerparagraph{Convergence}
 %
 We first proceeded to verify the convergence of nodes states at the end of simulations.
@@ -1313,7 +1317,7 @@ In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} 
 \headerparagraph{Integration times of standard operations}
 %
 Next, we compared the evolution of integration times of standard operations, \ie \emph{insert} and \emph{remove} operations, on LogootSplit and RenamableLogootSplit documents.
-Since both types of operation share the same time complexity, we used solely \emph{insert} oness in our benchmarks.
+Since both types of operation share the same time complexity, we used solely \emph{insert} ones in our benchmarks.
 We do however distinguish \emph{local} and \emph{remote} updates.
 Conceptually, local updates can be decomposed as presented in \cite{baquero2017pure} in the two following steps:
 \begin{enumerate*}[label=(\roman*)]
