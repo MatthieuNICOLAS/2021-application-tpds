@@ -742,8 +742,6 @@ Nodes need it until each of them can no longer issue concurrent operations to th
 In other words, nodes can safely garbage collect the former state once the \emph{rename} operation became causally stable \cite{10.1007/978-3-662-43352-2_11}.
 Meanwhile, nodes can offload it onto the disk as it is only required to handle concurrent operations.
 
-\mnnote{QUESTION : Ajouter une sous-section sur la stratégie de renommage ? À ce stade, me permettrait d'introduire le requirement de performance (temps d'intégration, mais aussi consommation en bande-passante ou même taille de la structure en mémoire). Permettrait aussi de faire le lien avec \autoref{sec:evaluation}.}
-
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
 \label{sec:distributed-rls}
@@ -1529,7 +1527,6 @@ As a result, Logoot identifiers grow linearly with the number of insertions inst
 LSEQ thus defines several identifier allocation strategy fitted to different editing pattern.
 Nodes pick randomly one of these strategies for each identifier size.
 Additionally LSEQ adopts an exponential tree model for identifiers: the range of possible identifiers doubles as the identifier size increases.
-\mnnote{TODO: Voir comment mieux formuler ce passage sur le nombre de bits alloués à \emph{position} qui double à chaque "profondeur" d'identifiant.}
 It enables LSEQ to fine-tune the size of identifiers according to needs.
 By combining the different allocation strategies to the exponential tree model, LSEQ achieves a polylogarithmic growth of identifiers according to the number of insertions.
 
