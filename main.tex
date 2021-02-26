@@ -240,9 +240,9 @@ CRDTs, real-time collaborative editing, eventual consistency, memory-wise optimi
 %
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{W}{hen} creating distributed systems, designers have to make a tradeoff between consistency and latency \cite{pacelc2012}.
-Many systems choose to favour latency and thus adopt optimistic replication techniques \cite{10.1145/1057977.1057980}.
-This approach ensures the high availability of the system, even in case of network partitions.
+\IEEEPARstart{W}{hen} creating distributed systems, designers have to make a tradeoff between \emph{consistency} and \emph{latency} \cite{pacelc2012}.
+Many systems choose to favour latency and thus adopt \emph{optimistic replication} techniques \cite{10.1145/1057977.1057980}.
+This approach ensures the high \emph{availability} of the system, even in case of network partitions.
 To this end, it relaxes consistency constraints and minimises coordination between nodes.
 In this model, every node owns a copy of the data, can modify it and then propagate updates to others.
 Replicas are thus allowed to temporarily diverge.
@@ -252,7 +252,7 @@ Several approaches were introduced to design efficient conflict resolution mecha
 The one we consider proposes to use \acfp{CRDT} \cite{shapiro_2011_crdt}.
 \acp{CRDT} are new specifications of abstract data types, e.g. the Set or the Sequence.
 From users' perspective, \acp{CRDT} share the same semantics and interfaces as previously existing specifications.
-However, their pecularity is that \acp{CRDT} are designed to natively support concurrent modifications.
+However, \acp{CRDT}' pecularity is that they are designed to natively support concurrent modifications.
 \acp{CRDT} thus have the same behavior as previous specifications in sequential executions, but also define additional semantics for scenarios that can only occur in distributed executions.
 
 To this end, \acp{CRDT} embed a conflict resolution mechanism directly in their specification.
@@ -435,6 +435,8 @@ Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronis
 
 \subsection{Definition of the \emph{rename} operation}
 
+\label{sec:definition-rename-operation}
+
 The purpose of the \emph{rename} operation is to reassign new identifiers to elements of the replicated sequence, but it must not alter its content.
 Since identifiers are metadata used by the data structure solely for conflict resolution, users are unaware of their existence.
 \emph{Rename} operations are thus system operations: they are issued and applied by nodes behind the scenes, without any user initiative.
@@ -574,7 +576,6 @@ This reduces the data to send to a fixed amount per block.
 To decompress the received operation, nodes browse their current state and log of concurrent \emph{remove} operations.
 This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
 Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
-\mnnote{QUESTION : Développer ce paragraphe en une sous-section de \autoref{sec:discussion} ? Je pourrais préciser les différents aspects du mécanisme de compression et de décompression (éléments permettant d'identifier un bloc de manière unique, algorithme de décompression, modèle de cohérence requis...)}
 
 \subsection{Dealing with concurrent updates}
 
@@ -1414,6 +1415,34 @@ We will discuss further this topic in \autoref{sec:postponing-transition-to-new-
 \section{Discussion}
 
 \label{sec:discussion}
+
+\subsection{Issuing \emph{rename} operations}
+\label{sec:issuing-rename-operations}
+
+As stated in \autoref{sec:definition-rename-operation}, \emph{rename} operations are system operations.
+It is thus up to the designers of the system to determine when nodes should issue \emph{rename} operations and to define a corresponding strategy.
+However, there is no silver bullet since each system has its own constraints.
+
+Several aspects should be taken into account to define the strategy.
+The first one is the size of the data structure.
+As displayed in \autoref{fig:evolution-document-size}, metadata progressively increases to represent 99\% of the data structure.
+Using \emph{rename} operations, nodes can discard metadata and reduce the size of the data structure to an acceptable amount.
+To determine when to issue \emph{rename} operations, nodes may monitor the number of operations performed since the last \emph{rename} one, the number of blocks composing the sequence or the length of identifiers.
+
+A second aspect to take into account is the integration time of \emph{rename} operations.
+As reported in \autoref{tab:evolution-integration-time-rename}, integrating remote \emph{rename} operations takes up to seconds if delayed for too long.
+Although \emph{rename} operations work behind the scenes, they can still impact negatively the user experience.
+Indeed, nodes can not integrate operations from others while they are processing \emph{rename} operations
+From users' points of view, \emph{rename} operations can thus be perceived as latency peaks.
+In the domain of real-time collaborative editing, user experiments have shown that delay degrades the quality of collaborations \cite{ignat:hal-01088815,ignat:hal-01238831}.
+It thus important to issue \emph{rename} operations frequently to keep their integration times below the perceptible limit.
+
+Finally, the last aspect to consider is the amount of concurrent \emph{rename} operations.
+\autoref{fig:evolution-document-size} shows that concurrent \emph{rename} operations decrease RenamableLogootSplit's performances.
+The proposed strategy must then aim to minimise the number of concurrent \emph{rename} operations issued.
+However, it should avoid to rely on synchronous coordination between nodes to do so.
+To reduce the likelihood of issuing concurrent \emph{rename} operations, several techniques can be proposed.
+For example, nodes can monitor to which other nodes they are currently connected and delegate to the one with the highest \emph{node identifier} the duty to issue \emph{rename} operations.
 
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
