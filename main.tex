@@ -271,8 +271,6 @@ The design of such applications faces many challenges.
 It requires the definition of correct and efficient conflict resolution mechanisms that preserve users' intention \cite{10.1145/289444.289469}.
 Collaborative systems must guarantee privacy and be resilient to censorship.
 Recent work \cite{ahmednacer:inria-00629503, Nedelec2016CRATE, MUTE2017} has demonstrated the relevance of Sequence \acp{CRDT} to address these issues, notably thanks to their compatibility with peer-to-peer approaches.
-% Previous work \cite{ahmednacer:inria-00629503,lseq2017} has demonstrated the relevance of Sequence \acp{CRDT} to address privacy and resilience to censorship concerns, notably thanks to their compatibility with peer-to-peer approaches.
-% As a result, several collaborative editors using \acp{CRDT} were proposed \cite{}.
 
 Still, Sequence \acp{CRDT} exhibits some limitations.
 In particular, Sequence \acp{CRDT} suffer from the accumulation of large amount of metadata over time due to their internal conflict resolution mechanisms.
@@ -311,6 +309,7 @@ The first one \cite{oster:inria-00108523, Weiss_2007, ahmednacer:inria-00629503,
 The downside of this approach is an ever growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
 The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom2013,lseq2013,lseq2017} avoids the need of tombstones by attaching identifiers from a dense total order to elements.
 Elements are ordered into the sequence by comparing their respective identifiers.
+New element can always be inserted in between with a proper identifier according to the dense order.
 However this approach suffers from an ever-increasing overhead, as the size of such identifiers is unbounded and grows over time.
 In the context of this paper, we focus on the later approach.
 
@@ -320,7 +319,7 @@ In the context of this paper, we focus on the later approach.
 LogootSplit (LS) \cite{AndreCollaborateCom2013} is the state of the art of the variable-size identifiers approach of Sequence \ac{CRDT}.
 As explained previously, it uses identifiers from a dense total order to position elements into the replicated sequence.
 
-To this end, LogootSplit generates identifiers made of a list of tuples to elements.
+To this end, LogootSplit assigns identifiers made of a list of tuples to elements.
 These tuples have four components:
 \begin{enumerate*}
     \item a \emph{position}, which embodies the intended position of the element
@@ -329,14 +328,14 @@ These tuples have four components:
     \item an \emph{offset}, which are combined to make identifiers unique.
 \end{enumerate*}
 By comparing identifiers using the lexicographical order, LogootSplit is able to determine the position of the element relatively to others.
-In this paper, we represent identifiers using the following notation: \id{position}{node~id~node~seq}{offset} where $\trm{position}$ is a lowercase letter, $\trm{node~id}$ an uppercase one and both $\trm{node~seq}$ and $\trm{offset}$ integers.
+In this paper, we represent identifiers using the following notation: \id{position}{node\_id~node\_seq}{offset} where $\trm{position}$ is a lowercase letter, $\trm{node\_id}$ an uppercase one and both $\trm{node\_seq}$ and $\trm{offset}$ integers.
 
 Instead of storing an identifier for each element of the sequence, the main insight of LogootSplit is to aggregate dynamically elements into blocks.
 Grouping elements into blocks enables LogootSplit to assign logically an identifier to each element while effectively storing only the block length and the identifier of its first element.
 LogootSplit gathers elements with \emph{contiguous} identifiers into a block.
 We call \emph{contiguous} two identifiers that are identical except for their last offset, and with both offsets being consecutive.
-\autoref{fig:logootsplit-seq} illustrates such a case: in \autoref{fig:logootsplit-seq-as-letters}, the element identifiers form a chain of contiguous identifiers.
-LogootSplit is then able to group them into one block to minimise the metadata stored, as shown in \autoref{fig:logootsplit-seq-as-block}.
+\autoref{fig:logootsplit-seq} illustrates such a case: in \autoref{fig:logootsplit-seq-as-letters}, the element identifiers \id{i}{B0}{0}, \id{i}{B0}{1}, \id{i}{B0}{2} form a chain of contiguous identifiers.
+LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimise the metadata stored, as shown in \autoref{fig:logootsplit-seq-as-block}.
 
 \begin{figure}[!t]
     \centering
@@ -355,20 +354,20 @@ LogootSplit is then able to group them into one block to minimise the metadata s
                 node[block, label=below:{\id{i}{B0}{0..2}}] {HLO};
         \end{tikzpicture}
         \label{fig:logootsplit-seq-as-block}}
-    \caption{Simulation results for the network.}
+    \caption{Representation of a LogootSplit sequence containing the elements "HLO"}
     \label{fig:logootsplit-seq}
 \end{figure}
 
-This feature allows to shift the root of metadata growth from the number of elements to the number of blocks.
-As blocks can contain an arbitrary number of elements, it enables to reduce significantly the memory overhead of the data structure.
+This feature reduces the number of identifiers stored in the data structure, since identifiers are kept at the level of blocks rather than on every individual element.
+It enables to reduce significantly the memory overhead of the data structure.
 
 \subsection{Limits}
 
 As stated previously, the size of identifiers from a dense total order is variable.
-When nodes insert new elements between two others with the same \emph{position} value, LogootSplit has no other option than to increase the size of the resulting identifiers.
+When nodes insert new elements between two others with the same \emph{position} value, LogootSplit has no other option but to increase the size of the resulting identifiers.
 \autoref{fig:example-split} illustrates such cases.
-In this example, since node A inserts a new element between contiguous identifiers, LogootSplit is not able to generate a fitting identifier of the same size.
-To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor.
+In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit can not generate a proper identifier of the same size.
+To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor : \id{i}{B0}{0}\id{f}{A0}{0}.
 
 \begin{figure}[t!]
     \centering
@@ -391,7 +390,7 @@ This growth impacts negatively the performance of the data structure on several 
 Since identifiers attached to values become longer, the memory overhead of the data structure increases accordingly.
 This also increases the bandwidth consumption as nodes have to broadcast identifiers to others.
 
-Additionally, as the lifetime of the replicated sequence increases, the number of blocks composing it grows as well.
+Additionally, during the lifetime of the replicated sequence, the number of blocks increases.
 Indeed, several constraints on identifier generation prevent nodes from adding new elements to existing blocks.
 For example, only the node that generated the block can append or prepend elements to it.
 These limitations cause the generation of new blocks.
@@ -399,9 +398,6 @@ The sequence ends up fragmented into many blocks of only few characters each.
 However no mechanism to merge blocks a posteriori is provided.
 The efficiency of the data structure hence decreases as each block introduces its own overhead.
 
-% We present obtained results in \autoref{fig:evolution-document-size}.
-In order to measure the introduced overhead, we proceeded to benchmarks.
-% We measured that content, represented as the blue dashed line, eventually represents less than 1\% of the whole data structure size, displayed as the red line.
 As shown later in \autoref{sec:evaluation}, we measured that content eventually represents less than 1\% of the whole data structure size.
 Remaining 99\% of the data structure hence correspond to metadata.
 It is thus necessary to address the previously highlighted issues.
@@ -409,33 +405,22 @@ It is thus necessary to address the previously highlighted issues.
 \section{Overview}
 \label{sec:overview}
 
-\subsection{Proposed approach}
-\label{sec:proposition}
-
 We propose a new Sequence \ac{CRDT} belonging to the variable-size identifiers approach: RenamableLogootSplit \cite{nicolas:hal-01932552,nicolas:hal-02526724}.
 This data structure allows nodes to insert or remove elements into a replicated sequence.
-Nodes' updates take the form of operations that are immediately applied to nodes' replicas.
-Operations are then broadcast asynchronously to other nodes so that they also integrate updates.
-
-To address the limitations of LogootSplit, we embed in the data structure a renaming mechanism.
-The purpose of this mechanism is to reassign shorter identifiers to elements and to group them into blocks to minimise the memory overhead of the whole sequence.
-
-To avoid costly and blocking consensus algorithms, we instead adopt the \emph{optimistic replication} \cite{10.1145/1057977.1057980} approach for our mechanism.
-Nodes perform renaming without any coordination.
-This new feature is designed as an additional type of operation: the \emph{rename} one.
-However, this operation is not intrinsically commutative with others.
-If conflicts arise, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66963,10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
+We introduce a \emph{rename} operation to reassign shorter identifiers to elements and to group them into blocks to minimise the memory overhead of the whole sequence.
 
 \subsection{System Model}
 
 The system is composed of a dynamic set of nodes, as nodes join and leave dynamically the collaboration during its lifetime.
 Nodes collaborate to build and maintain a sequence using RenamableLogootSplit.
-Each node owns a copy of the sequence and edit it without any coordination.
+Each node owns a copy of the sequence and edits it without any coordination.
+Nodes' updates take the form of operations that are immediately applied to nodes' replicas.
+Operations are then broadcast asynchronously to other nodes so that they also integrate updates.
 
 Nodes communicate through a \ac{P2P} network, which is unreliable.
 Messages can be lost, re-ordered or delivered multiple times.
 The network is also vulnerable to partitions, which split nodes into disjoined subgroups.
-To overcome the failures of the network, nodes rely on a message-passing layer.
+To overcome failures of the network, nodes rely on a message-passing layer.
 As RenamableLogootSplit is built on top of LogootSplit, it shares the same requirements for the operation delivery.
 This layer is thus used to deliver messages to the application exactly-once.
 The layer also ensures that \emph{remove} operations are delivered after corresponding \emph{insert} operations.
