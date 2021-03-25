@@ -435,7 +435,7 @@ Since identifiers are metadata used by the data structure solely for conflict re
 \emph{Rename} operations are thus system operations: they are issued and applied by nodes behind the scenes, without any user initiative.
 
 In order to ensure the \ac{SEC} property of the replicated sequence, we define several safety properties that the \emph{rename} operation must respect.
-These properties, which are mainly inspired by those presented in \cite{zawirski:hal-01248197}, are as follows:
+These properties are mainly inspired by those presented in \cite{zawirski:hal-01248197}.
 
 \begin{property}(Determinism)
     \emph{Rename} operations are applied by each node without any coordination.
@@ -450,7 +450,7 @@ These properties, which are mainly inspired by those presented in \cite{zawirski
 \begin{property}(Well-formed Sequence)
     The replicated sequence must be well-formed.
     Applying a \emph{rename} operation to a well-formed sequence must then output a well-formed sequence.
-    We define a replicated sequence as well-formed if it meets the following conditions:
+    A well-formed sequence ensures the following properties:
     \begin{itemize}[noitemsep]
         \item[~]
         \begin{subproperty}(Unicity Preservation)
@@ -459,7 +459,7 @@ These properties, which are mainly inspired by those presented in \cite{zawirski
         \end{subproperty}
         \item[~]
         \begin{subproperty}(Order Preservation)
-            The elements of the sequence must be sorted with regards to their identifiers.
+            The elements of the sequence must be sorted according to their identifiers.
             Therefore, the existing order between initial identifiers must be preserved by the \emph{rename} operation.
         \end{subproperty}
     \end{itemize}
@@ -468,7 +468,7 @@ These properties, which are mainly inspired by those presented in \cite{zawirski
 \begin{property}(Commutativity with Concurrent Operations)
     \label{prop:commutativity}
     Concurrent operations may be delivered in different orders to each node.
-    To ensure the convergence of nodes, the order of application of a set of concurrent operations should not have any impact on the resulting state.
+    To ensure convergence of replicas, the order of application of a set of concurrent operations should not have any impact on the resulting state.
     The \emph{rename} operation must then be commutative with any other concurrent operation.
 \end{property}
 
@@ -478,7 +478,7 @@ However, other operations such as \emph{insert} and \emph{remove} ones rely on t
 \emph{Rename} operations are thus intrinsically incompatible with concurrent \emph{insert} and \emph{remove} ones.
 Likewise, concurrent \emph{rename} operations may reassign different identifiers to given elements.
 Concurrent \emph{rename} operations are hence not commutative.
-Therefore, it is required to design and use conflict resolution strategies to apply concurrent operations to \emph{rename} ones.
+Therefore, it is required to design and use conflict resolution strategies to apply operations concurrent to \emph{rename} ones.
 
 For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
 In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
@@ -1361,7 +1361,7 @@ The results are displayed in \autoref{tab:evolution-integration-time-rename}.
     \caption{Integration time of rename operations}
     \label{tab:evolution-integration-time-rename}
     \resizebox{\columnwidth}{!}{
-        \begin{tabular}{llrrrr}
+        \begin{tabular}{lrrrrr}
             \toprule
             \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration Time (ms)} \\
             \cmidrule(lr){1-2} \cmidrule(lr){3-6}
