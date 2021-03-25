@@ -193,13 +193,13 @@ E-mail: \{matthieu.nicolas, gerald.oster, olivier.perrin\}@loria.fr.}% <-this % 
 \IEEEtitleabstractindextext{%
 \begin{abstract}
 To achieve high availability, large-scale distributed systems have to replicate data and to minimise coordination between nodes.
-For these purposes, literature and industry increasingly adopt \acfp{CRDT} to design systems.
-\acp{CRDT} are new specifications of existing data types, e.g. the Set or the Sequence.
-While \acp{CRDT} have the same behaviour as previous specifications in sequential executions, they actually shine in distributed settings as they natively support concurrent modifications.
+For these purposes, literature and industry increasingly adopt \acfp{CRDT} to design such systems.
+\acp{CRDT} are new specifications of existing data types, e.g. Set or Sequence.
+While \acp{CRDT} have the same behaviour as previous specifications in sequential executions, they actually shine in distributed settings as they natively support concurrent updates.
 To this end, \acp{CRDT} embed in their specification conflict resolution mechanisms.
 These mechanisms usually rely on identifiers attached to elements of the data structure to resolve conflicts in a deterministic and coordination-free manner.
 Identifiers have to comply with several constraints, such as being unique or belonging to a dense total order.
-These constraints may hinder the identifiers’ size from being bounded.
+These constraints may hinder the identifier size from being bounded.
 As a result, identifiers tend to grow as the system progresses, which deepens the overhead of \acp{CRDT} over time and leads to performance issues.
 To address this issue in the context of real-time collaborative editing, we propose a novel Sequence \ac{CRDT} which embeds a renaming mechanism.
 It enables nodes to reassign shorter identifiers to elements in an uncoordinated manner.
@@ -208,7 +208,7 @@ Experimental results demonstrate that this mechanism decreases the overhead of t
 
 % Note that keywords are not normally used for peerreview papers.
 \begin{IEEEkeywords}
-CRDTs, real-time collaborative editing, eventual consistency, memory-wise optimisation, performance.
+CRDTs, replication, real-time collaborative editing, eventual consistency, memory-wise optimisation, performance.
 \end{IEEEkeywords}}
 
 % make the title area
@@ -244,21 +244,21 @@ CRDTs, real-time collaborative editing, eventual consistency, memory-wise optimi
 Many systems choose to favour latency and thus adopt \emph{optimistic replication} techniques \cite{10.1145/1057977.1057980}.
 This approach ensures the high \emph{availability} of the system, even in case of network partitions.
 To this end, it relaxes consistency constraints and minimises coordination between nodes.
-In this model, every node owns a copy of the data, can modify it and then propagate updates to others.
+In this approach, every node owns a copy of the data, can modify it and then propagate updates to others.
 Replicas are thus allowed to temporarily diverge.
 To ensure that they eventually reach equivalent states despite concurrently generated updates, a conflict resolution mechanism is required.
 
 Several approaches were introduced to design efficient conflict resolution mechanisms.
-The one we consider proposes to use \acfp{CRDT} \cite{shapiro_2011_crdt}.
-\acp{CRDT} are new specifications of abstract data types, e.g. the Set or the Sequence.
-From users' perspective, \acp{CRDT} share the same semantics and interfaces as previously existing specifications.
-However, \acp{CRDT}' pecularity is that they are designed to natively support concurrent modifications.
-\acp{CRDT} thus have the same behavior as previous specifications in sequential executions, but also define additional semantics for scenarios that can only occur in distributed executions.
+We propose to use \acfp{CRDT} \cite{shapiro_2011_crdt}.
+\acp{CRDT} are new specifications of abstract data types, e.g. Set or Sequence.
+From users' perspective, \acp{CRDT} share the same semantics and interfaces as non-replicated specifications.
+However, the particularity of \acp{CRDT} is that they are designed to natively support concurrent modifications.
+\acp{CRDT} thus have the same behavior as previous specifications in sequential executions, but also define additional semantics for scenarios that may occur in distributed executions.
 
-To this end, \acp{CRDT} embed a conflict resolution mechanism directly in their specification.
+\acp{CRDT} embed a conflict resolution mechanism directly in their specification.
 It enables them to respect the \ac{SEC} model \cite{shapiro_2011_crdt}.
 This consistency model states that replicas reach equivalent states as soon as they observe the same set of updates, without any further communications required and in spite of possible different reception orders.
-This property makes \acp{CRDT} particularly suited to the design of highly-available large-scale distributed systems.
+This property makes \acp{CRDT} particularly suitable for the design of highly-available large-scale distributed systems.
 
 \acp{CRDT} have been widely adopted by literature and industry since their conceptualisation.
 \acp{CRDT} corresponding to more powerful data types were designed and made available as libraries to developers \cite{Nicolaescu2016YATA,yjsimplem, jsoncrdt2017, automerge};
@@ -268,29 +268,36 @@ and a new paradigm of applications using \acp{CRDT} as their keystone technology
 Additionally, \acp{CRDT} have become an important research topic in the domain of real-time collaborative editing.
 Real-time collaborative editors allow users to share and edit text documents, often represented as Sequences.
 The design of such applications faces many challenges.
-It requires the definition of correct and efficient conflict resolution mechanisms that preserve users' intention.
-Also, designed systems must guarantee privacy and be resilient to censorship.
-Work \cite{ahmednacer:inria-00629503,lseq2017} has demonstrated the relevance of Sequence \acp{CRDT} to address these issues, notably thanks to their compatibility with peer-to-peer approaches.
-As a result, several collaborative editors using \acp{CRDT} were proposed \cite{Nedelec2016CRATE, MUTE2017}.
+It requires the definition of correct and efficient conflict resolution mechanisms that preserve users' intention \cite{10.1145/289444.289469}.
+Collaborative systems must guarantee privacy and be resilient to censorship.
+Recent work \cite{ahmednacer:inria-00629503, Nedelec2016CRATE, MUTE2017} has demonstrated the relevance of Sequence \acp{CRDT} to address these issues, notably thanks to their compatibility with peer-to-peer approaches.
+% Previous work \cite{ahmednacer:inria-00629503,lseq2017} has demonstrated the relevance of Sequence \acp{CRDT} to address privacy and resilience to censorship concerns, notably thanks to their compatibility with peer-to-peer approaches.
+% As a result, several collaborative editors using \acp{CRDT} were proposed \cite{}.
 
 Still, Sequence \acp{CRDT} exhibits some limitations.
 In particular, Sequence \acp{CRDT} suffer from the accumulation of large amount of metadata over time due to their internal conflict resolution mechanisms.
 While the evergrowing metadata decreases the efficiency of these data structures memory-wise, it also increases their bandwith consumption and computational overhead.
+Some previous work proposed renaming mechanisms \cite{letia:hal-01248270,zawirski:hal-01248197} to reduce punctually this overhead.
+However, these mechanisms require synchronous coordination.
 
-To address this issue, we propose a new Sequence \ac{CRDT}: RenamableLogootSplit (RLS).
-This novel data structure embeds a renaming mechanism into its specification.
-The renaming mechanism allows the data structure to punctually reduce its metadata and to minimise it eventually.
-While this kind of approach has been proposed in previous work \cite{letia:hal-01248270,zawirski:hal-01248197}, RenamableLogootSplit differs as its renaming mechanism does not require synchronous coordination.
+In this work, we propose a new Sequence \ac{CRDT}: RenamableLogootSplit (RLS).
+This data structure allows nodes to insert or remove elements into a replicated sequence.
+It embeds a renaming mechanism to minimise the memory overhead induced by metadata punctually.
+To avoid costly and blocking consensus algorithms, we instead adopt an optimistic approach : nodes perform renaming without any coordination.
+This new feature is designed as an additional type of operation: the \emph{rename} one.
+Since this operation is not intrinsically commutative with others, conflicts may arise.
+Therefore, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66963,10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
+In this paper, we present experimental results that assess that metadata overhead in RenamableLogootSplit is significantly lower than other state-of-the-art Sequence \acp{CRDT}.
 
 This paper is organised as follows:
 Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their evergrowing overhead.
 Section \ref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
 Section \ref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
 Then Section \ref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
-Section \ref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit to which we proceeded and the obtained results.
-Section \ref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations can make.
+Section \ref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit.
+Section \ref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations offer.
 Section \ref{sec:related-work} compares our approach to related work.
-Finally Section \ref{sec:conclusion} summarises our work and introduces possible future work.
+Finally Section \ref{sec:conclusion} summarises our work and introduces future work.
 
 % needed in second column of first page if using \IEEEpubid
 %\IEEEpubidadjcol
@@ -392,9 +399,10 @@ The sequence ends up fragmented into many blocks of only few characters each.
 However no mechanism to merge blocks a posteriori is provided.
 The efficiency of the data structure hence decreases as each block introduces its own overhead.
 
-In order to measure the overhead introduced, we proceeded to benchmarks.
-We present obtained results in \autoref{fig:evolution-document-size}.
-We measured that content, represented as the blue dashed line, eventually represents less than 1\% of the whole data structure size, displayed as the red line.
+% We present obtained results in \autoref{fig:evolution-document-size}.
+In order to measure the introduced overhead, we proceeded to benchmarks.
+% We measured that content, represented as the blue dashed line, eventually represents less than 1\% of the whole data structure size, displayed as the red line.
+As shown later in \autoref{sec:evaluation}, we measured that content eventually represents less than 1\% of the whole data structure size.
 Remaining 99\% of the data structure hence correspond to metadata.
 It is thus necessary to address the previously highlighted issues.
 
