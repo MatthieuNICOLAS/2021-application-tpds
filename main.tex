@@ -340,20 +340,26 @@ LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimi
 \begin{figure}[!t]
     \centering
     \subfloat[Elements with their corresponding identifiers]{
-        \begin{tikzpicture}
-            \path
-                node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{1}}] {L}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{2}}] {O};
-        \end{tikzpicture}
-        \label{fig:logootsplit-seq-as-letters}}
+        \begin{minipage}{.48\linewidth}
+        \centering
+            \begin{tikzpicture}
+                \path
+                    node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                    to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{1}}] {L}
+                    to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{2}}] {O};
+            \end{tikzpicture}
+            \label{fig:logootsplit-seq-as-letters}
+        \end{minipage}}
     \hfil
     \subfloat[Elements grouped into a block]{
-        \begin{tikzpicture}
-            \path
-                node[block, label=below:{\id{i}{B0}{0..2}}] {HLO};
-        \end{tikzpicture}
-        \label{fig:logootsplit-seq-as-block}}
+        \begin{minipage}{.48\linewidth}
+        \centering
+            \begin{tikzpicture}
+                \path
+                    node[block, label=below:{\id{i}{B0}{0..2}}] {HLO};
+            \end{tikzpicture}
+            \label{fig:logootsplit-seq-as-block}
+        \end{minipage}}
     \caption{Representation of a LogootSplit sequence containing the elements "HLO"}
     \label{fig:logootsplit-seq}
 \end{figure}
@@ -499,46 +505,55 @@ To do so, it reassigns arbitrary identifiers to elements.
 \begin{figure}[t!]
     \centering
     \subfloat[Selecting the new identifier of the first element]{
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H};
-
-            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
-        \end{tikzpicture}
-        \label{fig:renaming-first-id}}
-    \hfil
-    \subfloat[Selecting the new identifiers of the remaining ones]{
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
-                to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {O};
+        \begin{minipage}{\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node {\textbf{A}}
+                    to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                    to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                    to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                    to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H};
 
                 \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
             \end{tikzpicture}
-        \label{fig:renaming-second-id}}
+            \label{fig:renaming-first-id}
+        \end{minipage}}
+    \hfil
+    \subfloat[Selecting the new identifiers of the remaining ones]{
+        \begin{minipage}{\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node {\textbf{A}}
+                    to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                    to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                    to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                    to ++(0:4 * \widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0}}] (H) {H}
+                    to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{1}}] {E}
+                    to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{2}}] {L}
+                    to ++(0:\widthletter) node[letter, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{3}}] {O};
+
+                    \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (H);
+                \end{tikzpicture}
+            \label{fig:renaming-second-id}
+        \end{minipage}}
     \hfil
     \subfloat[Final state obtained]{
-        \begin{tikzpicture}
-            \path
-                node {\textbf{A}}
-                to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
-                to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
-                to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
-                to ++(0:4 * \widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] (HELO) {HELO};
+        \begin{minipage}{\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node {\textbf{A}}
+                    to ++(0:\widthletter) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+                    to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{A0}{0}}] {E}
+                    to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (LO) {LO}
+                    to ++(0:4 * \widthletter) node[block, fill=mydarkblue, label=below:{\color{mydarkblueid}\id{i}{A1}{0..3}}] (HELO) {HELO};
 
-            \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (HELO);
-        \end{tikzpicture}
-        \label{fig:renaming-final-state}}
+                \draw[->, thick] (LO) -- node[below, align=center]{\emph{rename}} (HELO);
+            \end{tikzpicture}
+            \label{fig:renaming-final-state}
+        \end{minipage}}
     \caption{Renaming the sequence on node \emph{A}}
     \label{fig:renaming}
 \end{figure}
@@ -591,8 +606,8 @@ It is thus necessary to handle concurrent operations to \emph{rename} operations
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
             to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
             to ++(0:5 * \widthletter) node[block, fill=mydarkblue,
-            label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
-                ] (S1A) {HELO}
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
+                        ] (S1A) {HELO}
             to ++(0:8 * \widthletter) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
                         ] (S2A-left) {HELO}
@@ -867,40 +882,51 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
 \begin{figure}[t!]
     \centering
     \subfloat[State of A's \emph{epoch tree} at (1)]{
-        \begin{tikzpicture}
-            \path
-                node[op] (e0) {\epoch{0}}
-                to ++(270:1.5) node[op, red] (eA1) {\epoch{A1}};
+        \begin{minipage}{.23\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node[op] (e0) {\epoch{0}}
+                    to ++(270:1.5) node[op, red] (eA1) {\epoch{A1}};
 
-            \draw[thick] (e0) -- (eA1);
-            \draw[->, >=stealth, dashed, thick, red] (eA1.60) -- (e0.300);
-        \end{tikzpicture}
-        \label{fig:priority-example-step-1-A}}
+                \draw[thick] (e0) -- (eA1);
+                \draw[->, >=stealth, dashed, thick, red] (eA1.60) -- (e0.300);
+            \end{tikzpicture}
+            \label{fig:priority-example-step-1-A}
+        \end{minipage}}
     \hfil
     \subfloat[State of B's \emph{epoch tree} at (1)]{
-        \begin{tikzpicture}
-            \path
-                node[op] (e0) {\epoch{0}}
-                to ++(270:1.5) node[op, red] (eB2) {\epoch{B2}};
+        \begin{minipage}{.23\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node[op] (e0) {\epoch{0}}
+                    to ++(270:1.5) node[op, red] (eB2) {\epoch{B2}};
 
-            \draw[thick] (e0) -- (eB2);
-            \draw[->, >=stealth, dashed, thick, red] (eA1.120) -- (e0.240);
-        \end{tikzpicture}
-        \label{fig:priority-example-step-1-B}}
+                \draw[thick] (e0) -- (eB2);
+                \draw[->, >=stealth, dashed, thick, red] (eA1.120) -- (e0.240);
+            \end{tikzpicture}
+            \label{fig:priority-example-step-1-B}
+        \end{minipage}}
     \hfil
     \subfloat[State of both \emph{epoch trees} at (2)]{
-        \begin{tikzpicture}
-            \path
-                node[op] (e0) {\epoch{0}}
-                to ++(225:1.5) node[op] (eA1) {\epoch{A1}};
-            \path
-                to ++(315:1.5) node[op, red] (eB2) {\epoch{B2}};
+        \begin{minipage}{.33\linewidth}
+            \centering
+            \begin{tikzpicture}
+                \path
+                    node[op] (e0) {\epoch{0}}
+                    to ++(270:1.5)
+                    to ++(180:0.95) node[op] (eA1) {\epoch{A1}};
+                \path
+                    to ++(270:1.5)
+                    to ++(0:0.95) node[op, red] (eB2) {\epoch{B2}};
 
-            \draw[thick] (e0) -- (eA1);
-            \draw[thick] (e0) -- (eB2);
-            \draw[->, >=stealth, dashed, thick, red] (eB2.180) -- (eA1.0) -- (e0.270);
-        \end{tikzpicture}
-        \label{fig:priority-example-step-2}}
+                \draw[thick] (e0) -- (eA1);
+                \draw[thick] (e0) -- (eB2);
+                \draw[->, >=stealth, dashed, thick, red] (eB2.180) -- (eA1.0) -- (e0.275);
+            \end{tikzpicture}
+            \label{fig:priority-example-step-2}
+        \end{minipage}}
     \caption{Evolution of \emph{epoch trees} during the scenario of \autoref{fig:conflicting-rename-operations}}
     \label{fig:priority-example}
 \end{figure}
