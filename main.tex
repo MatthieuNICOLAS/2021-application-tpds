@@ -1068,10 +1068,20 @@ If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the 
 
 Once node A reverted its state to the LCA epoch \epoch{0} using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch \epoch{B2} using \autoref{alg:renameId}.
 
-According to the \emph{priority} relation used, nodes may have to redo previously undone \emph{rename} operations.
-In order to ensure the convergence in such cases, \autoref{alg:renameId} and \autoref{alg:revertRenameId} must be inverse functions.
-We thus have to propose a new version of \autoref{alg:renameId}, in particular to rename correctly ids assigned to elements inserted causally after the \emph{rename} operation.
-This new version is presented in \autoref{alg:updated-rename-id}.
+Note that \autoref{alg:renameId} and \autoref{alg:revertRenameId} are not inverse functions.
+\autoref{alg:revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
+But on the other hand, \autoref{alg:renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
+Thus redoing a previously undone \emph{rename} operation alter these identifiers.
+This alteration may cause a divergence between nodes, as the same element will be referred to using different identifiers.
+
+This issue is however prevented in our system by the proposed \emph{priority} relation.
+Since the \emph{priority} relation is defined using the lexicographical order on the path of epochs in the \emph{epoch tree}, nodes only move towards the rightmost epoch of the \emph{epoch tree} when switching epochs.
+Nodes thus avoid going back and forth between different epochs and undoing then redoing corresponding \emph{rename} operations.
+
+Nonetheless, the requirement to prevent nodes from redoing \emph{rename} operation limits our possibilities to design new \emph{priority} relations.
+It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \autoref{sec:designing-more-effective-priority-relation}.
+It can be achieved by designing a set of inverse functions for \autoref{alg:renameId} and \autoref{alg:revertRenameId}.
+Another solution is to propose an alternative implementation of the renaming mechanism that use original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
 \subsection{Garbage collection of \emph{former states}}
 
@@ -1604,71 +1614,6 @@ Another research trail to explore is to study data types to determine which ones
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
 \section{Algorithms for distributed settings}
-
-\begin{myalgorithm}[h!]
-    \begin{algorithmic}
-        \Function{renIdfromPredId}{id, renamedIds, nId, nSeq}
-            \State index $\gets$ findIndexOfPred(id, renamedIds)
-            \State predId $\gets$ renamedIds[index]
-            \State newPredId $\gets$ \new~Id(pos, nId, nSeq, index)
-            \\
-            \If{predId.length + 1 < id.length}
-                \State prefix $\gets$ concat(predId, MIN\_TUPLE)
-                \State tail $\gets$ getTail(id, prefix.length)
-                \If{isPrefix(prefix, id) \textbf{and} tail < predId}
-                    \State \Return concat(newPredId, tail)
-                \EndIf
-            \EndIf
-            \\
-            \State succId $\gets$ renamedIds[index + 1]
-            \If{succId.length + 1 < id.length}
-                \State offset $\gets$ getLastOffset(succId) - 1
-                \State predOfSuccId $\gets$ createIdFromBase(succId, offset)
-                \State prefix $\gets$ concat(predOfSuccId, MAX\_TUPLE)
-                \State tail $\gets$ getTail(id, prefix.length)
-
-                \If{isPrefix(prefix, id) \textbf{and} succId < tail}
-                    \State \Return concat(newPredId, tail)
-                \EndIf
-            \EndIf
-            \\
-            \State \Return concat(newPredId, id)
-        \EndFunction
-        \\
-        \Function{renIdLessThanFirstId}{id, firstId, newFirstId}
-            \State offset $\gets$ getLastOffset(firstId) - 1
-            \State predOfFirstId $\gets$ createIdFromBase(firstId, offset)
-            \State prefix $\gets$ concat(predOfFirstId, MAX\_TUPLE)
-            \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
-
-            \If{isPrefix(prefix, id)}
-                \State tail $\gets$ getTail(id, prefix.length)
-                \State \Return concat(predNewFirstId, tail)
-            \ElsIf{id < newFirstId}
-                \State \Return id
-            \Else
-                \State \Return concat(predNewFirstId, id)
-            \EndIf
-        \EndFunction
-        \\
-        \Function{renIdGreaterThanLastId}{id, lastId, newLastId}
-            \State prefix $\gets$ concat(lastId, MIN\_TUPLE)
-
-            \If{isPrefix(prefix, id)}
-                \State tail $\gets$ getTail(id, prefix.length)
-                \State \Return tail
-            \ElsIf{newLastId < id}
-                \State \Return id
-            \Else
-                % \State \LeftComment{lastId} < id} < newLastId}$}
-                \State \Return concat(newLastId, id)
-            \EndIf
-        \EndFunction
-    \end{algorithmic}
-    \caption{Updated algorithms to rename an identifier}
-    \label{alg:updated-rename-id}
-\end{myalgorithm}
-
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
