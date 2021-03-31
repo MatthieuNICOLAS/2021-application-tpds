@@ -748,7 +748,12 @@ It allows them to converge with nodes which processed the \emph{rename} operatio
 Since nodes rely on the former state to transform concurrent operations to a \emph{rename} one, they have to store it.
 Nodes need it until each of them can no longer issue concurrent operations to the corresponding \emph{rename} operation.
 In other words, nodes can safely garbage collect the former state once the \emph{rename} operation became causally stable \cite{10.1007/978-3-662-43352-2_11}.
-Meanwhile, nodes can offload it onto the disk as it is only required to handle concurrent operations.
+To determine that a given \emph{rename} operation is causally stable, nodes have to be aware of others and of their progress.
+A group membership protocol such as \cite{swim2002,lifeguard2018} is thus required.
+
+Causal stability may take some time to be achieved.
+Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
+We discuss this topic further in \autoref{sec:offloading-former-states}.
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
@@ -1474,7 +1479,7 @@ For example, nodes can monitor to which other nodes they are currently connected
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
 
-As explained in \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
+As explained in \autoref{sec:dealing-with-concurrent-updates} and \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
 Nodes may receive such operations given 2 different cases:
 \begin{enumerate*}[label=(\roman*)]
     \item nodes have recently issued \emph{rename} operations
