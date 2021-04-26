@@ -852,7 +852,7 @@ Nodes have to solve these conflicts to ensure the convergence of their state.
 
 To this end, we propose the following approach: nodes effectively apply only one \emph{rename} operation from a set of concurrent \emph{rename} operations.
 The insight behind this approach is that \emph{rename} operations are system operations: they have no effect on the document content and they do not carry any user intention.
-Therefore nodes can ignore several \emph{rename} operations from a set of concurrent \emph{rename} ones without disturbing the user experience.
+Therefore nodes can ignore several \emph{rename} operations from a set of concurrent \emph{rename} ones without introducing any anomalies.
 Thus, as long as every nodes apply one same \emph{rename} operation from the set of concurrent \emph{rename} ones, they will be able to benefit from its effects while avoiding conflicts.
 
 We define the one \emph{rename} operation that nodes apply from a set of concurrent \emph{rename} operations as the \emph{primary} one.
