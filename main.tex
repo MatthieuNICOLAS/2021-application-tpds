@@ -331,9 +331,11 @@ By comparing identifiers using the lexicographical order, LogootSplit is able to
 In this paper, we represent identifiers using the following notation: \id{position}{node\_id~node\_seq}{offset} where $\trm{position}$ is a lowercase letter, $\trm{node\_id}$ an uppercase one and both $\trm{node\_seq}$ and $\trm{offset}$ integers.
 
 Instead of storing an identifier for each element of the sequence, the main insight of LogootSplit is to aggregate dynamically elements into blocks.
-Grouping elements into blocks enables LogootSplit to assign logically an identifier to each element while effectively storing only the block length and the identifier of its first element.
+Grouping elements into blocks enables LogootSplit to assign logically an identifier to each element, using intervals of identifiers, while effectively storing only the block length and the identifier of its first element.
 LogootSplit gathers elements with \emph{contiguous} identifiers into a block.
 We call \emph{contiguous} two identifiers that are identical except for their last offset, and with both offsets being consecutive.
+We denote the interval of identifiers corresponding to a block using the following notation: \id{position}{node\_id~node\_seq}{begin..end} where $\trm{begin}$ is the offset of the first identifier of the block and $\trm{end}$ the offset of its last identifier.
+
 \autoref{fig:logootsplit-seq} illustrates such a case: in \autoref{fig:logootsplit-seq-as-letters}, the element identifiers \id{i}{B0}{0}, \id{i}{B0}{1}, \id{i}{B0}{2} form a chain of contiguous identifiers.
 LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimise the metadata stored, as shown in \autoref{fig:logootsplit-seq-as-block}.
 
@@ -445,7 +447,7 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
 
 \begin{property}(Determinism)
     \emph{Rename} operations are applied by each node without any coordination.
-    To ensure that each node reaches eventually the same state, a given \emph{rename} operation must always output the same new identifier for a given identifier.
+    To ensure that each node reaches eventually the same state, a given \emph{rename} operation must always output the same new identifier from the current identifier.
 \end{property}
 
 \begin{property}(User-intention Preservation)
@@ -655,6 +657,7 @@ This algorithm maps identifiers from a given epoch to corresponding ones in the 
 The main idea of this algorithm is to use the predecessor of the given identifier to do so.
 An example of its usage is illustrated in \autoref{fig:concurrent-insert-rename-fixed}.
 This figure depicts the same scenario as in \autoref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \autoref{alg:renameId} to rename the concurrently generated id before inserting it in its state.
+
 The algorithm proceeds as follows.
 First, node A retrieves the predecessor of the given id \id{i}{B0}{0}\id{m}{B1}{0} in the former state: \id{i}{B0}{0}\id{f}{A0}{0}.
 Then it computes the counterpart of \id{i}{B0}{0}\id{f}{A0}{0} in the renamed state: \id{i}{A1}{1}.
