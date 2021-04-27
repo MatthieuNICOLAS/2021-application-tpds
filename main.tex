@@ -89,6 +89,8 @@
 
 % Commands
 %---------
+\newcommand{\refappendix}[1]{\hyperref[#1]{Appendix~\ref*{#1}}} % Required since \autoref displays Section A instead of Appendix A
+
 \newcommand{\eg}{e.g. }
 \newcommand{\ie}{i.e. }
 
@@ -652,7 +654,7 @@ If they differ, nodes have to transform the operation before applying it.
 Nodes determine against which \emph{rename} operations to transform the received operation by computing the path between the operation epoch and their current one using the \emph{epoch chain}.
 For this purpose, it is required to add the following rule to existing constraints upon the delivery of operations: operations must now be delivered after the \emph{rename} operation which introduced their epoch.
 
-Nodes use \autoref{alg:renameId} to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
+Nodes use the function $\trm{renameId}$, described in \autoref{alg:renameId}, to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
 This algorithm maps identifiers from a given epoch to corresponding ones in the next epoch.
 The main idea of this algorithm is to use the predecessor of the given identifier to do so.
 An example of its usage is illustrated in \autoref{fig:concurrent-insert-rename-fixed}.
@@ -696,6 +698,9 @@ By reassigning this id to the concurrently added element, node A is able to inse
     \caption{Rename concurrently generated identifier}
     \label{alg:renameId}
 \end{myalgorithm}
+
+\autoref{alg:renameId} features only the main case of $\trm{renameId}$, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
+Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \refappendix{app:rename-id}.
 
 \begin{figure*}[t!]
     \centering
@@ -968,8 +973,8 @@ As illustrated in \autoref{sec:priority}, nodes may have to rename their state f
 However, the proposed algorithm in \autoref{alg:renameId} is only designed to rename to an epoch from its parent one.
 To address this issue, we propose that nodes having applied concurrent \emph{secondary rename} operations first revert the effect of these concurrently applied \emph{rename} operations.
 
-We thus introduce \autoref{alg:revertRenameId}.
-The goals of \autoref{alg:revertRenameId} are the following:
+We thus introduce the function $\trm{revertRenameId}$, described in \autoref{alg:revertRenameId}.
+The goals of $\trm{revertRenameId}$ are the following:
 \begin{enumerate*}[label=(\roman*)]
     \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
     \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
@@ -977,7 +982,7 @@ The goals of \autoref{alg:revertRenameId} are the following:
 
 \begin{myalgorithm}
     \begin{algorithmic}
-        \Function{revRenId}{id, renamedIds, nId, nSeq}
+        \Function{revertRenameId}{id, renamedIds, nId, nSeq}
             % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
             % \Statex \LeftComment{$renamedIds}$ is the former state shared by the \emph{rename} op}
             % \Statex \LeftComment{$nId}$ is $node~id}$ of the node which issued the \emph{rename} op}
@@ -989,6 +994,7 @@ The goals of \autoref{alg:revertRenameId} are the following:
             \State pos $\gets$ getPosition(firstId)
             \\
             \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
+            \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
             \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
             \\
             \If{id < newFirstId}
@@ -1101,6 +1107,10 @@ The algorithm returns the tail if it fits between the identifier of its predeces
 If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
 
 Once node A reverted its state to the LCA epoch \epoch{0} using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch \epoch{B2} using \autoref{alg:renameId}.
+
+As with \autoref{alg:renameId}, \autoref{alg:revertRenameId} only features the main case of $\trm{revertRenameId}$.
+It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
+Functions to handle the rest of cases are featured in \refappendix{app:revert-rename-id}.
 
 Note that \autoref{alg:renameId} and \autoref{alg:revertRenameId} are not inverse functions.
 \autoref{alg:revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
@@ -1627,6 +1637,8 @@ Another research trail to explore is to study data types to determine which ones
 \appendices
 \section{Algorithms for centralised settings}
 
+\label{app:rename-id}
+
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function{renIdLessThanFirstId}{id, newFirstId}
@@ -1656,6 +1668,8 @@ Another research trail to explore is to study data types to determine which ones
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
 \section{Algorithms for distributed settings}
+
+\label{app:revert-rename-id}
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
