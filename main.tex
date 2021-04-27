@@ -667,9 +667,9 @@ By reassigning this id to the concurrently added element, node A is able to inse
 \begin{myalgorithm}
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
-            \State length $\gets$ renamedBlocks.length
-            \State firstId $\gets$ idBegin(renamedBlocks[0])
-            \State lastId $\gets$ idEnd(renamedBlocks[length - 1])
+            \State length $\gets$ renamedIds.length
+            \State firstId $\gets$ renamedIds[0]
+            \State lastId $\gets$ renamedIds[length - 1]
             \State pos $\gets$ position(firstId)
             \\
             \If{id < firstId}
