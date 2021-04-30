@@ -434,6 +434,7 @@ To overcome failures of the network, nodes rely on a message-passing layer.
 As RenamableLogootSplit is built on top of LogootSplit, it shares the same requirements for the operation delivery.
 This layer is thus used to deliver messages to the application exactly-once.
 The layer also ensures that \emph{remove} operations are delivered after corresponding \emph{insert} operations.
+\mnnote{TODO: Ajouter une petite phrase pour exprimer qu'on a pas d'autres contraintes sur la livraison des opérations}
 Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronise in a pairwise manner, by detecting and re-exchanging lost operations.
 
 \subsection{Definition of the \emph{rename} operation}
@@ -751,6 +752,8 @@ Functions to deal with other cases, \ie when the identifier to rename is out of 
 
 As explained in \autoref{sec:rename-op}, some nodes may have applied concurrent \emph{insert} operations to their state before receiving a given remote \emph{rename} operation.
 \autoref{alg:renameId} also solves this case.
+\mnnote{TODO: Reformuler phrase précédente}
+% L'algo 1 permet aussi de résoudre le cas où le noeud B a inséré en concurrence du rename et doit maintenant intégrer le rename, lui permet de rename les identifiants insérés en concurrence
 It allows them to converge with nodes which processed the \emph{rename} operations before the concurrent \emph{insert} operations.
 
 Since nodes rely on the former state to transform concurrent operations to a \emph{rename} one, they have to store it.
@@ -860,7 +863,7 @@ The insight behind this approach is that \emph{rename} operations are system ope
 Therefore nodes can ignore several \emph{rename} operations from a set of concurrent \emph{rename} ones without introducing any anomalies.
 Thus, as long as every nodes apply one same \emph{rename} operation from the set of concurrent \emph{rename} ones, they will be able to benefit from its effects while avoiding conflicts.
 
-We define the one \emph{rename} operation that nodes apply from a set of concurrent \emph{rename} operations as the \emph{primary} one.
+We denote the one \emph{rename} operation that nodes apply from a set of concurrent \emph{rename} operations as the \emph{primary} one.
 Other operations from the set are called \emph{secondary} ones.
 
 To make this approach feasible, we have to address two issues.
@@ -877,6 +880,8 @@ We present a corresponding algorithm in \autoref{sec:applying-primary-rename-op}
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
+\mnnote{TODO: Reformuler/Simplifier 1er paragraphe}
+% À partir du moment où on a des renames concurrents, les noeuds maintiennent un epoch tree et non plus une epoch chain
 As stated in \autoref{sec:dealing-with-concurrent-updates}, nodes build and maintain the \emph{epoch chain} from received \emph{rename} operations.
 This data structure orders epochs according to their \emph{parent-child} relation.
 Using the \emph{epoch chain}, nodes determine their current epoch as the latest one.
@@ -1005,6 +1010,7 @@ The goals of $\trm{revertRenameId}$ are the following:
             \ElsIf{newLastId < id}
                 \State \Return revRenIdGreaterThanNewLastId(id, lastId)
             \Else
+                % Ajouter commentaire sur cas
                 \State index $\gets$ getFirstOffset(id)
                 \State \Return revRenIdfromPredId(id, renamedIds, index)
             \EndIf
@@ -1029,6 +1035,8 @@ The goals of $\trm{revertRenameId}$ are the following:
     \caption{Revert rename identifier}
     \label{alg:revertRenameId}
 \end{myalgorithm}
+
+\mnnote{TODO: Ajouter commentaire dans l'algo pour préciser le cas où on rename un id inséré de façon concurrente ou causale au rename}
 
 Upon the reception of a \emph{rename} operation introducing a concurrent but primary epoch to their current one, nodes have first to determine which \emph{rename} operations to revert.
 To this end, nodes use the \emph{epoch tree}.
@@ -1291,6 +1299,8 @@ The aims of this evaluation are to measure
     \item the cost of integrating \emph{rename} operations.
 \end{enumerate*}
 
+\mnnote{TODO: Reformuler paragraphe pour juste dire qu'on a utilisé des simulations pour notre évaluation (plutôt que d'insister sur le fait qu'on a pas réussi à avoir de traces réelles)}
+% We proceed to evaluation by means of simulations.
 Unfortunately, we were not able to retrieve an existing dataset of real-time collaborative editing sessions.
 We thus setup simulations to generate the dataset used to run our benchmarks.
 These simulations mimic the following scenario.
