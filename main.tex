@@ -756,6 +756,8 @@ Functions to deal with other cases, \ie when the identifier to rename is out of 
 
 \subsection{Optimisations}
 
+\label{sec:optimisations}
+
 \mnnote{TODO: Ajouter une phrase ou deux pour introduire cette sous-section}
 
 \headerparagraph{Garbage collection and offloading of former states}
@@ -780,6 +782,11 @@ This reduces the data to send to a fixed amount per block.
 To decompress the received operation, nodes browse their current state and log of concurrent \emph{remove} operations.
 This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
 Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
+
+\mnnote{QUESTION:
+    Ajouter un paragraphe sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
+    Permettrait de réduire sa complexité.
+}
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
@@ -1525,7 +1532,7 @@ For example, nodes can monitor to which other nodes they are currently connected
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
 
-As explained in \autoref{sec:dealing-with-concurrent-updates} and \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
+As explained in \autoref{sec:optimisations} and \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
 Nodes may receive such operations given 2 different cases:
 \begin{enumerate*}[label=(\roman*)]
     \item nodes have recently issued \emph{rename} operations
