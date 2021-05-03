@@ -803,61 +803,48 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
     \begin{tikzpicture}
         \path
             node {\textbf{A}}
-            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{A1}}
-            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
-                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
-                ] (S0A) {HELO}
-            to ++(0:7 * \widthletter) node[epoch] (S1A-left)  {\epoch{A1}}
-            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
-                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                ]{HE}
-            to ++(0:\widthblock) node[letter, fill=mylightblue,
-                    label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
-                ] {L}
-            to ++(0:\widthletter) node[block, fill=mydarkblue,
-                    label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                ] (S1A-right) {LO}
-            to ++ (0:5 * \widthletter) node[epoch] (S2A-left) {\epoch{B2}}
-            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkblue,
-                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                        ]{HE}
-            to ++(0:\widthblock) node[letter, fill=mylightblue,
-                    label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
-                ] {L}
-            to ++(0:\widthletter) node[block, fill=mydarkblue,
-                    label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                ] (S2A-right) {LO};
-
-        \path
-            to ++(270:2) node {\textbf{B}}
             to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
             to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
-            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S0B-right) {LO}
-            to ++(0:5 * \widthletter) node[epoch] (S1B-left) {\epoch{B2}}
-            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S1B-right) {HELLO}
-            to ++ (0:7 * \widthletter) node[epoch] (S2B-left) {\epoch{A1}}
-            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ]  {HELLO};
+            to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0A-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
+                        ] (S1A-right) {HELO}
+            to ++(0:8 * \widthletter) node[epoch] (S2A-left) {\epoch{A1}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
+                        ] {HE}
+            to ++(0:\widthblock) node[letter, fill=mylightblue,
+                    label={above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                        ] {L}
+            to ++(0:\widthletter) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                        ] {LO};
 
         \path
-            to ($(S1A-left)!0.5!(S1A-right)$)
-            to ++(90:1.5) node{(1)}
-            to ($(S2A-left)!0.5!(S2A-right)$)
-            to ++(90:1.5) node{(2)};
+            to ++(270:3) node {\textbf{B}}
+            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{0}}
+            to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[block, label=below:{\id{i}{B0}{1..2}}] (S0B-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S1B-left) {\epoch{0}}
+            to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S1B-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S2B-left) {\epoch{B2}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] {HELLO};
 
-        \draw[dotted] (S0A) -- node[above, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S1A-left);
-        \draw[dotted] (S1A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S2A-left);
-        \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S1B-left);
-        \draw[dotted] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S2B-left);
 
-        \draw[dashed, ->, thick, shorten >= 3] (S0B-right.east) -- (S1A-left.west);
-        \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- (S2A-left.west);
-        \draw[dashed, ->, thick, shorten >= 3] (S1A-right.east) -- (S2B-left.west);
+        \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \draw[dotted] (S1A-right) -- (S2A-left);
+        \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{insert "l"}\\\emph{between}\\\emph{"e" and "l"}} (S1B-left);
+        \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[right, xshift=5pt, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
+        \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S2B-left);
+
 
     \end{tikzpicture}
     \caption{Concurrent \emph{rename} operations leading to divergent states}
@@ -869,35 +856,44 @@ This operation reassigns new identifiers to every element based on the id of the
 This operation also introduces a new epoch: \epoch{B2}.
 Since node A's \emph{rename} operation was not yet delivered to node B at that moment, both \emph{rename} operations are concurrent.
 
-Node A and B then synchronise: each node applies the other one's \emph{rename} operation.
-However, although they applied the same set of operations, their resulting states diverge.
-The identifiers attached to every element as well as the current epoch are now different.
-While the content of both sequences is still identical at that moment, the divergence will only widen.
-Subsequent operations will rely on these divergent identifiers to express at which position to insert new elements or which ones to remove.
-The same operations will thus produce different outputs on each copy.
+% - Expliquer l'arbre des epochs
+As concurrent epochs are now generated, epochs now form the \emph{epoch tree}.
+We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} corresponding to the scenario described in \autoref{fig:conflicting-rename-operations}.
+Epochs are displayed as nodes and the \emph{parent-child} relation between them displayed as black arrows.
 
-The divergence depicted in \autoref{fig:conflicting-rename-operations} occurs since the proposed \emph{rename} operation is not commutative with itself.
-As concurrent operations may be delivered and applied in different orders to each nodes, conflicts may arise as a result.
-Nodes have to solve these conflicts to ensure the convergence of their state.
+\begin{figure}[t!]
+    \centering
+    \begin{tikzpicture}
+        \path
+            node[op] (e0) {\epoch{0}}
+            to ++(270:1.5)
+            to ++(180:0.95) node[op] (eA1) {\epoch{A1}};
+        \path
+            to ++(270:1.5)
+            to ++(0:0.95) node[op] (eB2) {\epoch{B2}};
 
-To this end, we propose the following approach: nodes effectively apply only one \emph{rename} operation from a set of concurrent \emph{rename} operations.
-The insight behind this approach is that \emph{rename} operations are system operations: they have no effect on the document content and they do not carry any user intention.
-Therefore nodes can ignore several \emph{rename} operations from a set of concurrent \emph{rename} ones without introducing any anomalies.
-Thus, as long as every nodes apply one same \emph{rename} operation from the set of concurrent \emph{rename} ones, they will be able to benefit from its effects while avoiding conflicts.
+        \draw[thick, ->] (e0) -- (eA1);
+        \draw[thick, ->] (e0) -- (eB2);
+    \end{tikzpicture}
+    \caption{The \emph{epoch tree} corresponding to the scenario of \autoref{fig:conflicting-rename-operations}}
+    \label{fig:epoch-tree}
+\end{figure}
 
-We denote the one \emph{rename} operation that nodes apply from a set of concurrent \emph{rename} operations as the \emph{primary} one.
-Other operations from the set are called \emph{secondary} ones.
+At the end of the scenario described in \autoref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
+In order to converge, every node should eventually reach the same epoch.
+However, the function $\trm{renameId}$ described in \autoref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
+Nodes A and B are thus unable to progress towards the epoch of the other.
+It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
-To make this approach feasible, we have to address two issues.
-First, nodes have to be able to select the \emph{primary rename} operation to apply from a set of concurrent ones.
-In order to avoid performance issues due to coordination, nodes should select this operation in a coordination-free manner, \ie solely using data from the set of concurrent \emph{rename} operations.
+First, nodes have to be able to select a target epoch from the \emph{epoch tree}.
+In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
 We propose such a mechanism in \autoref{sec:priority}.
-Second, nodes have to able to revert the effect of applied \emph{rename} operations.
-Upon the reception of \emph{rename} operations, nodes can only rely on their current knowledge to make decisions.
-However, nodes have only partial knowledge of the state of the system and of the operations issued at a given time.
-They may thus consider a received \emph{rename} operation as the \emph{primary} one and apply it, only to learn a few moments later that there is a concurrent \emph{rename} operation with higher priority.
-In that case, nodes have to revert mistakenly applied \emph{rename} operations to apply the correct \emph{primary} one eventually.
-We present a corresponding algorithm in \autoref{sec:applying-primary-rename-op}.
+
+Second, nodes have to be able to move from epoch to epoch throught the \emph{epoch tree} in order to reach the target one.
+The function $\trm{renameId}$ already enables nodes to move from the root to the leaves of the tree.
+Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
+In these cases, nodes have to be able to move up the \emph{epoch tree}.
+We propose a function enabling this move in \autoref{sec:applying-primary-rename-op}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
