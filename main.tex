@@ -898,18 +898,7 @@ We propose a function enabling this move in \autoref{sec:applying-primary-rename
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-\mnnote{TODO: Reformuler/Simplifier 1er paragraphe}
-% À partir du moment où on a des renames concurrents, les noeuds maintiennent un epoch tree et non plus une epoch chain
-As stated in \autoref{sec:dealing-with-concurrent-updates}, nodes build and maintain the \emph{epoch chain} from received \emph{rename} operations.
-This data structure orders epochs according to their \emph{parent-child} relation.
-Using the \emph{epoch chain}, nodes determine their current epoch as the latest one.
-However, in case of concurrent \emph{rename} operations, this data structure is no longer suitable as several epochs may share the same parent epoch.
-Epochs now form the \emph{epoch tree}.
-Several epochs may be considered as the latest ones.
-To converge, every node should eventually select the same epoch as the \emph{primary} one.
-
-To this end, we define \emph{priority}, a total order relation between epochs.
-The goal of this relation is to enable nodes to designate the \emph{primary rename} operation from a set of concurrent ones, but also the current epoch from the set of all issued \emph{rename} operations, in a coordination-free manner.
+To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a total order relation between epochs.
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
