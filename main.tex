@@ -276,7 +276,7 @@ Recent work \cite{ahmednacer:inria-00629503, Nedelec2016CRATE, MUTE2017} has dem
 
 Still, Sequence \acp{CRDT} exhibits some limitations.
 In particular, Sequence \acp{CRDT} suffer from the accumulation of large amount of metadata over time due to their internal conflict resolution mechanisms.
-While the evergrowing metadata decreases the efficiency of these data structures memory-wise, it also increases their bandwith consumption and computational overhead.
+While the ever-growing metadata decreases the efficiency of these data structures memory-wise, it also increases their bandwith consumption and computational overhead.
 Some previous work proposed renaming mechanisms \cite{letia:hal-01248270,zawirski:hal-01248197} to reduce punctually this overhead.
 However, these mechanisms require synchronous coordination.
 
@@ -290,7 +290,7 @@ Therefore, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66
 In this paper, we present experimental results that assess that metadata overhead in RenamableLogootSplit is significantly lower than other state-of-the-art Sequence \acp{CRDT}.
 
 This paper is organised as follows:
-Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their evergrowing overhead.
+Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their ever-growing overhead.
 Section \ref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
 Section \ref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
 Then Section \ref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
@@ -308,7 +308,7 @@ Finally Section \ref{sec:conclusion} summarises our work and introduces future w
 To deterministically solve conflicts and ensure convergence of all nodes, \acp{CRDT} rely on metadata.
 In the context of Sequence \acp{CRDT}, two different approaches were proposed, both trying to minimise the overhead introduced.
 The first one \cite{oster:inria-00108523, Weiss_2007, ahmednacer:inria-00629503, ROH2011354, briot:hal-01343941} attaches fixed size identifiers to each element in the sequence and uses them to represent the sequence as a linked list.
-The downside of this approach is an ever growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
+The downside of this approach is an ever-growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
 The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom2013,lseq2013,lseq2017} avoids the need of tombstones by attaching identifiers from a dense total order to elements.
 Elements are ordered into the sequence by comparing their respective identifiers.
 New element can always be inserted in between with a proper identifier according to the dense order.
@@ -395,7 +395,7 @@ To comply with the intended order, LogootSplit generates a new identifier by app
     \label{fig:example-split}
 \end{figure}
 
-As a result, the size of identifiers tends to grow as the collaboration progresses.
+As a result, the size of identifiers tends to grow as the system progresses.
 This growth impacts negatively the performance of the data structure on several aspects.
 Since identifiers attached to values become longer, the memory overhead of the data structure increases accordingly.
 This also increases the bandwidth consumption as nodes have to broadcast identifiers to others.
@@ -441,7 +441,7 @@ Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronis
 
 \label{sec:definition-rename-operation}
 
-The purpose of the \emph{rename} operation is to reassign new identifiers to elements of the replicated sequence, but it must not alter its content.
+The purpose of the \emph{rename} operation is to reassign new identifiers to elements of the replicated sequence without altering its content.
 Since identifiers are metadata used by the data structure solely for conflict resolution, users are unaware of their existence.
 \emph{Rename} operations are thus system operations: they are issued and applied by nodes behind the scenes, without any user initiative.
 
@@ -483,19 +483,19 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
     The \emph{rename} operation must then be commutative with any other concurrent operation.
 \end{property}
 
-In the case of the \emph{rename} operation, \autoref{prop:commutativity} is particularly difficult to achieve.
+\autoref{prop:commutativity} is particularly difficult to achieve.
 This is due to the fact that \emph{rename} operations modify identifiers assigned to elements.
 However, other operations such as \emph{insert} and \emph{remove} ones rely on these identifiers to specify where to insert elements or which ones to remove.
 \emph{Rename} operations are thus intrinsically incompatible with concurrent \emph{insert} and \emph{remove} ones.
 Likewise, concurrent \emph{rename} operations may reassign different identifiers to given elements.
 Concurrent \emph{rename} operations are hence not commutative.
-Therefore, it is required to design and use conflict resolution strategies to apply operations concurrent to \emph{rename} ones.
+Therefore, it is required to design and use conflict resolution strategies to achieve \autoref{prop:commutativity}.
 
 For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
 In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
 This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operations.
 Then, in \autoref{sec:distributed-rls}, we remove this assumption to allow concurrent \emph{rename} operations.
-We present our approach to make the \emph{rename} operation commutative with itself to deal with this scenario.
+We present our approach to make the \emph{rename} operation commutative with itself to handle scenarios with concurrent \emph{rename} operations.
 
 \section{RenamableLogootSplit without concurrent \emph{rename} operations}
 \label{sec:centralised-rls}
@@ -794,8 +794,7 @@ Additionally, we can set an upper-bound to the size of \emph{rename} operations 
 \subsection{Concurrent \emph{rename} operations}
 
 We now consider scenarios with concurrent \emph{rename} operations.
-\autoref{fig:conflicting-rename-operations} depicts such one.
-This figure expands the scenario previously described in \autoref{fig:concurrent-insert-rename-fixed}.
+\autoref{fig:conflicting-rename-operations} depicts such a scenario and expands the one previously described in \autoref{fig:concurrent-insert-rename-fixed}.
 
 \begin{figure*}[h!]
     \centering
