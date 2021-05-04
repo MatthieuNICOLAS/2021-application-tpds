@@ -379,7 +379,7 @@ When nodes insert new elements between two others with the same \emph{position} 
 In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit can not generate a proper identifier of the same size.
 To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor : \id{i}{B0}{0}\id{f}{A0}{0}.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -506,8 +506,9 @@ We present our approach to make the \emph{rename} operation commutative with its
 
 Our \emph{rename} operation enables RenamableLogootSplit to reduce the overhead of nodes replica.
 To do so, it reassigns arbitrary identifiers to elements.
+Its behaviour is illustrated in \autoref{fig:renaming}.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \subfloat[Selecting the new identifier of the first element]{
         \begin{minipage}{\linewidth}
@@ -563,8 +564,6 @@ To do so, it reassigns arbitrary identifiers to elements.
     \label{fig:renaming}
 \end{figure}
 
-
-Its behaviour is illustrated in \autoref{fig:renaming}.
 In this example, node A initiates a \emph{rename} operation on its local state.
 First, node A reuses the id of the first element of the sequence (\id{i}{B0}{0}) but modifies it with its own node id (\textbf{A}) and current sequence number (\emph{1}).
 Also the offset is set to 0.
@@ -595,7 +594,7 @@ However, since identifiers were modified by the concurrent \emph{rename} operati
 As described by this example, applying naively concurrent updates would result in inconsistencies.
 It is thus necessary to handle concurrent operations to \emph{rename} operations in a particular manner.
 
-\begin{figure*}[t!]
+\begin{figure*}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -663,7 +662,7 @@ Then it computes the counterpart of \id{i}{B0}{0}\id{f}{A0}{0} in the renamed st
 Finally, node A prepends it to the given id to generate the renamed id: \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
 By reassigning this id to the concurrently added element, node A is able to insert it in its state while preserving the intended order.
 
-\begin{myalgorithm}
+\begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
             \State length $\gets$ renamedIds.length
@@ -696,7 +695,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
     \label{alg:renameId}
 \end{myalgorithm}
 
-\begin{figure*}[t!]
+\begin{figure*}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -798,7 +797,7 @@ We now consider scenarios with concurrent \emph{rename} operations.
 \autoref{fig:conflicting-rename-operations} depicts such one.
 This figure expands the scenario previously described in \autoref{fig:concurrent-insert-rename-fixed}.
 
-\begin{figure*}[t!]
+\begin{figure*}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -820,7 +819,9 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
                         ] {L}
             to ++(0:\widthletter) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                        ] {LO};
+                        ] (S2A-right) {LO};
+            % to ++(0:2) node (A-sync) {}
+            % to ++(90:1) node (sync-top-left) {};
 
         \path
             to ++(270:3) node {\textbf{B}}
@@ -836,11 +837,22 @@ This figure expands the scenario previously described in \autoref{fig:concurrent
             to ++(0:5 * \widthletter) node[epoch] (S2B-left) {\epoch{B2}}
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] {HELLO};
+                ] (S2B-right) {HELLO};
+            % to ++(0:3.8) node (B-sync) {}
+            % to ++(0:1.2)
+            % to ++(270:1) node (sync-bottom-right) {};
 
+        % \draw[thick] (sync-top-left) rectangle (sync-bottom-right) node [midway] (midway) {};
+
+        % \path
+        %     (midway)
+        %     to ++(90:0.6) node {S}
+        %     to ++(270:0.4) node {Y}
+        %     to ++(270:0.4) node {N}
+        %     to ++(270:0.4) node {C};
 
         \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
-        \draw[dotted] (S1A-right) -- (S2A-left);
+        \draw[dotted] (S1A-right) -- (S2A-left); % (S2A-right) -- (A-sync) (S2B-right) -- (B-sync);
         \draw[->, thick] (S0B-right) -- node[below, align=center]{\emph{insert "l"}\\\emph{between}\\\emph{"e" and "l"}} (S1B-left);
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[right, xshift=5pt, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
         \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S2B-left);
@@ -857,11 +869,11 @@ This operation also introduces a new epoch: \epoch{B2}.
 Since node A's \emph{rename} operation was not yet delivered to node B at that moment, both \emph{rename} operations are concurrent.
 
 % - Expliquer l'arbre des epochs
-As concurrent epochs are now generated, epochs now form the \emph{epoch tree}.
-We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} corresponding to the scenario described in \autoref{fig:conflicting-rename-operations}.
-Epochs are displayed as nodes and the \emph{parent-child} relation between them displayed as black arrows.
+As concurrent epochs are generated, epochs now form the \emph{epoch tree}.
+We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise in the scenario described in \autoref{fig:conflicting-rename-operations}.
+Epochs are displayed as nodes of the tree and the \emph{parent-child} relation between them displayed as black arrows.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -885,12 +897,12 @@ However, the function $\trm{renameId}$ described in \autoref{alg:renameId} only 
 Nodes A and B are thus unable to progress towards the epoch of the other.
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
-First, nodes have to be able to select a target epoch from the \emph{epoch tree}.
+First, nodes have to be able to select one epoch from the \emph{epoch tree} as the target epoch.
 In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
 We propose such a mechanism in \autoref{sec:priority}.
 
 Second, nodes have to be able to move from epoch to epoch throught the \emph{epoch tree} in order to reach the target one.
-The function $\trm{renameId}$ already enables nodes to move from the root to the leaves of the tree.
+The function $\trm{renameId}$ already enables nodes to move down the tree.
 Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
 In these cases, nodes have to be able to move up the \emph{epoch tree}.
 We propose a function enabling this move in \autoref{sec:applying-primary-rename-op}.
@@ -904,74 +916,74 @@ To define the \emph{priority} relation, we may actually select different strateg
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
 \autoref{fig:priority-example} provides an example of its use.
 
-\begin{figure}[t!]
-    \centering
-    \subfloat[State of A's \emph{epoch tree} at (1)]{
-        \begin{minipage}{.23\linewidth}
+\begin{figure}[h!]
+    \subfloat[Example of execution with concurrent \emph{rename} operations]{
+        \begin{minipage}{\linewidth}
             \centering
             \begin{tikzpicture}
                 \path
-                    node[op] (e0) {\epoch{0}}
-                    to ++(270:1.5) node[op, red] (eA1) {\epoch{A1}};
+                    node {\textbf{A}}
+                    to ++(0:1) node (a0) {}
+                    to ++(0:1) node[op] (a1) {$a_1$}
+                    to ++(0:5) node (a-end) {};
 
-                \draw[thick] (e0) -- (eA1);
-                \draw[->, >=stealth, dashed, thick, red] (eA1.60) -- (e0.300);
+                \draw[->, thick] (a0) --  (a1) -- (a-end);
+
+                \path
+                    to ++(270:1.5) node {\textbf{B}}
+                    to ++(0:1) node (b0) {}
+                    to ++(0:1) node[op] (b2) {$b_2$}
+                    to ++(0:3) node[op] (b7) {$b_7$}
+                    to ++(0:2) node (b-end) {};
+
+                \draw[->, thick] (b0) -- (b2) -- (b7) -- (b-end);
+
+                \path
+                    to ++(270:3) node {\textbf{C}}
+                    to ++(0:1) node (c0) {}
+                    to ++(0:3) node[op] (c6) {$c_6$}
+                    to ++(0:3) node (c-end) {};
+
+                \draw[->, thick] (c0) -- (c6) -- (c-end);
+
+                \draw[->, dashed, shorten >= 3] (a1) -- (c6);
             \end{tikzpicture}
-            \label{fig:priority-example-step-1-A}
+            \label{fig:priority-execution}
         \end{minipage}}
     \hfil
-    \subfloat[State of B's \emph{epoch tree} at (1)]{
-        \begin{minipage}{.23\linewidth}
+    \subfloat[Corresponding epoch tree with \emph{priority} relation shown]{
+        \begin{minipage}{\linewidth}
             \centering
             \begin{tikzpicture}
                 \path
                     node[op] (e0) {\epoch{0}}
-                    to ++(270:1.5) node[op, red] (eB2) {\epoch{B2}};
-
-                \draw[thick] (e0) -- (eB2);
-                \draw[->, >=stealth, dashed, thick, red] (eA1.120) -- (e0.240);
-            \end{tikzpicture}
-            \label{fig:priority-example-step-1-B}
-        \end{minipage}}
-    \hfil
-    \subfloat[State of both \emph{epoch trees} at (2)]{
-        \begin{minipage}{.33\linewidth}
-            \centering
-            \begin{tikzpicture}
+                    to ++(225:1.5) node[op] (eA1) {\epoch{A1}}
+                    to ++(270:1.5) node[op] (eC6) {\epoch{C6}};
                 \path
-                    node[op] (e0) {\epoch{0}}
-                    to ++(270:1.5)
-                    to ++(180:0.95) node[op] (eA1) {\epoch{A1}};
-                \path
-                    to ++(270:1.5)
-                    to ++(0:0.95) node[op, red] (eB2) {\epoch{B2}};
+                    to ++(315:1.5) node[op] (eB2) {\epoch{B2}}
+                    to ++(270:1.5) node[op, red] (eB7) {\epoch{B7}};
 
-                \draw[thick] (e0) -- (eA1);
-                \draw[thick] (e0) -- (eB2);
-                \draw[->, >=stealth, dashed, thick, red] (eB2.180) -- (eA1.0) -- (e0.275);
+                \draw[->, thick] (e0) edge (eA1) (eA1) edge (eC6) (e0) edge (eB2) (eB2) edge (eB7);
+                \draw[->, dashed, thick, red] (eB7.135) -- (eB2.225) (eB2.180) -- (eC6.45) -- (eA1.315) (eA1.0) -- (e0.270);
             \end{tikzpicture}
-            \label{fig:priority-example-step-2}
+            \label{fig:priority-epoch-tree}
         \end{minipage}}
-    \caption{Evolution of \emph{epoch trees} during the scenario of \autoref{fig:conflicting-rename-operations}}
+    \caption{Selecting target epoch from execution with concurrent \emph{rename} operations}
     \label{fig:priority-example}
 \end{figure}
 
-This figure displays the evolution of node A and B's \emph{epoch trees} during the execution of \autoref{fig:conflicting-rename-operations}'s scenario.
-Red dashed arrows represents the order between epochs according to the \emph{priority} relation while current epochs are displayed as red nodes.
+\autoref{fig:priority-execution} describes an execution in which the three nodes A, B and C issue several operations before eventually synchronising.
+As solely \emph{rename} operations are relevant to the problem at hand, only them are represented in this figure.
+Initially, node A issues a \emph{rename} operation introducing the epoch \epoch{A1}.
+This operation is delivered to node C, which later generates its own \emph{rename} operation creating the epoch \epoch{C6}.
+Concurrently to these operations, node B issues two \emph{rename} operations, generating \epoch{B2} then \epoch{B7}.
 
-Initially, both nodes are only aware of their own \emph{rename} operation.
-Node A's (resp. node B's) \emph{epoch tree} is thus only composed of the epochs \epoch{0} and \epoch{A1} (resp. \epoch{0} and \epoch{B2}).
-Using the \emph{priority} relation, both nodes order epochs to determine the current one.
-According to the lexicographical order on the path of epochs in the \emph{epoch tree}, node A (resp. node B) establishes that \epoch{0} < \epoch{0}\epoch{A1} (resp. \epoch{0} < \epoch{0}\epoch{B2}).
-Therefore node A selects \epoch{A1} as its current epoch while node B picks \epoch{B2}.
+Once nodes synchronised, they obtain the \emph{epoch tree} represented in \autoref{fig:priority-epoch-tree}.
+In this figure, the red dashed arrow represents the order between epochs according to the \emph{priority} relation while the selected target epoch is displayed as a red node.
 
-Then, both nodes synchronise and their \emph{epoch trees} converge.
-Using the \emph{priority} relation, they are able to decide which \emph{rename} operation to deem as the \emph{primary} one in a coordination-free manner.
-Nodes establish that \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{B2}.
-Therefore, they choose \epoch{B2} as the new \emph{primary} and current epoch.
-As \epoch{B2} was already node B's current epoch, node B does not rename its state upon the reception of the \emph{rename} operation to \epoch{A1}.
-On the other hand, node A has to \emph{rename} its state from \epoch{A1} to \epoch{B2}.
-We explain how node A proceeds in \autoref{sec:applying-primary-rename-op}.
+To determine the target epoch, nodes rely on the \emph{priority} relation.
+According to the lexicographical order on the path of epochs in the \emph{epoch tree}, \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{A1}\epoch{C6} < \epoch{0}\epoch{B2} < \epoch{0}\epoch{B2}\epoch{B7}.
+Therefore each node selects \epoch{B7} as the target epoch in a coordination-free manner.
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
@@ -992,7 +1004,7 @@ The goals of $\trm{revertRenameId}$ are the following:
     \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
 
-\begin{myalgorithm}
+\begin{myalgorithm}[h!]
     \begin{algorithmic}
         \Function{revertRenameId}{id, renamedIds, nId, nSeq}
             % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
@@ -1051,7 +1063,7 @@ By identifying the \ac{LCA} of their current epoch and of the new \emph{primary}
 Nodes have then to revert \emph{rename} operations applied since the \ac{LCA} epoch between their current epoch and the new primary one in the reverse order, using \autoref{alg:revertRenameId}.
 The \autoref{fig:revertRenameId} illustrates such a scenario.
 
-\begin{figure*}[t!]
+\begin{figure*}[h!]
     \centering
     \begin{tikzpicture}
         \path
@@ -1182,7 +1194,7 @@ Since in that case node B would have to transform operations to apply them to \e
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
 Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \subfloat[Execution]{
         \begin{minipage}{\linewidth}
             \centering
@@ -1359,7 +1371,7 @@ Further work to formally prove its correctness should be undertaken.
 We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
 We present the obtained results in \autoref{fig:evolution-document-size}.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \includegraphics[width=\columnwidth]{img/snapshot-sizes.pdf}
     \caption{Evolution of the size of the document}
@@ -1399,7 +1411,7 @@ However, for performance reasons, we merged these two steps in our implementatio
 We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
 \autoref{fig:evolution-integration-time-insert} displays the results.
 
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \subfloat[Local updates]{
         \includegraphics[width=0.9\columnwidth]{img/integration-time-boxplot-local-operations-without-outliers.pdf}
