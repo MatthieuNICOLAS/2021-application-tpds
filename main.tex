@@ -434,7 +434,7 @@ To overcome failures of the network, nodes rely on a message-passing layer.
 As RenamableLogootSplit is built on top of LogootSplit, it shares the same requirements for the operation delivery.
 This layer is thus used to deliver messages to the application exactly-once.
 The layer also ensures that \emph{remove} operations are delivered after corresponding \emph{insert} operations.
-\mnnote{TODO: Ajouter une petite phrase pour exprimer qu'on a pas d'autres contraintes sur la livraison des opérations}
+No other constraints exist on the delivery order of operations.
 Nodes use an anti-entropy mechanism \cite{10.1109/TSE.1983.236733} to synchronise in a pairwise manner, by detecting and re-exchanging lost operations.
 
 \subsection{Definition of the \emph{rename} operation}
@@ -1033,8 +1033,10 @@ To this end, $\trm{revertRenameId}$ maps identifiers from \emph{children} epoch 
             \State tail $\gets$ getTail(id, 1)
             \\
             \If{tail < predId}
+                \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                 \State \Return concat(predId, MIN\_TUPLE, tail)
             \ElsIf{succId < tail}
+                \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                 \State offset $\gets$ getLastOffset(succId) - 1
                 \State predOfSuccId $\gets$ createIdFromBase(succId, offset)
                 \State \Return concat(predOfSuccId, MAX\_TUPLE, tail)
@@ -1326,10 +1328,7 @@ The aims of this evaluation are to measure
     \item the cost of integrating \emph{rename} operations.
 \end{enumerate*}
 
-\mnnote{TODO: Reformuler paragraphe pour juste dire qu'on a utilisé des simulations pour notre évaluation (plutôt que d'insister sur le fait qu'on a pas réussi à avoir de traces réelles)}
-% We proceed to evaluation by means of simulations.
-Unfortunately, we were not able to retrieve an existing dataset of real-time collaborative editing sessions.
-We thus setup simulations to generate the dataset used to run our benchmarks.
+By means of simulations, we generated the dataset used to run our benchmarks.
 These simulations mimic the following scenario.
 
 Several authors collaboratively write an article in real-time.
