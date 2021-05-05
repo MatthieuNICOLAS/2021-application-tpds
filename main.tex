@@ -494,8 +494,7 @@ Therefore, it is required to design and use conflict resolution strategies to ac
 For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
 In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
 This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operations.
-Then, in \autoref{sec:distributed-rls}, we remove this assumption to allow concurrent \emph{rename} operations.
-We present our approach to make the \emph{rename} operation commutative with itself to handle scenarios with concurrent \emph{rename} operations.
+Then, in \autoref{sec:distributed-rls}, we remove this assumption and present our approach to handle scenarios with concurrent \emph{rename} operations.
 
 \section{RenamableLogootSplit without concurrent \emph{rename} operations}
 \label{sec:centralised-rls}
@@ -794,7 +793,7 @@ Additionally, we can set an upper-bound to the size of \emph{rename} operations 
 \subsection{Concurrent \emph{rename} operations}
 
 We now consider scenarios with concurrent \emph{rename} operations.
-\autoref{fig:conflicting-rename-operations} depicts such a scenario and expands the one previously described in \autoref{fig:concurrent-insert-rename-fixed}.
+\autoref{fig:conflicting-rename-operations} expands the scenario previously described in \autoref{fig:concurrent-insert-rename-fixed} to depicts such one.
 
 \begin{figure*}[h!]
     \centering
@@ -896,15 +895,16 @@ However, the function $\trm{renameId}$ described in \autoref{alg:renameId} only 
 Nodes A and B are thus unable to progress towards the epoch of the other.
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
-First, nodes have to be able to select one epoch from the \emph{epoch tree} as the target epoch.
+First, nodes have to agree on one epoch from the \emph{epoch tree} as the target epoch.
 In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
 We propose such a mechanism in \autoref{sec:priority}.
 
-Second, nodes have to be able to move from epoch to epoch throught the \emph{epoch tree} in order to reach the target one.
+Second, nodes have to move throught the \emph{epoch tree} to reach the target epoch.
 The function $\trm{renameId}$ already enables nodes to move down the tree.
 Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
-In these cases, nodes have to be able to move up the \emph{epoch tree}.
-We propose a function enabling this move in \autoref{sec:applying-primary-rename-op}.
+In these cases, nodes have to be able to move up the \emph{epoch tree} to return to the \ac{LCA} of the current epoch and the target one.
+This move is actually akin to reverting the effect of previously applied \emph{rename} operations.
+We propose a function that fulfills this purpose in \autoref{sec:applying-primary-rename-op}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
@@ -974,7 +974,7 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
 \autoref{fig:priority-execution} describes an execution in which the three nodes A, B and C issue several operations before eventually synchronising.
 As solely \emph{rename} operations are relevant to the problem at hand, only them are represented in this figure.
 Initially, node A issues a \emph{rename} operation introducing the epoch \epoch{A1}.
-This operation is delivered to node C, which later generates its own \emph{rename} operation creating the epoch \epoch{C6}.
+This operation is delivered to node C, which later issues its own \emph{rename} operation creating \epoch{C6}.
 Concurrently to these operations, node B issues two \emph{rename} operations, generating \epoch{B2} then \epoch{B7}.
 
 Once nodes synchronised, they obtain the \emph{epoch tree} represented in \autoref{fig:priority-epoch-tree}.
@@ -982,7 +982,7 @@ In this figure, the red dashed arrow represents the order between epochs accordi
 
 To determine the target epoch, nodes rely on the \emph{priority} relation.
 According to the lexicographical order on the path of epochs in the \emph{epoch tree}, \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{A1}\epoch{C6} < \epoch{0}\epoch{B2} < \epoch{0}\epoch{B2}\epoch{B7}.
-Therefore each node selects \epoch{B7} as the target epoch in a coordination-free manner.
+Therefore every node selects \epoch{B7} as the target epoch in a coordination-free manner.
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
