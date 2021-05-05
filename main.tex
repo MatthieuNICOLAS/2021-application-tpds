@@ -910,6 +910,7 @@ We propose an algorithm that fulfills this purpose in \autoref{sec:reverting-ren
 \label{sec:priority}
 
 To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a total order relation between epochs.
+Nodes select the maximum epoch according to this relation as the target epoch.
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
@@ -1138,6 +1139,7 @@ For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
+\mnnote{TODO: Indiquer que retirer le préfixe permet d'inverser la transformation appliquée à l'identifiant par $\trm{renIdFromPredId}$ dans le cas où celui-ci a été inséré en concurrence du renommage}
 
 Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
 As no corresponding identifier exists yet at the \emph{parent} epoch, $\trm{revertRenameId}$ can return any identifier as long as it preserves the intended order.
@@ -1384,6 +1386,8 @@ We present the obtained results in \autoref{fig:evolution-document-size}.
     \caption{Evolution of the size of the document}
     \label{fig:evolution-document-size}
 \end{figure}
+
+\mnnote{TODO: Refaire figure pour déplacer légende en-dessous}
 
 For each plot displayed in \autoref{fig:evolution-document-size}, we represent 4 different data.
 The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red solid line corresponds to the size of the whole LogootSplit document.
