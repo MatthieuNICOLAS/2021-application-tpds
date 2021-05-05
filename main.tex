@@ -1135,8 +1135,11 @@ To retrieve the original identifiers, $\trm{revertRenameId}$ simply uses their o
 For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
-The algorithm can thus return the tail, as its value is between the identifiers of its predecessor and successor and preserve the intended order.
-If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
+The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
+
+Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
+As no corresponding identifier exists yet at the \emph{parent} epoch, $\trm{revertRenameId}$ can return any identifier as long as it preserves the intended order.
+To this end, \autoref{alg:revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
 
 Once node A mapped its state to the equivalent one at \epoch{0} using \autoref{alg:revertRenameId}, it can now apply $\trm{renameId}$ to compute the corresponding state at \epoch{B2}.
 
