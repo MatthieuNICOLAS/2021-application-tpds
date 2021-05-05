@@ -868,7 +868,7 @@ Since node A's \emph{rename} operation was not yet delivered to node B at that m
 
 % - Expliquer l'arbre des epochs
 As concurrent epochs are generated, epochs now form the \emph{epoch tree}.
-We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise in the scenario described in \autoref{fig:conflicting-rename-operations}.
+We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise.
 Epochs are displayed as nodes of the tree and the \emph{parent-child} relation between them displayed as black arrows.
 
 \begin{figure}[h!]
@@ -904,7 +904,7 @@ The function $\trm{renameId}$ already enables nodes to move down the tree.
 Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
 In these cases, nodes have to be able to move up the \emph{epoch tree} to return to the \ac{LCA} of the current epoch and the target one.
 This move is actually akin to reverting the effect of previously applied \emph{rename} operations.
-We propose a function that fulfills this purpose in \autoref{sec:applying-primary-rename-op}.
+We propose an algorithm that fulfills this purpose in \autoref{sec:reverting-rename-ops}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
@@ -988,20 +988,13 @@ Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
 This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}.
 
-\subsection{Applying \emph{primary rename} operations}
+\subsection{Reverting \emph{rename} operations}
 
-\label{sec:applying-primary-rename-op}
+\label{sec:reverting-rename-ops}
 
-As illustrated in \autoref{sec:priority}, nodes may have to rename their state from an epoch to a concurrent one.
-However, the proposed algorithm in \autoref{alg:renameId} is only designed to rename to an epoch from its parent one.
-To address this issue, we propose that nodes having applied concurrent \emph{secondary rename} operations first revert the effect of these concurrently applied \emph{rename} operations.
-
-We thus introduce the function $\trm{revertRenameId}$, described in \autoref{alg:revertRenameId}.
-The goals of $\trm{revertRenameId}$ are the following:
-\begin{enumerate*}[label=(\roman*)]
-    \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
-    \item To assign new ids complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
-\end{enumerate*}
+We now introduce the function $\trm{revertRenameId}$.
+Described in \autoref{alg:revertRenameId}, this function enables nodes to revert previously applied \emph{rename} operations.
+To this end, $\trm{revertRenameId}$ maps identifiers from \emph{children} epoch to equivalent ones in their \emph{parent} epoch.
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
@@ -1056,91 +1049,104 @@ The goals of $\trm{revertRenameId}$ are the following:
 
 \mnnote{TODO: Ajouter commentaire dans l'algo pour préciser le cas où on rename un id inséré de façon concurrente ou causale au rename}
 
-Upon the reception of a \emph{rename} operation introducing a concurrent but primary epoch to their current one, nodes have first to determine which \emph{rename} operations to revert.
-To this end, nodes use the \emph{epoch tree}.
-By identifying the \ac{LCA} of their current epoch and of the new \emph{primary} one, nodes can determine which operations to revert.
-Nodes have then to revert \emph{rename} operations applied since the \ac{LCA} epoch between their current epoch and the new primary one in the reverse order, using \autoref{alg:revertRenameId}.
-The \autoref{fig:revertRenameId} illustrates such a scenario.
+The goals of $\trm{revertRenameId}$ are the following:
+\begin{enumerate*}[label=(\roman*)]
+    \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
+    \item To assign new identifiers complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
+\end{enumerate*}
+We illustrate its behaviour with the help of \autoref{fig:revertRenameId}.
 
 \begin{figure*}[h!]
     \centering
     \begin{tikzpicture}
         \path
             node {\textbf{A}}
-            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{A1}}
+            % to ++(0:0.5 * \widthletter) node (A-origin) {}
+            % to ++(0:\widthletter) node (A-former) {}
+            % to ++(0:3 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+            to ++(0:0.5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
+                        ] (S1A-right) {HELO}
+            to ++(0:8 * \widthletter) node[epoch] (S2A-left) {\epoch{A1}}
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{0..1}} }
-                ]{HE}
+                        ] {HE}
             to ++(0:\widthblock) node[letter, fill=mylightblue,
-                    label={ [] above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
-                ] {L}
+                    label={above:{\color{mylightblue!20!mydarkblueid}\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}} }
+                        ] {L}
             to ++(0:\widthletter) node[block, fill=mydarkblue,
-                    label={ [] below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
-                ] (S0A-right) {LO}
-            to ++ (0:5 * \widthletter) node (S1A) {}
-            to ++ (0:5 * \widthletter) node[epoch] (S2A-left) {\epoch{0}}
+                    label={below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
+                        ] (S2A-right) {LO}
+            to ++(0:2 * \widthblock) node (between-S2A-S3A) {}
+            to ++(0:3 * \widthletter) node[epoch] (S3A-left) {\epoch{0}}
             to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
             to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S2A-right) {LO}
-            to ++ (0:5 * \widthletter) node[epoch] (S3A-left) {\epoch{B2}}
-            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ]  {HELLO};
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
 
         \path
-            to ++(270:2) node {\textbf{B}}
-            to ++(0:0.5 * \widthletter) node[epoch] {\epoch{B2}}
+            to ++(270:3) node {\textbf{B}}
+            % to ++(0:0.5 * \widthletter) node (B-origin) {}
+            % to ++(0:\widthletter) node (B-former) {}
+            % to ++(0:3 * \widthletter) node[epoch] (S1B-left) {\epoch{0}}
+            to ++(0:0.5 * \widthletter) node[epoch] (S1B-left) {\epoch{0}}
+            to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
+            to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
+            to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S1B-right) {LO}
+            to ++(0:5 * \widthletter) node[epoch] (S2B-left) {\epoch{B2}}
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ] (S0B-right) {HELLO}
-            to ++ (0:7.5 * \widthletter) node (S1B) {}
-            to ++ (0:5 * \widthletter) node[epoch] (S2B-left) {\epoch{B2}}
-            to ++ (0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
-                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
-                ]  {HELLO};
+                ] (S2B-right) {HELLO};
 
-        \draw[dotted] (S0A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S1A);
-        \draw[dotted] (S0B-right) -- node[below, align=center]{\emph{rename to \epoch{A1}}} (S1B);
-
-        \draw[dashed, thick] (S0B-right.east) -- (S1A.east);
-        \draw[dashed, ->, thick, shorten >= 3] (S1A) -- node[above, align=center] {\emph{undo rename to \epoch{A1}}} (S2A-left);
-        \draw[dashed, ->, thick, shorten >= 3] (S2A-right) -- node[above, align=center] {\emph{rename to \epoch{B2}}} (S3A-left);
-
-        \draw[dashed, thick] (S0A-right.east) -- (S1B.east);
-        \draw[dashed, ->, thick, shorten >= 3] (S1B) -- node[below, align=center] {\emph{ignore rename to \epoch{A1}}} (S2B-left);
-
+        % \draw[dotted] (A-origin) -- (A-former) (B-origin) -- (B-former);
+        % \draw[->, thick] (A-former) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
+        \draw[dotted] (S1A-right) -- (S2A-left);
+        % \draw[->, thick] (B-former) -- node[below, align=center]{\emph{insert "l"}\\\emph{between}\\\emph{"e" and "l"}} (S1B-left);
+        \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[right, xshift=5pt, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
+        \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S2B-left);
+        \draw[dotted] (S2A-right) -- (between-S2A-S3A);
+        \draw[dashed, thick] (S2B-right.east) -- node[right, xshift=5pt, align=center]{\emph{rename to \epoch{B2}}} (between-S2A-S3A);
+        \draw[dashed, ->, thick] (between-S2A-S3A) -- node[above, align=center]{\emph{revert rename}\\\emph{to \epoch{A1}}} (S3A-left);
     \end{tikzpicture}
-    \caption{Handling concurrent \emph{rename} operations}
+    \caption{Reverting a previously applied \emph{rename} operation}
     \label{fig:revertRenameId}
 \end{figure*}
 
-This figure describes the same scenario as \autoref{fig:conflicting-rename-operations}, except that nodes now use the \emph{priority} to determine how to process the concurrent \emph{rename} operation received.
+This figure resumes the scenario from \autoref{fig:conflicting-rename-operations}.
+Node A is delivered node B's \emph{rename} operation, which is concurrent to A's one.
+According to the proposed \emph{priority} relation, node A determines the introduced epoch \epoch{B2} as the target one.
+It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{LCA} of its current epoch \epoch{A1} and the target one \epoch{B2}.
+To this end, it applies $\trm{revertRenameId}$ to every identifiers of its current state.
 
-Upon the reception of both \emph{rename} operations, nodes compares introduced epochs to determine the \emph{primary} one.
-According to the proposed \emph{priority} relation, nodes deems \epoch{B2} as \emph{primary} one since \epoch{0} < \epoch{0}\epoch{A1} < \epoch{0}\epoch{B2}.
-Since node B's current epoch is already \epoch{B2}, node B can simply ignore the received \emph{rename} operation.
-Meanwhile, node A has to rename its state from \epoch{A1} to \epoch{B2}.
+$\trm{revertRenameId}$ determines which strategy to apply to revert the given identifier using patterns.
+For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which were originally renamed.
+To retrieve the original identifiers, $\trm{revertRenameId}$ simply uses their offset as it is their index in \emph{renamedIds}.
 
-Node A first determines the \ac{LCA} between \epoch{A1} and \epoch{B2}: \epoch{0}.
-It then undoes each \emph{rename} operations that separates its current epoch from \epoch{0}, \ie the \emph{rename} operation from \epoch{0} to \epoch{A1}.
-To this end, node A uses \autoref{alg:revertRenameId}.
+% According to its structure, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0} may result from the transformation using $\trm{renIdFromPredId}$ of a identifier concurrently inserted to the \emph{rename} operation.
+% Indeed, this identifier is composed of a prefix (\id{i}{A1}{1}) and a tail (\id{i}{B0}{0}\id{m}{B1}{0}), with the tail is between
+% To revert the effect of the \emph{rename} operation, $\trm{revertRenameId}$ returns the tail.
+% % To revert the effect of the \emph{rename} operation, $\trm{revertRenameId}$ first removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+% The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
+% In this case, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
+% $\trm{revertRenameId}$ can thus return the tail, as it
 
-\autoref{alg:revertRenameId} enables node A to retrieve fitting counterparts for every identifiers of its current state.
-For identifiers of the form \id{i}{A1}{offset}, it simply uses their offset to retrieve the original identifiers, as offsets correspond to the identifier indexes in \emph{renamedIds}.
 For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
-The algorithm returns the tail if it fits between the identifier of its predecessor (\id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0}) and the identifier of its successor (\id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}).
+The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
+In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
+The algorithm can thus return the tail, as its value is between the identifiers of its predecessor and successor and preserve the intended order.
 If it would not, \autoref{alg:revertRenameId} would use exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$, to generate an identifier complying with the intended order.
 
-Once node A reverted its state to the LCA epoch \epoch{0} using \autoref{alg:revertRenameId}, it can successively apply \emph{rename} operations leading to the new \emph{primary} epoch \epoch{B2} using \autoref{alg:renameId}.
+Once node A mapped its state to the equivalent one at \epoch{0} using \autoref{alg:revertRenameId}, it can now apply $\trm{renameId}$ to compute the corresponding state at \epoch{B2}.
 
 As with \autoref{alg:renameId}, \autoref{alg:revertRenameId} only features the main case of $\trm{revertRenameId}$.
 It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
 Functions to handle the rest of cases are featured in \refappendix{app:revert-rename-id}.
 
-Note that \autoref{alg:renameId} and \autoref{alg:revertRenameId} are not inverse functions.
-\autoref{alg:revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
-But on the other hand, \autoref{alg:renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
+Note that $\trm{renameId}$ and $\trm{revertRenameId}$ are not inverse functions.
+$\trm{revertRenameId}$ reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
+But on the other hand, $\trm{renameId}$ does not do the same for identifiers inserted causally after the \emph{rename} operation.
 Thus redoing a previously undone \emph{rename} operation alter these identifiers.
 This alteration may cause a divergence between nodes, as the same element will be referred to using different identifiers.
 
@@ -1150,12 +1156,12 @@ Nodes thus avoid going back and forth between different epochs and undoing then 
 
 Nonetheless, the requirement to prevent nodes from redoing \emph{rename} operation limits our possibilities to design new \emph{priority} relations.
 It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \autoref{sec:designing-more-effective-priority-relation}.
-It can be achieved by designing a set of inverse functions for \autoref{alg:renameId} and \autoref{alg:revertRenameId}.
-Another solution is to propose an alternative implementation of the renaming mechanism that use original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
+It can be achieved by designing a set of inverse functions for $\trm{renameId}$ and $\trm{revertRenameId}$.
+Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
 \subsection{Garbage collection of \emph{former states}}
 
-As explained in \autoref{sec:dealing-with-concurrent-updates} and \autoref{sec:applying-primary-rename-op}, nodes have to store epochs and corresponding \emph{former states} to transform operations from previous or concurrent epochs to the current one, or to rename their state from their current epoch to the new \emph{primary} one.
+Nodes store epochs and corresponding \emph{former states} to map identifiers from previous or concurrent epochs to the current one.
 However, once nodes become aware that some epochs can not possibly be required anymore to apply future operations, they can garbage collect these epochs and their corresponding \emph{rename} operations.
 But, in systems which allow the generation of concurrent \emph{rename} operations, nodes can not solely rely on causal stability of \emph{rename} operations to determine which operations can be garbage collected.
 Therefore, we propose the two following rules to enable nodes to identify unnecessary epochs:
