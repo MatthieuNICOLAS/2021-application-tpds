@@ -259,7 +259,7 @@ However, the particularity of \acp{CRDT} is that they are designed to natively s
 
 \acp{CRDT} embed a conflict resolution mechanism directly in their specification.
 It enables them to respect the \ac{SEC} model \cite{shapiro_2011_crdt}.
-This consistency model states that replicas reach equivalent states as soon as they observe the same set of updates, without any further communications required and in spite of possible different reception orders.
+This consistency model defines that replicas reach equivalent states as soon as they observe the same set of updates, without any further communications required and in spite of possible different reception orders.
 This property makes \acp{CRDT} particularly suitable for the design of highly-available large-scale distributed systems.
 
 \acp{CRDT} have been widely adopted by literature and industry since their conceptualisation.
@@ -276,7 +276,7 @@ Recent work \cite{ahmednacer:inria-00629503, Nedelec2016CRATE, MUTE2017} has dem
 
 Still, Sequence \acp{CRDT} exhibits some limitations.
 In particular, Sequence \acp{CRDT} suffer from the accumulation of large amount of metadata over time due to their internal conflict resolution mechanisms.
-While the ever-growing metadata decreases the efficiency of these data structures memory-wise, it also increases their bandwith consumption and computational overhead.
+While the ever-growing metadata decreases the memory efficiency of these data structures, it also increases their bandwith consumption and computational overhead.
 Some previous work proposed renaming mechanisms \cite{letia:hal-01248270,zawirski:hal-01248197} to reduce punctually this overhead.
 However, these mechanisms require synchronous coordination.
 
@@ -1540,7 +1540,7 @@ For example, nodes can monitor to which other nodes they are currently connected
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
 
-As explained in \autoref{sec:optimisations} and \autoref{sec:applying-primary-rename-op}, nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
+Nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
 Nodes may receive such operations given 2 different cases:
 \begin{enumerate*}[label=(\roman*)]
     \item nodes have recently issued \emph{rename} operations
