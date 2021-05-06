@@ -910,7 +910,7 @@ We propose an algorithm that fulfills this purpose in \autoref{sec:reverting-ren
 \label{sec:priority}
 
 To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a total order relation between epochs.
-Nodes select the maximum epoch according to this relation as the target epoch.
+Nodes then select the maximum epoch according to this relation as the target epoch.
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
@@ -994,8 +994,8 @@ This topic will be further discussed in \autoref{sec:designing-more-effective-pr
 \label{sec:reverting-rename-ops}
 
 We now introduce the function $\trm{revertRenameId}$.
-Described in \autoref{alg:revertRenameId}, this function enables nodes to revert previously applied \emph{rename} operations.
-To this end, $\trm{revertRenameId}$ maps identifiers from \emph{children} epoch to equivalent ones in their \emph{parent} epoch.
+Described in \autoref{alg:revertRenameId}, this function enables nodes to revert a previously applied \emph{rename} operation.
+To this end, $\trm{revertRenameId}$ maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
@@ -1118,14 +1118,14 @@ We illustrate its behaviour with the help of \autoref{fig:revertRenameId}.
 \end{figure*}
 
 This figure resumes the scenario from \autoref{fig:conflicting-rename-operations}.
-Node A is delivered node B's \emph{rename} operation, which is concurrent to A's one.
+Node A receives node B's \emph{rename} operation, which is concurrent to the \emph{rename} operation node A previously applied.
 According to the proposed \emph{priority} relation, node A determines the introduced epoch \epoch{B2} as the target one.
-It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{LCA} of its current epoch \epoch{A1} and the target one \epoch{B2}.
+It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{LCA} of its current epoch \epoch{A1} and the target epoch \epoch{B2}.
 To this end, it applies $\trm{revertRenameId}$ to every identifiers of its current state.
 
 $\trm{revertRenameId}$ determines which strategy to apply to revert the given identifier using patterns.
-For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which were originally renamed.
-To retrieve the original identifiers, $\trm{revertRenameId}$ simply uses their offset as it is their index in \emph{renamedIds}.
+For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
+To retrieve the original identifiers, $\trm{revertRenameId}$ simply uses their offset since it is their index the \emph{former state}.
 
 % According to its structure, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0} may result from the transformation using $\trm{renIdFromPredId}$ of a identifier concurrently inserted to the \emph{rename} operation.
 % Indeed, this identifier is composed of a prefix (\id{i}{A1}{1}) and a tail (\id{i}{B0}{0}\id{m}{B1}{0}), with the tail is between
@@ -1269,8 +1269,8 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
                     to ++(270:1.5) node[op, red] (BeB7) {\epoch{B7}};
 
 
-                \draw[thick] (AeA0) -- (AeA1) -- (AeA8);
-                \draw[thick] (BeB0) -- (BeB2) -- (BeB7);
+                \draw[thick, ->] (AeA0) edge (AeA1) (AeA1) edge (AeA8);
+                \draw[thick, ->] (BeB0) edge (BeB2) (BeB2) edge (BeB7);
                 \draw[->, dashed, thick, red] (AeA8.45) -- (AeA1.315) (AeA1.0) -- (AeA0.270);
                 \draw[->, dashed, thick, red] (BeB7.130) -- (BeB2.225) (BeB2.180) -- (BeB0.270);
 
@@ -1304,8 +1304,8 @@ Nodes will then be able to garbage collect all other epochs using \autoref{rule:
                     to ++(225:1.5) node[causalop] (BeA1) {\epoch{A1}};
 
 
-                \draw[thick] (Ae0) -- (AeA1) -- (AeA8) (Ae0) -- (AeB2) -- (AeA9);
-                \draw[thick] (Be0) -- (BeB2) -- (BeB7) -- (BeB8) (Be0) -- (BeA1);
+                \draw[thick, ->] (Ae0) edge (AeA1) (AeA1) edge (AeA8) (Ae0) edge (AeB2) (AeB2) edge (AeA9);
+                \draw[thick, ->] (Be0) edge (BeB2) (BeB2) edge (BeB7) (BeB7) edge (BeB8) (Be0) edge (BeA1);
                 \draw[->, dashed, thick, red] (AeA9.135) -- (AeB2.225) (AeB2.180) -- (AeA8.45) -- (AeA1.315) (AeA1.0) -- (Ae0.270);
                 \draw[->, dashed, thick, red] (BeB8.135) -- (BeB7.225) (BeB7.135) -- (BeB2.225) (BeB2.180) -- (BeA1.0) -- (Be0.270);
 
