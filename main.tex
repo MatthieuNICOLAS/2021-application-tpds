@@ -646,7 +646,7 @@ If they differ, nodes have to transform the operation before applying it.
 Nodes determine against which \emph{rename} operations to transform the received operation by computing the path between the operation epoch and their current one using the \emph{epoch chain}.
 For this purpose, it is required to add the following rule to existing constraints upon the delivery of operations: operations must now be delivered after the \emph{rename} operation which introduced their epoch.
 
-Nodes use the function $\trm{renameId}$, described in \autoref{alg:renameId}, to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
+Nodes use the function \textsc{renameId}, described in \autoref{alg:renameId}, to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
 % Before:
 % Upon the reception of an operation, nodes compare the operation epoch to their current one.
 % The main idea of this algorithm is to use the predecessor of the given identifier to do so.
@@ -749,7 +749,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
 This case corresponds to node B's one in \autoref{fig:concurrent-insert-rename-fixed}.
 Upon the delivery of node A's \emph{rename} operation, applying \autoref{alg:renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
 
-\autoref{alg:renameId} features only the main case of $\trm{renameId}$, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
+\autoref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \refappendix{app:rename-id}.
 
 \subsection{Optimisations}
@@ -891,7 +891,7 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
 
 At the end of the scenario described in \autoref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
 In order to converge, every node should eventually reach the same epoch.
-However, the function $\trm{renameId}$ described in \autoref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
+However, the function \textsc{renameId} described in \autoref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
 Nodes A and B are thus unable to progress towards the epoch of the other.
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
@@ -900,7 +900,7 @@ In order to avoid performance issues due to coordination, nodes should select th
 We propose such a mechanism in \autoref{sec:priority}.
 
 Second, nodes have to move throught the \emph{epoch tree} to reach the target epoch.
-The function $\trm{renameId}$ already enables nodes to move down the tree.
+The function \textsc{renameId} already enables nodes to move down the tree.
 Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
 In these cases, nodes have to be able to move up the \emph{epoch tree} to return to the \ac{LCA} of the current epoch and the target one.
 This move is actually akin to reverting the effect of previously applied \emph{rename} operations.
@@ -993,9 +993,9 @@ This topic will be further discussed in \autoref{sec:designing-more-effective-pr
 
 \label{sec:reverting-rename-ops}
 
-We now introduce the function $\trm{revertRenameId}$.
+We now introduce the function \textsc{revertRenameId}.
 Described in \autoref{alg:revertRenameId}, this function enables nodes to revert a previously applied \emph{rename} operation.
-To this end, $\trm{revertRenameId}$ maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
+To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
@@ -1052,7 +1052,7 @@ To this end, $\trm{revertRenameId}$ maps identifiers from the \emph{child} epoch
 
 \mnnote{TODO: Ajouter commentaire dans l'algo pour préciser le cas où on rename un id inséré de façon concurrente ou causale au rename}
 
-The goals of $\trm{revertRenameId}$ are the following:
+The goals of \textsc{revertRenameId} are the following:
 \begin{enumerate*}[label=(\roman*)]
     \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
     \item To assign new identifiers complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
@@ -1121,19 +1121,19 @@ This figure resumes the scenario from \autoref{fig:conflicting-rename-operations
 Node A receives node B's \emph{rename} operation, which is concurrent to the \emph{rename} operation node A previously applied.
 According to the proposed \emph{priority} relation, node A determines the introduced epoch \epoch{B2} as the target one.
 It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{LCA} of its current epoch \epoch{A1} and the target epoch \epoch{B2}.
-To this end, it applies $\trm{revertRenameId}$ to every identifiers of its current state.
+To this end, it applies \textsc{revertRenameId} to every identifiers of its current state.
 
-$\trm{revertRenameId}$ determines which strategy to apply to revert the given identifier using patterns.
+\textsc{revertRenameId} determines which strategy to apply to revert the given identifier using patterns.
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
-To retrieve the original identifiers, $\trm{revertRenameId}$ simply uses their offset since it is their index the \emph{former state}.
+To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index the \emph{former state}.
 
 % According to its structure, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0} may result from the transformation using $\trm{renIdFromPredId}$ of a identifier concurrently inserted to the \emph{rename} operation.
 % Indeed, this identifier is composed of a prefix (\id{i}{A1}{1}) and a tail (\id{i}{B0}{0}\id{m}{B1}{0}), with the tail is between
-% To revert the effect of the \emph{rename} operation, $\trm{revertRenameId}$ returns the tail.
-% % To revert the effect of the \emph{rename} operation, $\trm{revertRenameId}$ first removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+% To revert the effect of the \emph{rename} operation, \textsc{revertRenameId} returns the tail.
+% % To revert the effect of the \emph{rename} operation, \textsc{revertRenameId} first removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 % The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 % In this case, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
-% $\trm{revertRenameId}$ can thus return the tail, as it
+% \textsc{revertRenameId} can thus return the tail, as it
 
 For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
@@ -1142,18 +1142,18 @@ The algorithm can thus return the tail as the resulting identifier while preserv
 \mnnote{TODO: Indiquer que retirer le préfixe permet d'inverser la transformation appliquée à l'identifiant par $\trm{renIdFromPredId}$ dans le cas où celui-ci a été inséré en concurrence du renommage}
 
 Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
-As no corresponding identifier exists yet at the \emph{parent} epoch, $\trm{revertRenameId}$ can return any identifier as long as it preserves the intended order.
+As no corresponding identifier exists yet at the \emph{parent} epoch, \textsc{revertRenameId} can return any identifier as long as it preserves the intended order.
 To this end, \autoref{alg:revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
 
-Once node A mapped its state to the equivalent one at \epoch{0} using \autoref{alg:revertRenameId}, it can now apply $\trm{renameId}$ to compute the corresponding state at \epoch{B2}.
+Once node A mapped its state to the equivalent one at \epoch{0} using \autoref{alg:revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
 
-As with \autoref{alg:renameId}, \autoref{alg:revertRenameId} only features the main case of $\trm{revertRenameId}$.
+As with \autoref{alg:renameId}, \autoref{alg:revertRenameId} only features the main case of \textsc{revertRenameId}.
 It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
 Functions to handle the rest of cases are featured in \refappendix{app:revert-rename-id}.
 
-Note that $\trm{renameId}$ and $\trm{revertRenameId}$ are not inverse functions.
-$\trm{revertRenameId}$ reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
-But on the other hand, $\trm{renameId}$ does not do the same for identifiers inserted causally after the \emph{rename} operation.
+Note that \textsc{renameId} and \textsc{revertRenameId} are not inverse functions.
+\textsc{revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
+But on the other hand, \textsc{renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
 Thus redoing a previously undone \emph{rename} operation alter these identifiers.
 This alteration may cause a divergence between nodes, as the same element will be referred to using different identifiers.
 
@@ -1163,7 +1163,7 @@ Nodes thus avoid going back and forth between different epochs and undoing then 
 
 Nonetheless, the requirement to prevent nodes from redoing \emph{rename} operation limits our possibilities to design new \emph{priority} relations.
 It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \autoref{sec:designing-more-effective-priority-relation}.
-It can be achieved by designing a set of inverse functions for $\trm{renameId}$ and $\trm{revertRenameId}$.
+It can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
 Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
 \subsection{Garbage collection of \emph{former states}}
