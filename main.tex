@@ -34,10 +34,6 @@
 \newtheorem{myrule}{Rule}
 \newtheorem{property}{Property}
 \newtheorem{subproperty}{Property}[property]
-\def\myalgorithmautorefname{Algorithm} % \autoref
-\def\myruleautorefname{Rule} % \autoref
-\def\propertyautorefname{Property} % \autoref
-\def\subpropertyautorefname{Subproperty}
 
 \usepackage{algpseudocode}
 
@@ -82,6 +78,11 @@
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 
+\usepackage[noabbrev]{cleveref}
+\crefname{myalgorithm}{algorithm}{algorithms}
+\crefname{myrule}{rule}{rules}
+\crefname{property}{property}{properties}
+
 \usepackage[draft,inline,nomargin,index]{fixme}
 \fxsetup{theme=colorsig,mode=multiuser,inlineface=\itshape,envface=\itshape}
 \FXRegisterAuthor{go}{ago}{Gerald}
@@ -89,8 +90,6 @@
 
 % Commands
 %---------
-\newcommand{\refappendix}[1]{\hyperref[#1]{Appendix~\ref*{#1}}} % Required since \autoref displays Section A instead of Appendix A
-
 \newcommand{\eg}{e.g. }
 \newcommand{\ie}{i.e. }
 
@@ -338,8 +337,8 @@ LogootSplit gathers elements with \emph{contiguous} identifiers into a block.
 We call \emph{contiguous} two identifiers that are identical except for their last offset, and with both offsets being consecutive.
 We denote the interval of identifiers corresponding to a block using the following notation: \id{position}{node\_id~node\_seq}{begin..end} where $\trm{begin}$ is the offset of the first identifier of the block and $\trm{end}$ the offset of its last identifier.
 
-\autoref{fig:logootsplit-seq} illustrates such a case: in \autoref{fig:logootsplit-seq-as-letters}, the element identifiers \id{i}{B0}{0}, \id{i}{B0}{1}, \id{i}{B0}{2} form a chain of contiguous identifiers.
-LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimise the metadata stored, as shown in \autoref{fig:logootsplit-seq-as-block}.
+\Cref{fig:logootsplit-seq} illustrates such a case: in \Cref{fig:logootsplit-seq-as-letters}, the element identifiers \id{i}{B0}{0}, \id{i}{B0}{1}, \id{i}{B0}{2} form a chain of contiguous identifiers.
+LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimise the metadata stored, as shown in \Cref{fig:logootsplit-seq-as-block}.
 
 \begin{figure}[!t]
     \centering
@@ -375,7 +374,7 @@ It enables to reduce significantly the memory overhead of the data structure.
 
 As stated previously, the size of identifiers from a dense total order is variable.
 When nodes insert new elements between two others with the same \emph{position} value, LogootSplit has no other option but to increase the size of the resulting identifiers.
-\autoref{fig:example-split} illustrates such cases.
+\Cref{fig:example-split} illustrates such cases.
 In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit can not generate a proper identifier of the same size.
 To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor : \id{i}{B0}{0}\id{f}{A0}{0}.
 
@@ -408,7 +407,7 @@ The sequence ends up fragmented into many blocks of only few characters each.
 However no mechanism to merge blocks a posteriori is provided.
 The efficiency of the data structure hence decreases as each block introduces its own overhead.
 
-As shown later in \autoref{sec:evaluation}, we measured that content eventually represents less than 1\% of the whole data structure size.
+As shown later in \Cref{sec:evaluation}, we measured that content eventually represents less than 1\% of the whole data structure size.
 Remaining 99\% of the data structure hence correspond to metadata.
 It is thus necessary to address the previously highlighted issues.
 
@@ -483,18 +482,18 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
     The \emph{rename} operation must then be commutative with any other concurrent operation.
 \end{property}
 
-\autoref{prop:commutativity} is particularly difficult to achieve.
+\Cref{prop:commutativity} is particularly difficult to achieve.
 This is due to the fact that \emph{rename} operations modify identifiers assigned to elements.
 However, other operations such as \emph{insert} and \emph{remove} ones rely on these identifiers to specify where to insert elements or which ones to remove.
 \emph{Rename} operations are thus intrinsically incompatible with concurrent \emph{insert} and \emph{remove} ones.
 Likewise, concurrent \emph{rename} operations may reassign different identifiers to given elements.
 Concurrent \emph{rename} operations are hence not commutative.
-Therefore, it is required to design and use conflict resolution strategies to achieve \autoref{prop:commutativity}.
+Therefore, it is required to design and use conflict resolution strategies to achieve \Cref{prop:commutativity}.
 
 For the sake of simplicity, the presentation of the \emph{rename} operation is divided into two parts.
-In \autoref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
+In \Cref{sec:centralised-rls}, we present the proposed \emph{rename} operation under the assumption that no concurrent \emph{rename} operations may be issued.
 This assumption enables us to focus on the inner working of the \emph{rename} operation and on how to deal with concurrent \emph{insert} and \emph{remove} operations.
-Then, in \autoref{sec:distributed-rls}, we remove this assumption and present our approach to handle scenarios with concurrent \emph{rename} operations.
+Then, in \Cref{sec:distributed-rls}, we remove this assumption and present our approach to handle scenarios with concurrent \emph{rename} operations.
 
 \section{RenamableLogootSplit without concurrent \emph{rename} operations}
 \label{sec:centralised-rls}
@@ -505,7 +504,7 @@ Then, in \autoref{sec:distributed-rls}, we remove this assumption and present ou
 
 Our \emph{rename} operation enables RenamableLogootSplit to reduce the overhead of nodes replica.
 To do so, it reassigns arbitrary identifiers to elements.
-Its behaviour is illustrated in \autoref{fig:renaming}.
+Its behaviour is illustrated in \Cref{fig:renaming}.
 
 \begin{figure}[h!]
     \centering
@@ -566,9 +565,9 @@ Its behaviour is illustrated in \autoref{fig:renaming}.
 In this example, node A initiates a \emph{rename} operation on its local state.
 First, node A reuses the id of the first element of the sequence (\id{i}{B0}{0}) but modifies it with its own node id (\textbf{A}) and current sequence number (\emph{1}).
 Also the offset is set to 0.
-Node A reassigns the resulting id (\id{i}{A1}{0}) to the first element of the sequence as described in \autoref{fig:renaming-first-id}.
-Then, node A derives contiguous identifiers for all remaining elements by successively incrementing the offset (\id{i}{A1}{1}, \id{i}{A1}{2} and \id{i}{A1}{3}), as shown in \autoref{fig:renaming-second-id}.
-As we assign contiguous identifiers to all elements of the sequence, we eventually group them into one block as illustrated in \autoref{fig:renaming-final-state}.
+Node A reassigns the resulting id (\id{i}{A1}{0}) to the first element of the sequence as described in \Cref{fig:renaming-first-id}.
+Then, node A derives contiguous identifiers for all remaining elements by successively incrementing the offset (\id{i}{A1}{1}, \id{i}{A1}{2} and \id{i}{A1}{3}), as shown in \Cref{fig:renaming-second-id}.
+As we assign contiguous identifiers to all elements of the sequence, we eventually group them into one block as illustrated in \Cref{fig:renaming-final-state}.
 It allows nodes to benefit the most from the block feature and to minimise the overhead of the resulting state.
 
 To converge, other nodes have to rename their state identically.
@@ -577,7 +576,7 @@ Indeed, they may have performed concurrent updates on their states.
 In order not to discard these updates, nodes have to process the \emph{rename} operation themselves.
 To this end, the node issuing the \emph{rename} operation broadcasts its \emph{former state} to others.
 Using this state, other nodes compute the new identifier of each renamed identifier.
-As for concurrently inserted identifiers, we explain in \autoref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
+As for concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
 
 \subsection{Dealing with concurrent updates}
 
@@ -587,7 +586,7 @@ As for concurrently inserted identifiers, we explain in \autoref{sec:dealing-wit
 % As \emph{rename} operations can be issued without any kind of coordination, it is possible for other nodes to perform updates concurrently.
 After applying \emph{rename} operations on their local state, nodes may receive concurrent updates.
 Figure \ref{fig:concurrent-insert-rename-inconsistent} illustrates such cases.
-In this example node B inserts the new element "L", assigns the id \id{i}{B0}{0}\id{m}{B1}{0} to it and broadcasts its update, concurrently to the \emph{rename} operation described in \autoref{fig:renaming}.
+In this example node B inserts the new element "L", assigns the id \id{i}{B0}{0}\id{m}{B1}{0} to it and broadcasts its update, concurrently to the \emph{rename} operation described in \Cref{fig:renaming}.
 Upon reception of the \emph{insert} operation, node A adds the inserted element into its sequence, using the element id to determine its position.
 However, since identifiers were modified by the concurrent \emph{rename} operation, node A inserts the new element at the end of its sequence (since \id{i}{A1}{3} < \id{i}{B0}{0}\id{m}{B1}{0}) instead of at the intended position.
 As described by this example, applying naively concurrent updates would result in inconsistencies.
@@ -637,7 +636,7 @@ To this end, we use an \emph{epoch-based} system.
 Initally, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
 Each \emph{rename} operation introduces a new epoch and enables nodes to advance their states to it from the previous epoch.
 The generated epoch is characterised using the node id and its current sequence number upon the generation of the \emph{rename} operation.
-For example, the \emph{rename} operation described in \autoref{fig:concurrent-insert-rename-inconsistent} enables nodes to advance their states from \epoch{0} to \epoch{A1}.
+For example, the \emph{rename} operation described in \Cref{fig:concurrent-insert-rename-inconsistent} enables nodes to advance their states from \epoch{0} to \epoch{A1}.
 
 As they receive \emph{rename} operations, nodes build and maintain the \emph{epoch chain}, a data structure ordering epochs according to their \emph{parent-child} relation.
 Additionally, nodes tag every operation with their current epoch at the time the operation is generated.
@@ -646,14 +645,14 @@ If they differ, nodes have to transform the operation before applying it.
 Nodes determine against which \emph{rename} operations to transform the received operation by computing the path between the operation epoch and their current one using the \emph{epoch chain}.
 For this purpose, it is required to add the following rule to existing constraints upon the delivery of operations: operations must now be delivered after the \emph{rename} operation which introduced their epoch.
 
-Nodes use the function \textsc{renameId}, described in \autoref{alg:renameId}, to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
+Nodes use the function \textsc{renameId}, described in \Cref{alg:renameId}, to transform \emph{insert} or \emph{remove} operations against \emph{rename} ones.
 % Before:
 % Upon the reception of an operation, nodes compare the operation epoch to their current one.
 % The main idea of this algorithm is to use the predecessor of the given identifier to do so.
 This algorithm maps identifiers from a \emph{parent} epoch to corresponding ones in the \emph{child} epoch.
 The main idea of this algorithm is to rename unknown identifiers at the time of the \emph{rename} operation generation using their predecessor.
-An example of its usage is illustrated in \autoref{fig:concurrent-insert-rename-fixed}.
-This figure depicts the same scenario as in \autoref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \autoref{alg:renameId} to rename the concurrently generated id before inserting it in its state.
+An example of its usage is illustrated in \Cref{fig:concurrent-insert-rename-fixed}.
+This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \Cref{alg:renameId} to rename the concurrently generated id before inserting it in its state.
 
 The algorithm proceeds as follows.
 First, node A retrieves the predecessor of the given id \id{i}{B0}{0}\id{m}{B1}{0} in the former state: \id{i}{B0}{0}\id{f}{A0}{0}.
@@ -737,20 +736,20 @@ By reassigning this id to the concurrently added element, node A is able to inse
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
 
     \end{tikzpicture}
-    \caption{Renaming concurrent update using \autoref{alg:renameId} before applying it to maintain intended order}
+    \caption{Renaming concurrent update using \Cref{alg:renameId} before applying it to maintain intended order}
     \label{fig:concurrent-insert-rename-fixed}
 \end{figure*}
 
 % Before:
-% As explained in \autoref{sec:rename-op}, some nodes may have applied concurrent \emph{insert} operations to their state before receiving a given remote \emph{rename} operation.
-% \autoref{alg:renameId} also solves this case.
+% As explained in \Cref{sec:rename-op}, some nodes may have applied concurrent \emph{insert} operations to their state before receiving a given remote \emph{rename} operation.
+% \Cref{alg:renameId} also solves this case.
 % It allows them to converge with nodes which processed the \emph{rename} operations before the concurrent \emph{insert} operations.
-\autoref{alg:renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local state while they have previously applied concurrent updates.
-This case corresponds to node B's one in \autoref{fig:concurrent-insert-rename-fixed}.
-Upon the delivery of node A's \emph{rename} operation, applying \autoref{alg:renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
+\Cref{alg:renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local state while they have previously applied concurrent updates.
+This case corresponds to node B's one in \Cref{fig:concurrent-insert-rename-fixed}.
+Upon the delivery of node A's \emph{rename} operation, applying \Cref{alg:renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
 
-\autoref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
-Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \refappendix{app:rename-id}.
+\Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
+Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
 
 \subsection{Optimisations}
 
@@ -768,7 +767,7 @@ A group membership protocol such as \cite{swim2002,lifeguard2018} is thus requir
 
 Causal stability may take some time to be achieved.
 Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
-We discuss this topic further in \autoref{sec:offloading-former-states}.
+We discuss this topic further in \Cref{sec:offloading-former-states}.
 
 \headerparagraph{Compression technique for \emph{rename} operations}
 %
@@ -793,7 +792,7 @@ Additionally, we can set an upper-bound to the size of \emph{rename} operations 
 \subsection{Concurrent \emph{rename} operations}
 
 We now consider scenarios with concurrent \emph{rename} operations.
-\autoref{fig:conflicting-rename-operations} expands the scenario previously described in \autoref{fig:concurrent-insert-rename-fixed} to depicts such one.
+\Cref{fig:conflicting-rename-operations} expands the scenario previously described in \Cref{fig:concurrent-insert-rename-fixed} to depicts such one.
 
 \begin{figure*}[h!]
     \centering
@@ -868,7 +867,7 @@ Since node A's \emph{rename} operation was not yet delivered to node B at that m
 
 % - Expliquer l'arbre des epochs
 As concurrent epochs are generated, epochs now form the \emph{epoch tree}.
-We represent in \autoref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise.
+We represent in \Cref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise.
 Epochs are displayed as nodes of the tree and the \emph{parent-child} relation between them displayed as black arrows.
 
 \begin{figure}[h!]
@@ -885,26 +884,26 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
         \draw[thick, ->] (e0) -- (eA1);
         \draw[thick, ->] (e0) -- (eB2);
     \end{tikzpicture}
-    \caption{The \emph{epoch tree} corresponding to the scenario of \autoref{fig:conflicting-rename-operations}}
+    \caption{The \emph{epoch tree} corresponding to the scenario of \Cref{fig:conflicting-rename-operations}}
     \label{fig:epoch-tree}
 \end{figure}
 
-At the end of the scenario described in \autoref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
+At the end of the scenario described in \Cref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
 In order to converge, every node should eventually reach the same epoch.
-However, the function \textsc{renameId} described in \autoref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
+However, the function \textsc{renameId} described in \Cref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
 Nodes A and B are thus unable to progress towards the epoch of the other.
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
 First, nodes have to agree on one epoch from the \emph{epoch tree} as the target epoch.
 In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
-We propose such a mechanism in \autoref{sec:priority}.
+We propose such a mechanism in \Cref{sec:priority}.
 
 Second, nodes have to move throught the \emph{epoch tree} to reach the target epoch.
 The function \textsc{renameId} already enables nodes to move down the tree.
 Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
 In these cases, nodes have to be able to move up the \emph{epoch tree} to return to the \ac{LCA} of the current epoch and the target one.
 This move is actually akin to reverting the effect of previously applied \emph{rename} operations.
-We propose an algorithm that fulfills this purpose in \autoref{sec:reverting-rename-ops}.
+We propose an algorithm that fulfills this purpose in \Cref{sec:reverting-rename-ops}.
 
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
@@ -914,7 +913,7 @@ Nodes then select the maximum epoch according to this relation as the target epo
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
-\autoref{fig:priority-example} provides an example of its use.
+\Cref{fig:priority-example} provides an example of its use.
 
 \begin{figure}[h!]
     \subfloat[Example of execution with concurrent \emph{rename} operations]{
@@ -972,13 +971,13 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
     \label{fig:priority-example}
 \end{figure}
 
-\autoref{fig:priority-execution} describes an execution in which the three nodes A, B and C issue several operations before eventually synchronising.
+\Cref{fig:priority-execution} describes an execution in which the three nodes A, B and C issue several operations before eventually synchronising.
 As solely \emph{rename} operations are relevant to the problem at hand, only them are represented in this figure.
 Initially, node A issues a \emph{rename} operation introducing the epoch \epoch{A1}.
 This operation is delivered to node C, which later issues its own \emph{rename} operation creating \epoch{C6}.
 Concurrently to these operations, node B issues two \emph{rename} operations, generating \epoch{B2} then \epoch{B7}.
 
-Once nodes synchronised, they obtain the \emph{epoch tree} represented in \autoref{fig:priority-epoch-tree}.
+Once nodes synchronised, they obtain the \emph{epoch tree} represented in \Cref{fig:priority-epoch-tree}.
 In this figure, the red dashed arrow represents the order between epochs according to the \emph{priority} relation while the selected target epoch is displayed as a red node.
 
 To determine the target epoch, nodes rely on the \emph{priority} relation.
@@ -987,14 +986,14 @@ Therefore every node selects \epoch{B7} as the target epoch in a coordination-fr
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
-This topic will be further discussed in \autoref{sec:designing-more-effective-priority-relation}.
+This topic will be further discussed in \Cref{sec:designing-more-effective-priority-relation}.
 
 \subsection{Reverting \emph{rename} operations}
 
 \label{sec:reverting-rename-ops}
 
 We now introduce the function \textsc{revertRenameId}.
-Described in \autoref{alg:revertRenameId}, this function enables nodes to revert a previously applied \emph{rename} operation.
+Described in \Cref{alg:revertRenameId}, this function enables nodes to revert a previously applied \emph{rename} operation.
 To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
 
 \begin{myalgorithm}[h!]
@@ -1057,7 +1056,7 @@ The goals of \textsc{revertRenameId} are the following:
     \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
     \item To assign new identifiers complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
-We illustrate its behaviour with the help of \autoref{fig:revertRenameId}.
+We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
 
 \begin{figure*}[h!]
     \centering
@@ -1117,7 +1116,7 @@ We illustrate its behaviour with the help of \autoref{fig:revertRenameId}.
     \label{fig:revertRenameId}
 \end{figure*}
 
-This figure resumes the scenario from \autoref{fig:conflicting-rename-operations}.
+This figure resumes the scenario from \Cref{fig:conflicting-rename-operations}.
 Node A receives node B's \emph{rename} operation, which is concurrent to the \emph{rename} operation node A previously applied.
 According to the proposed \emph{priority} relation, node A determines the introduced epoch \epoch{B2} as the target one.
 It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{LCA} of its current epoch \epoch{A1} and the target epoch \epoch{B2}.
@@ -1125,7 +1124,7 @@ To this end, it applies \textsc{revertRenameId} to every identifiers of its curr
 
 \textsc{revertRenameId} determines which strategy to apply to revert the given identifier using patterns.
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
-To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index the \emph{former state}.
+To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
 
 % According to its structure, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0} may result from the transformation using $\trm{renIdFromPredId}$ of a identifier concurrently inserted to the \emph{rename} operation.
 % Indeed, this identifier is composed of a prefix (\id{i}{A1}{1}) and a tail (\id{i}{B0}{0}\id{m}{B1}{0}), with the tail is between
@@ -1135,7 +1134,7 @@ To retrieve the original identifiers, \textsc{revertRenameId} simply uses their 
 % In this case, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 % \textsc{revertRenameId} can thus return the tail, as it
 
-For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \autoref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \Cref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
@@ -1143,13 +1142,13 @@ The algorithm can thus return the tail as the resulting identifier while preserv
 
 Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
 As no corresponding identifier exists yet at the \emph{parent} epoch, \textsc{revertRenameId} can return any identifier as long as it preserves the intended order.
-To this end, \autoref{alg:revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
+To this end, \Cref{alg:revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
 
-Once node A mapped its state to the equivalent one at \epoch{0} using \autoref{alg:revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
+Once node A mapped its state to the equivalent one at \epoch{0} using \Cref{alg:revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
 
-As with \autoref{alg:renameId}, \autoref{alg:revertRenameId} only features the main case of \textsc{revertRenameId}.
+As with \Cref{alg:renameId}, \Cref{alg:revertRenameId} only features the main case of \textsc{revertRenameId}.
 It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
-Functions to handle the rest of cases are featured in \refappendix{app:revert-rename-id}.
+Functions to handle the rest of cases are featured in \Cref{app:revert-rename-id}.
 
 Note that \textsc{renameId} and \textsc{revertRenameId} are not inverse functions.
 \textsc{revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
@@ -1162,9 +1161,11 @@ Since the \emph{priority} relation is defined using the lexicographical order on
 Nodes thus avoid going back and forth between different epochs and undoing then redoing corresponding \emph{rename} operations.
 
 Nonetheless, the requirement to prevent nodes from redoing \emph{rename} operation limits our possibilities to design new \emph{priority} relations.
-It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \autoref{sec:designing-more-effective-priority-relation}.
+It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \Cref{sec:designing-more-effective-priority-relation}.
 It can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
 Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
+
+\mnnote{TODO: Déplacer ce paragraphe (En 7.3 ? Une sous-section de la 7 dédiée ?)}
 
 \subsection{Garbage collection of \emph{former states}}
 
@@ -1183,28 +1184,28 @@ Therefore, we propose the two following rules to enable nodes to identify unnece
     An epoch \epoch{} can be garbage collected if \epoch{} is the root of the epoch tree, has only one child \epoch{}' and that \epoch{}' is causally stable.
 \end{myrule}
 
-\autoref{fig:GC-epochs} illustrates a use case of \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}.
-In \autoref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
-The operations shown in \autoref{fig:GC-execution} are solely \emph{rename} operations, as only these operations are relevant to the problem at hand.
-In \autoref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
-In \autoref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by each other.
+\Cref{fig:GC-epochs} illustrates a use case of \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root}.
+In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
+The operations shown in \Cref{fig:GC-execution} are solely \emph{rename} operations, as only these operations are relevant to the problem at hand.
+In \Cref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
+In \Cref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by each other.
 Epochs introduced by causally stable \emph{rename} operations are represented in \emph{epoch trees} using double circles.
 The \emph{origin} epoch \epoch{0} is considered as causally stable from the beginning by design.
-Epochs that are no longer necessary by applying \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root} are respectively displayed as blue dashed nodes and green dotted nodes.
+Epochs that are no longer necessary by applying \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root} are respectively displayed as blue dashed nodes and green dotted nodes.
 
 Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, \epoch{B2} becomes causally stable.
 From this point, node A knows that every node switched to this epoch at least.
 Therefore nodes can no longer issue operations from \epoch{0}, \epoch{A1} or \epoch{A8}.
 Thus these epochs and the \emph{rename} operations enabling nodes to switch between them can now be garbage collected.
-\autoref{rule:gc-concurrent-primary-epoch} enables node A to garbage collect epochs \epoch{A8} then \epoch{A1}.
-Then \autoref{rule:gc-root} enables node A to garbage collect \epoch{0} and the \emph{renaming} operation to switch to \epoch{B2}.
+\Cref{rule:gc-concurrent-primary-epoch} enables node A to garbage collect epochs \epoch{A8} then \epoch{A1}.
+Then \Cref{rule:gc-root} enables node A to garbage collect \epoch{0} and the \emph{renaming} operation to switch to \epoch{B2}.
 
 On the other hand, upon the reception of the \emph{rename} operation introducing \epoch{A1}, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
 Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
 Since in that case node B would have to transform operations to apply them to \epoch{B8}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B8} and their corresponding \emph{rename} operations.
 
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
-Nodes will then be able to garbage collect all other epochs using \autoref{rule:gc-concurrent-primary-epoch} and \autoref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
+Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
 
 \begin{figure}[h!]
     \subfloat[Execution]{
@@ -1378,7 +1379,7 @@ Further work to formally prove its correctness should be undertaken.
 \headerparagraph{Memory overhead}
 %
 We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
-We present the obtained results in \autoref{fig:evolution-document-size}.
+We present the obtained results in \Cref{fig:evolution-document-size}.
 
 \begin{figure}[h!]
     \centering
@@ -1389,7 +1390,7 @@ We present the obtained results in \autoref{fig:evolution-document-size}.
 
 \mnnote{TODO: Refaire figure pour déplacer légende en-dessous}
 
-For each plot displayed in \autoref{fig:evolution-document-size}, we represent 4 different data.
+For each plot displayed in \Cref{fig:evolution-document-size}, we represent 4 different data.
 The blue dashed line illustrates the size of the actual content of the document, \ie the text, while the red solid line corresponds to the size of the whole LogootSplit document.
 
 The green dashed-dotted line represents the size of the RenamableLogootSplit document in the best case scenario.
@@ -1406,7 +1407,7 @@ This result is explained by the fact that the renaming mechanism enables nodes t
 
 To summarise the results presented, the renaming mechanism introduces a temporary metadata overhead which increases with each \emph{rename} operations.
 But the overhead will eventually subsides once the system becomes quiescent and \emph{rename} operations become causally stable.
-In \autoref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until causal stability is achieved to address the temporary memory overhead.
+In \Cref{sec:offloading-former-states}, we discuss that \emph{former states} may be offloaded until causal stability is achieved to address the temporary memory overhead.
 
 \headerparagraph{Integration times of standard operations}
 %
@@ -1420,7 +1421,7 @@ Conceptually, local updates can be decomposed as presented in \cite{baquero2017p
 \end{enumerate*}
 However, for performance reasons, we merged these two steps in our implementation.
 We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
-\autoref{fig:evolution-integration-time-insert} displays the results.
+\Cref{fig:evolution-integration-time-insert} displays the results.
 
 \begin{figure}[h!]
     \centering
@@ -1439,12 +1440,12 @@ In these figures, orange boxplots correspond to integration times on LogootSplit
 While both are initially equivalent, integration times on RenamableLogootSplit documents are then reduced when compared to LogootSplit ones once \emph{rename} operations have been applied.
 This improvement is explained by the fact that \emph{rename} operations optimise the internal representation of the sequence.
 
-Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit: integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \autoref{fig:evolution-integration-time-remote-insert}.
+Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit: integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \Cref{fig:evolution-integration-time-remote-insert}.
 Operations from previous epochs are operations generated concurrently to the \emph{rename} operation but applied after it.
-Since the operation has to be transformed beforehand using \autoref{alg:renameId}, we observe a computational overhead compared to other operations.
+Since the operation has to be transformed beforehand using \Cref{alg:renameId}, we observe a computational overhead compared to other operations.
 But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
 
-Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \autoref{alg:revertRenameId}.
+Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \Cref{alg:revertRenameId}.
 Because of this overhead, RenamableLogootSplit's performances for these operations are comparable to LogootSplit ones.
 
 To summarise, transformation functions introduce an overhead with regard to integration times of concurrent operations to \emph{rename} ones.
@@ -1456,7 +1457,7 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 %
 Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
 As before, we distinguish performances of \emph{local} and \emph{remote} updates.
-The results are displayed in \autoref{tab:evolution-integration-time-rename}.
+The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 
 \begin{table}[t!]
     \centering
@@ -1503,7 +1504,7 @@ It is thus necessary to take this result into account when designing strategies 
 
 Another interesting result from this benchmark is that concurrent \emph{secondary rename} operations are cheap to apply, as they only consist in storage of corresponding \emph{former states}.
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
-We will discuss further this topic in \autoref{sec:postponing-transition-to-new-epoch}.
+We will discuss further this topic in \Cref{sec:postponing-transition-to-new-epoch}.
 
 \section{Discussion}
 
@@ -1512,18 +1513,18 @@ We will discuss further this topic in \autoref{sec:postponing-transition-to-new-
 \subsection{Issuing \emph{rename} operations}
 \label{sec:issuing-rename-operations}
 
-As stated in \autoref{sec:definition-rename-operation}, \emph{rename} operations are system operations.
+As stated in \Cref{sec:definition-rename-operation}, \emph{rename} operations are system operations.
 It is thus up to the designers of the system to determine when nodes should issue \emph{rename} operations and to define a corresponding strategy.
 However, there is no silver bullet since each system has its own constraints.
 
 Several aspects should be taken into account to define the strategy.
 The first one is the size of the data structure.
-As displayed in \autoref{fig:evolution-document-size}, metadata progressively increases to represent 99\% of the data structure.
+As displayed in \Cref{fig:evolution-document-size}, metadata progressively increases to represent 99\% of the data structure.
 Using \emph{rename} operations, nodes can discard metadata and reduce the size of the data structure to an acceptable amount.
 To determine when to issue \emph{rename} operations, nodes may monitor the number of operations performed since the last \emph{rename} one, the number of blocks composing the sequence or the length of identifiers.
 
 A second aspect to take into account is the integration time of \emph{rename} operations.
-As reported in \autoref{tab:evolution-integration-time-rename}, integrating remote \emph{rename} operations takes up to seconds if delayed for too long.
+As reported in \Cref{tab:evolution-integration-time-rename}, integrating remote \emph{rename} operations takes up to seconds if delayed for too long.
 Although \emph{rename} operations work behind the scenes, they can still impact negatively the user experience.
 Indeed, nodes can not integrate operations from others while they are processing \emph{rename} operations
 From users' points of view, \emph{rename} operations can thus be perceived as latency peaks.
@@ -1531,7 +1532,7 @@ In the domain of real-time collaborative editing, user experiments have shown th
 It thus important to issue \emph{rename} operations frequently to keep their integration times below the perceptible limit.
 
 Finally, the last aspect to consider is the amount of concurrent \emph{rename} operations.
-\autoref{fig:evolution-document-size} shows that concurrent \emph{rename} operations decrease RenamableLogootSplit's performances.
+\Cref{fig:evolution-document-size} shows that concurrent \emph{rename} operations decrease RenamableLogootSplit's performances.
 The proposed strategy must then aim to minimise the number of concurrent \emph{rename} operations issued.
 However, it should avoid to rely on synchronous coordination between nodes to do so.
 To reduce the likelihood of issuing concurrent \emph{rename} operations, several techniques can be proposed.
@@ -1556,7 +1557,7 @@ The design of these strategies could be based on several heuristics: epochs of c
 \subsection{Designing a more effective \emph{priority} relation}
 \label{sec:designing-more-effective-priority-relation}
 
-Although the \emph{priority} relation proposed in \autoref{sec:priority} is simple and ensures that nodes designate the same epoch as the \emph{primary} one, it introduces a significant computational overhead in some cases.
+Although the \emph{priority} relation proposed in \Cref{sec:priority} is simple and ensures that nodes designate the same epoch as the \emph{primary} one, it introduces a significant computational overhead in some cases.
 Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is deemed as the \emph{primary} one.
 
 The \emph{priority} relation should thus be designed to ensure convergence, but also to minimise the overall amount of computations performed by nodes of the system.
@@ -1566,7 +1567,7 @@ This way, we can favour the branch from the \emph{epoch tree} with the more and 
 \subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
 
-As shown in \autoref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
+As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
 This process can introduce a signification computational overhead in some cases.
 Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation.
 In this scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and would rename its state each time.
@@ -1608,7 +1609,7 @@ Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} ope
 It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
 
 However, systems can actually adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
-The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \autoref{alg:revertRenameId} and \autoref{rule:gc-concurrent-primary-epoch}.
+The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \Cref{alg:revertRenameId} and \Cref{rule:gc-concurrent-primary-epoch}.
 
 \subsection{The LSEQ approach}
 
@@ -1677,7 +1678,7 @@ Another research trail to explore is to study data types to determine which ones
 \appendices
 \section{Algorithms for centralised settings}
 
-\label{app:rename-id}
+\label[appendix]{app:rename-id}
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
@@ -1709,7 +1710,7 @@ Another research trail to explore is to study data types to determine which ones
 % if you want by leaving the argument blank
 \section{Algorithms for distributed settings}
 
-\label{app:revert-rename-id}
+\label[appendix]{app:revert-rename-id}
 
 \begin{myalgorithm}[h!]
     \begin{algorithmic}
