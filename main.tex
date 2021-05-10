@@ -341,7 +341,7 @@ We denote the interval of identifiers corresponding to a block using the followi
 \Cref{fig:logootsplit-seq} illustrates such a case: in \Cref{fig:logootsplit-seq-as-letters}, the element identifiers \id{i}{B0}{0}, \id{i}{B0}{1}, \id{i}{B0}{2} form a chain of contiguous identifiers.
 LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimise the metadata stored, as shown in \Cref{fig:logootsplit-seq-as-block}.
 
-\begin{figure}[!t]
+\begin{figure}[!ht]
     \centering
     \subfloat[Elements with their corresponding identifiers]{
         \begin{minipage}{.48\linewidth}
@@ -379,7 +379,7 @@ When nodes insert new elements between two others with the same \emph{position} 
 In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit can not generate a proper identifier of the same size.
 To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor : \id{i}{B0}{0}\id{f}{A0}{0}.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -507,7 +507,7 @@ Our \emph{rename} operation enables RenamableLogootSplit to reduce the overhead 
 To do so, it reassigns arbitrary identifiers to elements.
 Its behaviour is illustrated in \Cref{fig:renaming}.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \subfloat[Selecting the new identifier of the first element]{
         \begin{minipage}{\linewidth}
@@ -593,7 +593,7 @@ However, since identifiers were modified by the concurrent \emph{rename} operati
 As described by this example, applying naively concurrent updates would result in inconsistencies.
 It is thus necessary to handle concurrent operations to \emph{rename} operations in a particular manner.
 
-\begin{figure*}[h!]
+\begin{figure*}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -661,7 +661,7 @@ Then it computes the counterpart of \id{i}{B0}{0}\id{f}{A0}{0} in the renamed st
 Finally, node A prepends it to the given id to generate the renamed id: \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
 By reassigning this id to the concurrently added element, node A is able to insert it in its state while preserving the intended order.
 
-\begin{myalgorithm}[h!]
+\begin{myalgorithm}[!ht]
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
             \State length $\gets$ renamedIds.length
@@ -694,7 +694,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
     \label{alg:renameId}
 \end{myalgorithm}
 
-\begin{figure*}[h!]
+\begin{figure*}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -795,7 +795,7 @@ Additionally, we can set an upper-bound to the size of \emph{rename} operations 
 We now consider scenarios with concurrent \emph{rename} operations.
 \Cref{fig:conflicting-rename-operations} expands the scenario previously described in \Cref{fig:concurrent-insert-rename-fixed} to depicts such one.
 
-\begin{figure*}[h!]
+\begin{figure*}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -871,7 +871,7 @@ As concurrent epochs are generated, epochs now form the \emph{epoch tree}.
 We represent in \Cref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise.
 Epochs are displayed as nodes of the tree and the \emph{parent-child} relation between them displayed as black arrows.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -916,7 +916,7 @@ To define the \emph{priority} relation, we may actually select different strateg
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
 \Cref{fig:priority-example} provides an example of its use.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \subfloat[Example of execution with concurrent \emph{rename} operations]{
         \begin{minipage}{\linewidth}
             \centering
@@ -997,7 +997,7 @@ We now introduce the function \textsc{revertRenameId}.
 Described in \Cref{alg:revertRenameId}, this function enables nodes to revert a previously applied \emph{rename} operation.
 To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
 
-\begin{myalgorithm}[h!]
+\begin{myalgorithm}[!ht]
     \begin{algorithmic}
         \Function{revertRenameId}{id, renamedIds, nId, nSeq}
             % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
@@ -1059,7 +1059,7 @@ The goals of \textsc{revertRenameId} are the following:
 \end{enumerate*}
 We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
 
-\begin{figure*}[h!]
+\begin{figure*}[!ht]
     \centering
     \begin{tikzpicture}
         \path
@@ -1208,7 +1208,7 @@ Since in that case node B would have to transform operations to apply them to \e
 Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
 Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \subfloat[Execution]{
         \begin{minipage}{\linewidth}
             \centering
@@ -1385,7 +1385,7 @@ Further work to formally prove its correctness should be undertaken.
 We then proceeded to measure the evolution of the document's memory consumption throughout the simulations, according to the CRDT used and the number of \emph{renaming bots}.
 We present the obtained results in \Cref{fig:evolution-document-size}.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=\columnwidth]{img/snapshot-sizes.pdf}
     \caption{Evolution of the size of the document}
@@ -1427,7 +1427,7 @@ However, for performance reasons, we merged these two steps in our implementatio
 We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
 \Cref{fig:evolution-integration-time-insert} displays the results.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
     \centering
     \subfloat[Local updates]{
         \includegraphics[width=0.9\columnwidth]{img/integration-time-boxplot-local-operations-without-outliers.pdf}
@@ -1463,7 +1463,7 @@ Finally, we measured the evolution of integration times of \emph{rename} operati
 As before, we distinguish performances of \emph{local} and \emph{remote} updates.
 The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 
-\begin{table}[t!]
+\begin{table}[!ht]
     \centering
     \caption{Integration time of rename operations}
     \label{tab:evolution-integration-time-rename}
@@ -1684,7 +1684,7 @@ Another research trail to explore is to study data types to determine which ones
 
 \label[appendix]{app:rename-id}
 
-\begin{myalgorithm}[h!]
+\begin{myalgorithm}[!ht]
     \begin{algorithmic}
         \Function{renIdLessThanFirstId}{id, newFirstId}
         \If{id < newFirstId}
@@ -1716,7 +1716,7 @@ Another research trail to explore is to study data types to determine which ones
 
 \label[appendix]{app:revert-rename-id}
 
-\begin{myalgorithm}[h!]
+\begin{myalgorithm}[!ht]
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
             \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
