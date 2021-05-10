@@ -1235,14 +1235,14 @@ Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-
                 \path
                     to ++(270:2) node {\textbf{B}}
                     to ++(0:0.5) node (b0) {}
-                    to ++(0:1) node[point, label=above:{rename to \epoch{B2}}] (b2) {}
+                    to ++(0:1) node[point, label=below:{rename to \epoch{B2}}] (b2) {}
                     to ++(0:1) node (b3) {}
                     to ++(0:1) node (b6) {}
-                    to ++(0:1) node[point, label=above:{rename to \epoch{B7}}] (b7) {}
+                    to ++(0:1) node[point, label=below:{rename to \epoch{B7}}] (b7) {}
                     to ++(0:1.5)
                     to ++(270:1) node (hideBot) {}
                     to ++(90:1)
-                    to ++(0:1.5) node[point, label=above:{rename to \epoch{B8}}] (b8) {}
+                    to ++(0:1.5) node[point, label=below:{rename to \epoch{B8}}] (b8) {}
                     to ++(0:1.5) node (b-end) {};
 
                 \draw[->, thick] (b0) -- (b2) -- (b3);
