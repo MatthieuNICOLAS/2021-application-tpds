@@ -1061,7 +1061,7 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
 
 \begin{figure*}[!ht]
     \centering
-    \begin{tikzpicture}
+    \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
         \path
             node {\textbf{A}}
             % to ++(0:0.5 * \widthletter) node (A-origin) {}
@@ -1081,12 +1081,16 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
             to ++(0:\widthletter) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
                         ] (S2A-right) {LO}
-            to ++(0:2 * \widthblock) node (between-S2A-S3A) {}
+            to ++(0:2 * \widthblock) node[point] (between-S2A-S3A) {}
             to ++(0:3 * \widthletter) node[epoch] (S3A-left) {\epoch{0}}
             to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
             to ++(0:\widthletter) node[letter, fill=mylightorange, label=below:{\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}] {L}
-            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] {LO};
+            to ++(0:\widthletter) node[block, label=above:{\id{i}{B0}{1..2}}] (S3A-right) {LO}
+            to ++ (0:3 * \widthblock) node[epoch] (S4A-left) {\epoch{B2}}
+            to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
+                    label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
+                ] {HELLO};
 
         \path
             to ++(270:3) node {\textbf{B}}
@@ -1109,9 +1113,10 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
         % \draw[->, thick] (B-former) -- node[below, align=center]{\emph{insert "l"}\\\emph{between}\\\emph{"e" and "l"}} (S1B-left);
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[right, xshift=5pt, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
         \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S2B-left);
-        \draw[dotted] (S2A-right) -- (between-S2A-S3A);
-        \draw[dashed, thick] (S2B-right.east) -- node[right, xshift=5pt, align=center]{\emph{rename to \epoch{B2}}} (between-S2A-S3A);
-        \draw[dashed, ->, thick] (between-S2A-S3A) -- node[above, align=center]{\emph{revert rename}\\\emph{to \epoch{A1}}} (S3A-left);
+        \draw[dotted] (S2A-right) -- (between-S2A-S3A) (S3A-right) -- (S4A-left);
+        \draw[->, dashed, thick] (S2B-right.east) -- node[right, xshift=5pt, align=center]{\emph{rename to \epoch{B2}}} (between-S2A-S3A);
+        \draw[->, loosely dash dot, thick, shorten >= 1] (between-S2A-S3A) -- node[above, align=center]{\emph{revert to \epoch{0}}} (S3A-left);
+        \draw[->, dashed, thick, shorten >= 3] (between-S2A-S3A) edge[bend right] (S4A-left.west);
     \end{tikzpicture}
     \caption{Reverting a previously applied \emph{rename} operation}
     \label{fig:revertRenameId}
