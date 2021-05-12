@@ -31,6 +31,7 @@
 
 \usepackage{amsmath}
 \interdisplaylinepenalty=2500
+\newtheorem{definition}{Definition}
 \newtheorem{myrule}{Rule}
 \newtheorem{property}{Property}
 \newtheorem{subproperty}{Property}[property]
@@ -741,50 +742,12 @@ By reassigning this id to the concurrently added element, node A is able to inse
     \label{fig:concurrent-insert-rename-fixed}
 \end{figure*}
 
-% Before:
-% As explained in \Cref{sec:rename-op}, some nodes may have applied concurrent \emph{insert} operations to their state before receiving a given remote \emph{rename} operation.
-% \Cref{alg:renameId} also solves this case.
-% It allows them to converge with nodes which processed the \emph{rename} operations before the concurrent \emph{insert} operations.
 \Cref{alg:renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local state while they have previously applied concurrent updates.
 This case corresponds to node B's one in \Cref{fig:concurrent-insert-rename-fixed}.
 Upon the delivery of node A's \emph{rename} operation, applying \Cref{alg:renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
 
 \Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
-
-\subsection{Optimisations}
-
-\label{sec:optimisations}
-
-\mnnote{TODO: Ajouter une phrase ou deux pour introduire cette sous-section}
-
-\headerparagraph{Garbage collection and offloading of former states}
-%
-Since nodes rely on the former state to transform concurrent operations to a \emph{rename} one, they have to store it.
-Nodes need it until each of them can no longer issue concurrent operations to the corresponding \emph{rename} operation.
-In other words, nodes can safely garbage collect the former state once the \emph{rename} operation became causally stable \cite{10.1007/978-3-662-43352-2_11}.
-To determine that a given \emph{rename} operation is causally stable, nodes have to be aware of others and of their progress.
-A group membership protocol such as \cite{swim2002,lifeguard2018} is thus required.
-
-Causal stability may take some time to be achieved.
-Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
-We discuss this topic further in \Cref{sec:offloading-former-states}.
-
-\headerparagraph{Compression technique for \emph{rename} operations}
-%
-To limit bandwidth consumption of \emph{rename} operations, we propose the following compression technique.
-Node may broadcast only necessary components to uniquely identify blocks instead of whole identifiers.
-Indeed, an identifier can be uniquely identified from the \emph{node identifier}, \emph{node sequence number} and \emph{offset} of its last tuple.
-A block can therefore be uniquely identified from these components and its length.
-This reduces the data to send to a fixed amount per block.
-To decompress the received operation, nodes browse their current state and log of concurrent \emph{remove} operations.
-This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
-Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
-
-\mnnote{QUESTION:
-    Ajouter un paragraphe sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
-    Permettrait de réduire sa complexité.
-}
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
@@ -818,8 +781,6 @@ We now consider scenarios with concurrent \emph{rename} operations.
             to ++(0:\widthletter) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{2..3}} }
                         ] (S2A-right) {LO};
-            % to ++(0:2) node (A-sync) {}
-            % to ++(90:1) node (sync-top-left) {};
 
         \path
             to ++(270:3) node {\textbf{B}}
@@ -836,18 +797,6 @@ We now consider scenarios with concurrent \emph{rename} operations.
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkpurple,
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S2B-right) {HELLO};
-            % to ++(0:3.8) node (B-sync) {}
-            % to ++(0:1.2)
-            % to ++(270:1) node (sync-bottom-right) {};
-
-        % \draw[thick] (sync-top-left) rectangle (sync-bottom-right) node [midway] (midway) {};
-
-        % \path
-        %     (midway)
-        %     to ++(90:0.6) node {S}
-        %     to ++(270:0.4) node {Y}
-        %     to ++(270:0.4) node {N}
-        %     to ++(270:0.4) node {C};
 
         \draw[->, thick] (S0A-right) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \draw[dotted] (S1A-right) -- (S2A-left); % (S2A-right) -- (A-sync) (S2B-right) -- (B-sync);
@@ -873,7 +822,7 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
 
 \begin{figure}[!ht]
     \centering
-    \begin{tikzpicture}
+    \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
         \path
             node[op] (e0) {\epoch{0}}
             to ++(270:1.5)
@@ -920,7 +869,7 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
     \subfloat[Example of execution with concurrent \emph{rename} operations]{
         \begin{minipage}{\linewidth}
             \centering
-            \begin{tikzpicture}
+            \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
                 \path
                     node {\textbf{A}}
                     to ++(0:1) node (a0) {}
@@ -954,7 +903,7 @@ In this work, we use the lexicographical order on the path of epochs in the \emp
     \subfloat[Corresponding epoch tree with \emph{priority} relation shown]{
         \begin{minipage}{\linewidth}
             \centering
-            \begin{tikzpicture}
+            \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
                 \path
                     node[op] (e0) {\epoch{0}}
                     to ++(225:1.5) node[op] (eA1) {\epoch{A1}}
@@ -1064,9 +1013,6 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
     \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
         \path
             node {\textbf{A}}
-            % to ++(0:0.5 * \widthletter) node (A-origin) {}
-            % to ++(0:\widthletter) node (A-former) {}
-            % to ++(0:3 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
             to ++(0:0.5 * \widthletter) node[epoch] (S1A-left) {\epoch{A1}}
             to ++(0:1.3 * \widthepoch) node[block, fill=mydarkblue,
                     label={below:{\color{mydarkblueid}\id{i}{A1}{0..3}} }
@@ -1094,9 +1040,6 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
 
         \path
             to ++(270:3) node {\textbf{B}}
-            % to ++(0:0.5 * \widthletter) node (B-origin) {}
-            % to ++(0:\widthletter) node (B-former) {}
-            % to ++(0:3 * \widthletter) node[epoch] (S1B-left) {\epoch{0}}
             to ++(0:0.5 * \widthletter) node[epoch] (S1B-left) {\epoch{0}}
             to ++(0:1.05 * \widthoriginepoch) node[letter, label=below:{\id{i}{B0}{0}}] {H}
             to ++(0:\widthletter) node[letter, fill=mydarkorange, label=above:{\color{mydarkorange}\id{i}{B0}{0}\id{f}{\,A0}{0}}] {E}
@@ -1107,10 +1050,7 @@ We illustrate its behaviour with the help of \Cref{fig:revertRenameId}.
                     label={ [] below:{\color{mydarkpurpleid}\id{i}{B2}{0..4}} }
                 ] (S2B-right) {HELLO};
 
-        % \draw[dotted] (A-origin) -- (A-former) (B-origin) -- (B-former);
-        % \draw[->, thick] (A-former) -- node[above, align=center]{\emph{rename to \epoch{A1}}} (S1A-left);
         \draw[dotted] (S1A-right) -- (S2A-left);
-        % \draw[->, thick] (B-former) -- node[below, align=center]{\emph{insert "l"}\\\emph{between}\\\emph{"e" and "l"}} (S1B-left);
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[right, xshift=5pt, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
         \draw[->, thick] (S1B-right) -- node[below, align=center]{\emph{rename to \epoch{B2}}} (S2B-left);
         \draw[dotted] (S2A-right) -- (between-S2A-S3A) (S3A-right) -- (S4A-left);
@@ -1131,14 +1071,6 @@ To this end, it applies \textsc{revertRenameId} to every identifiers of its curr
 \textsc{revertRenameId} determines which strategy to apply to revert the given identifier using patterns.
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
 To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
-
-% According to its structure, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0} may result from the transformation using $\trm{renIdFromPredId}$ of a identifier concurrently inserted to the \emph{rename} operation.
-% Indeed, this identifier is composed of a prefix (\id{i}{A1}{1}) and a tail (\id{i}{B0}{0}\id{m}{B1}{0}), with the tail is between
-% To revert the effect of the \emph{rename} operation, \textsc{revertRenameId} returns the tail.
-% % To revert the effect of the \emph{rename} operation, \textsc{revertRenameId} first removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
-% The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
-% In this case, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
-% \textsc{revertRenameId} can thus return the tail, as it
 
 For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \Cref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
@@ -1173,46 +1105,41 @@ Another solution is to propose an alternative implementation of the renaming mec
 
 \mnnote{TODO: Déplacer ce paragraphe (En 7.3 ? Une sous-section de la 7 dédiée ?)}
 
+\section{Optimisations}
+
+\label{sec:optimisations}
+
 \subsection{Garbage collection of \emph{former states}}
 
-Nodes store epochs and corresponding \emph{former states} to map identifiers from previous or concurrent epochs to the current one.
-However, once nodes become aware that some epochs can not possibly be required anymore to apply future operations, they can garbage collect these epochs and their corresponding \emph{rename} operations.
-But, in systems which allow the generation of concurrent \emph{rename} operations, nodes can not solely rely on causal stability of \emph{rename} operations to determine which operations can be garbage collected.
-Therefore, we propose the two following rules to enable nodes to identify unnecessary epochs:
+% - Indiquer qu'on veut GC les métadonnées du mécanismes de renommage
+% - Alors que le système progresse, des epochs et leurs données associées deviennent inutiles
+% - Doit identifier de quelles epochs on peut se séparer
 
-\begin{myrule}
-    \label{rule:gc-concurrent-primary-epoch}
-    An epoch \epoch{} can be garbage collected if \epoch{} is a leaf of the epoch tree and a concurrent primary epoch \epoch{}' is causally stable.
-\end{myrule}
+Nodes store epochs and corresponding \emph{former states} to transform identifiers through different epochs.
+But as the system progresses, some epochs and associated metadata become unnecessary since no more operations are issued from these epochs.
+Nodes can then garbage collect these epochs.
+In this section, we present a mechanism enabling nodes to identify obsolete epochs.
 
-\begin{myrule}
-    \label{rule:gc-root}
-    An epoch \epoch{} can be garbage collected if \epoch{} is the root of the epoch tree, has only one child \epoch{}' and that \epoch{}' is causally stable.
-\end{myrule}
+% - Pour cela, repose sur la notion de stabilité causale des opérations
+% - Une fois qu'une opération /rename/ est stable, cela signifie que tous les noeuds ont au moins progressé sur l'epoch correspondante
+%   - Ou une epoch plus grande d'après la relation /priority/
+% - Permet donc d'identifier l'ensemble des /potential current epochs/
+To propose such a mechanism, we rely on the notion of \emph{causal stability of operations} \cite{10.1007/978-3-662-43352-2_11}.
+An operation being causally stable means it was delivered to every nodes.
+In the context of a \emph{rename} operation, it implies that every node progressed to the epoch introduced by this operation or to a greater one according to the \emph{priority} relation.
+Using this knowledge, nodes determine the \emph{potential current epochs}, the set of epochs on which nodes may currently be.
 
-\Cref{fig:GC-epochs} illustrates a use case of \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root}.
-In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation before eventually synchronising.
-The operations shown in \Cref{fig:GC-execution} are solely \emph{rename} operations, as only these operations are relevant to the problem at hand.
-In \Cref{fig:GC-epoch-trees-step-1}, we represent the states of their respective \emph{epoch trees} once they each generate their \emph{rename} operations.
-In \Cref{fig:GC-epoch-trees-step-2}, we represent the new states of their \emph{epoch trees} once they each receive the first \emph{rename} operation issued by each other.
-Epochs introduced by causally stable \emph{rename} operations are represented in \emph{epoch trees} using double circles.
-The \emph{origin} epoch \epoch{0} is considered as causally stable from the beginning by design.
-Epochs that are no longer necessary by applying \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root} are respectively displayed as blue dashed nodes and green dotted nodes.
+% - Besoin de maintenir un chemin entre ces epochs
+% - Identifie donc leur LCA
+% - Définit les /required epochs/ comme l'ensemble des epochs qui appartiennent aux chemins entre LCA et les /potential current epochs/
+% - Peut GC toute epoch n'appartenant pas à /required epochs/
+To handle next operations, nodes have to maintain the paths between every epoch of \emph{potential current epochs}.
+We denote as \emph{required epochs} the set of epochs that form the paths between \emph{potential current epochs} and their \ac{LCA}.
+It follows that any epoch that does not belong to the set of \emph{required epochs} can be garbage collected by nodes.
 
-Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, \epoch{B2} becomes causally stable.
-From this point, node A knows that every node switched to this epoch at least.
-Therefore nodes can no longer issue operations from \epoch{0}, \epoch{A1} or \epoch{A8}.
-Thus these epochs and the \emph{rename} operations enabling nodes to switch between them can now be garbage collected.
-\Cref{rule:gc-concurrent-primary-epoch} enables node A to garbage collect epochs \epoch{A8} then \epoch{A1}.
-Then \Cref{rule:gc-root} enables node A to garbage collect \epoch{0} and the \emph{renaming} operation to switch to \epoch{B2}.
-
-On the other hand, upon the reception of the \emph{rename} operation introducing \epoch{A1}, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
-Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
-Since in that case node B would have to transform operations to apply them to \epoch{B8}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B8} and their corresponding \emph{rename} operations.
-
-Eventually, once the system becomes idle, the current \emph{primary} epoch will become causally stable.
-Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-concurrent-primary-epoch} and \Cref{rule:gc-root}, effectively suppressing the overhead of the renaming mechanism.
-
+% - Illustrer avec un exemple
+% - Faire remarquer que dans le cas sans operations /rename/ concurrentes, le LCA des /potential current epochs/ correspond à la /maximum causally stable epoch/
+%   - Cette epoch devient donc la nouvelle racine de l'/epoch tree/
 \begin{figure}[!ht]
     \subfloat[Execution]{
         \begin{minipage}{\linewidth}
@@ -1225,12 +1152,10 @@ Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-
                     to ++(0:1) node (a2) {}
                     to ++(0:1) node (a7) {}
                     to ++(0:1) node[point, label=above:{rename to \epoch{A8}}] (a8) {}
-                    to ++(90:1) node {(1)}
+                    to ++(90:1)
                     to ++(0:1.5) node (hideTop) {}
                     to ++(270:1)
                     to ++(0:1.5) node[point, label=above:{rename to \epoch{A9}}] (a9) {}
-                    to ++(90:1) node {(2)};
-                    to ++(270:1)
                     to ++(0:1.5) node (a-end) {};
 
                 \draw[->, thick] (a0) --  (a1) -- (a2);
@@ -1262,57 +1187,43 @@ Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-
             \label{fig:GC-execution}
         \end{minipage}}
     \hfil
-    \subfloat[States of respective epoch trees at (1)]{
+    \subfloat[States of respective epoch trees with \emph{potential current epochs} and \emph{required epochs} displayed]{
         \begin{minipage}{\linewidth}
             \centering
             \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
                 \path
                     node {\textbf{A}}
-                    to ++(270:1) node[causalop] (AeA0) {\epoch{0}}
+                    to ++(270:1) node[causalop] (Ae0) {\epoch{0}}
                     to ++(225:1.5) node[op] (AeA1) {\epoch{A1}}
-                    to ++(270:1.5) node[op, red] (AeA8) {\epoch{A8}};
-
-                \path
-                    to ++(0:3) node {\textbf{B}}
-                    to ++(270:1) node[causalop] (BeB0) {\epoch{0}}
-                    to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
-                    to ++(270:1.5) node[op, red] (BeB7) {\epoch{B7}};
-
-
-                \draw[thick, ->] (AeA0) edge (AeA1) (AeA1) edge (AeA8);
-                \draw[thick, ->] (BeB0) edge (BeB2) (BeB2) edge (BeB7);
-                \draw[->, dashed, thick, red] (AeA8.45) -- (AeA1.315) (AeA1.0) -- (AeA0.270);
-                \draw[->, dashed, thick, red] (BeB7.130) -- (BeB2.225) (BeB2.180) -- (BeB0.270);
-
-            \end{tikzpicture}
-            \label{fig:GC-epoch-trees-step-1}
-        \end{minipage}}
-    \hfil
-    \subfloat[States of respective epoch trees at (2)]{
-        \begin{minipage}{\linewidth}
-            \centering
-            \begin{tikzpicture}[scale=0.8,every node/.style={scale=0.8}]
-                \path
-                    node {\textbf{A}}
-                    to ++(270:1) node[op, gc-rule-2] (Ae0) {\epoch{0}}
-                    to ++(225:1.5) node[op, gc-rule-1] (AeA1) {\epoch{A1}}
-                    to ++(270:1.5) node[op, gc-rule-1] (AeA8) {\epoch{A8}};
+                    to ++(270:1.5) node[op] (AeA8) {\epoch{A8}};
                 \path
                     to ++(270:1)
                     to ++(315:1.5) node[causalop] (AeB2) {\epoch{B2}}
-                    to ++(270:1.5) node[op, red] (AeA9) {\epoch{A9}};
+                        node[outer sep=12pt] (A-tl-potential-epochs) {}
+                        node[outer sep=15pt] (A-tl-required-epochs) {}
+                    to ++(270:1.5) node[op, red] (AeA9) {\epoch{A9}}
+                        node[outer sep=12pt] (A-br-potential-epochs) {}
+                        node[outer sep=15pt] (A-br-required-epochs) {};
+
+                \draw[dashed] (A-tl-potential-epochs.north west) rectangle (A-br-potential-epochs.south east);
+                \draw[dotted, thick, darkgreen] (A-tl-required-epochs.north west) rectangle (A-br-required-epochs.south east);
 
                 \path
                     to ++(0:4) node {\textbf{B}}
                     to ++(270:1) node[causalop] (Be0) {\epoch{0}}
                     to ++(315:1.5) node[op] (BeB2) {\epoch{B2}}
                     to ++(270:1.5) node[op] (BeB7) {\epoch{B7}}
-                    to ++(270:1.5) node[op, red] (BeB8) {\epoch{B8}};
+                    to ++(270:1.5) node[op, red] (BeB8) {\epoch{B8}}
+                        node[outer sep=12pt] (B-br-potential-epochs) {}
+                        node[outer sep=15pt] (B-br-required-epochs) {};
                 \path
                     to ++(0:4)
                     to ++(270:1)
-                    to ++(225:1.5) node[causalop] (BeA1) {\epoch{A1}};
+                    to ++(225:1.5) node[causalop] (BeA1) {\epoch{A1}}
+                        node[outer sep=12pt] (B-tl-potential-epochs) {};
 
+                \draw[dashed] (B-tl-potential-epochs.north west) rectangle (B-br-potential-epochs.south east);
+                \draw[dotted, thick, darkgreen] (B-tl-potential-epochs.north west)[xshift=-3pt, yshift=33pt] rectangle (B-br-required-epochs.south east);
 
                 \draw[thick, ->] (Ae0) edge (AeA1) (AeA1) edge (AeA8) (Ae0) edge (AeB2) (AeB2) edge (AeA9);
                 \draw[thick, ->] (Be0) edge (BeB2) (BeB2) edge (BeB7) (BeB7) edge (BeB8) (Be0) edge (BeA1);
@@ -1320,11 +1231,64 @@ Nodes will then be able to garbage collect all other epochs using \Cref{rule:gc-
                 \draw[->, dashed, thick, red] (BeB8.135) -- (BeB7.225) (BeB7.135) -- (BeB2.225) (BeB2.180) -- (BeA1.0) -- (Be0.270);
 
             \end{tikzpicture}
-            \label{fig:GC-epoch-trees-step-2}
+            \label{fig:GC-epoch-trees}
         \end{minipage}}
     \caption{Garbage collecting epochs and corresponding \emph{former states}}
     \label{fig:GC-epochs}
 \end{figure}
+
+\Cref{fig:GC-epochs} illustrates a use case of the proposed garbage collection mechanism.
+In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation.
+Then they each receive each other's first \emph{rename} operation before issuing their own third \emph{rename} operation.
+In \Cref{fig:GC-epoch-trees}, we represent the states of their respective \emph{epoch trees}.
+Epochs introduced by causally stable \emph{rename} operations are displayed using double circles.
+The set of \emph{potential current epochs} is shown as a dashed black rectangle while the set of \emph{required epochs} is represented as a dotted green rectangle.
+
+Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, this operation becomes causally stable.
+From this point, node A knows that every node progressed to this epoch or a greater one according to the \emph{priority} relation.
+Epochs \epoch{B2} and \epoch{A9} form the set of \emph{potential epochs} and nodes can now only issue operations from these epochs or one of their not yet known descendants.
+% As nodes need to maintain the path between \epoch{D10} and others, ...
+\mnnote{TODO: Expliquer que \emph{required epochs} correspond à \emph{potential current epochs} dans ce cas}
+Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely garbage collected.
+
+\mnnote{TODO: Présenter le cas du point de vue de B}
+% On the other hand, upon the reception of the \emph{rename} operation introducing \epoch{A1}, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
+% Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
+% Since in that case node B would have to transform operations to apply them to \epoch{B8}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B8} and their corresponding \emph{rename} operations.
+
+\mnnote{QUESTION:
+    Exemple vraiment pertinent ?
+    Est-ce qu'un seul epoch tree plus complet avec \emph{potential current epochs} différent de \emph{required epochs} et des epochs à GC ne seraient pas plus intéressant ?
+    Est-ce utile d'adopter le point de vue de différents noeuds ?
+}
+
+Eventually, once the system becomes idle, nodes reach the same epoch and the corresponding \emph{rename} operation becomes causally stable.
+Nodes can then to garbage collect all other epochs and associated metadata, effectively suppressing the overhead of the renaming mechanism.
+
+Causal stability may take some time to be achieved.
+Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
+We discuss this topic further in \Cref{sec:offloading-former-states}.
+
+\mnnote{QUESTION: Réintroduire le fait que la stabilité causale nécessite un protocole de membership ?}
+% To determine that a given \emph{rename} operation is causally stable, nodes have to be aware of others and of their progress.
+% A group membership protocol such as \cite{swim2002,lifeguard2018} is thus required.
+
+\subsection{Compression technique for \emph{rename} operations}
+
+To limit bandwidth consumption of \emph{rename} operations, we propose the following compression technique.
+Node may broadcast only necessary components to uniquely identify blocks instead of whole identifiers.
+Indeed, an identifier can be uniquely identified from the \emph{node identifier}, \emph{node sequence number} and \emph{offset} of its last tuple.
+A block can therefore be uniquely identified from these components and its length.
+This reduces the data to send to a fixed amount per block.
+
+To decompress the received operation, nodes browse their current state and log of concurrent \emph{remove} operations.
+This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
+Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
+
+\mnnote{QUESTION:
+    Ajouter un paragraphe sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
+    Permettrait de réduire sa complexité.
+}
 
 \section{Evaluation}
 
