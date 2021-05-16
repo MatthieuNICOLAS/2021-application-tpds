@@ -1096,13 +1096,6 @@ This issue is however prevented in our system by the proposed \emph{priority} re
 Since the \emph{priority} relation is defined using the lexicographical order on the path of epochs in the \emph{epoch tree}, nodes only move towards the rightmost epoch of the \emph{epoch tree} when switching epochs.
 Nodes thus avoid going back and forth between different epochs and undoing then redoing corresponding \emph{rename} operations.
 
-Nonetheless, the requirement to prevent nodes from redoing \emph{rename} operation limits our possibilities to design new \emph{priority} relations.
-It would be interesting to remove this constraint to propose more effective \emph{priority} relations, as discussed in \Cref{sec:designing-more-effective-priority-relation}.
-It can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
-Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
-
-\mnnote{TODO: Déplacer ce paragraphe (En 7.3 ? Une sous-section de la 7 dédiée ?)}
-
 \section{Optimisations}
 
 \label{sec:optimisations}
@@ -1515,12 +1508,16 @@ The design of these strategies could be based on several heuristics: epochs of c
 \subsection{Designing a more effective \emph{priority} relation}
 \label{sec:designing-more-effective-priority-relation}
 
-Although the \emph{priority} relation proposed in \Cref{sec:priority} is simple and ensures that nodes designate the same epoch as the \emph{primary} one, it introduces a significant computational overhead in some cases.
-Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is deemed as the \emph{primary} one.
+Although the \emph{priority} relation proposed in \Cref{sec:priority} is simple and ensures that nodes designate the same epoch as the target one, it introduces a significant computational overhead in some cases.
+Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is considered as the new target one.
 
 The \emph{priority} relation should thus be designed to ensure convergence, but also to minimise the overall amount of computations performed by nodes of the system.
 In order to design an efficient \emph{priority} relation, we could embed into \emph{rename} operations metrics that represent the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
 This way, we can favour the branch from the \emph{epoch tree} with the more and most active collaborators and prevent isolated nodes from overthrowing the existing order.
+
+To enable greater flexibility in the design of the \emph{priority} relation, it is necessary to remove the constraint that prohibits nodes from redoing \emph{rename} operations.
+This can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
+Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
 \subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
