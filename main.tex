@@ -999,8 +999,6 @@ To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoc
     \label{alg:revertRenameId}
 \end{myalgorithm}
 
-\mnnote{TODO: Ajouter commentaire dans l'algo pour préciser le cas où on rename un id inséré de façon concurrente ou causale au rename}
-
 The goals of \textsc{revertRenameId} are the following:
 \begin{enumerate*}[label=(\roman*)]
     \item To revert identifiers generated causally before or concurrently to the reverted \emph{rename} operation to their former value
@@ -1111,35 +1109,20 @@ Another solution is to propose an alternative implementation of the renaming mec
 
 \subsection{Garbage collection of \emph{former states}}
 
-% - Indiquer qu'on veut GC les métadonnées du mécanismes de renommage
-% - Alors que le système progresse, des epochs et leurs données associées deviennent inutiles
-% - Doit identifier de quelles epochs on peut se séparer
-
 Nodes store epochs and corresponding \emph{former states} to transform identifiers through different epochs.
 But as the system progresses, some epochs and associated metadata become unnecessary since no more operations are issued from these epochs.
 Nodes can then garbage collect these epochs.
 In this section, we present a mechanism enabling nodes to identify obsolete epochs.
 
-% - Pour cela, repose sur la notion de stabilité causale des opérations
-% - Une fois qu'une opération /rename/ est stable, cela signifie que tous les noeuds ont au moins progressé sur l'epoch correspondante
-%   - Ou une epoch plus grande d'après la relation /priority/
-% - Permet donc d'identifier l'ensemble des /potential current epochs/
 To propose such a mechanism, we rely on the notion of \emph{causal stability of operations} \cite{10.1007/978-3-662-43352-2_11}.
 An operation being causally stable means it was delivered to every nodes.
 In the context of a \emph{rename} operation, it implies that every node progressed to the epoch introduced by this operation or to a greater one according to the \emph{priority} relation.
 Using this knowledge, nodes determine the \emph{potential current epochs}, the set of epochs on which nodes may currently be.
 
-% - Besoin de maintenir un chemin entre ces epochs
-% - Identifie donc leur LCA
-% - Définit les /required epochs/ comme l'ensemble des epochs qui appartiennent aux chemins entre LCA et les /potential current epochs/
-% - Peut GC toute epoch n'appartenant pas à /required epochs/
 To handle next operations, nodes have to maintain the paths between every epoch of \emph{potential current epochs}.
-We denote as \emph{required epochs} the set of epochs that form the paths between \emph{potential current epochs} and their \ac{LCA}.
+We denote as \emph{required epochs} the set of epochs that form the paths between every \emph{potential current epochs} and their \ac{LCA}.
 It follows that any epoch that does not belong to the set of \emph{required epochs} can be garbage collected by nodes.
 
-% - Illustrer avec un exemple
-% - Faire remarquer que dans le cas sans operations /rename/ concurrentes, le LCA des /potential current epochs/ correspond à la /maximum causally stable epoch/
-%   - Cette epoch devient donc la nouvelle racine de l'/epoch tree/
 \begin{figure}[!ht]
     \subfloat[Execution]{
         \begin{minipage}{\linewidth}
@@ -1247,14 +1230,16 @@ The set of \emph{potential current epochs} is shown as a dashed black rectangle 
 Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, this operation becomes causally stable.
 From this point, node A knows that every node progressed to this epoch or a greater one according to the \emph{priority} relation.
 Epochs \epoch{B2} and \epoch{A9} form the set of \emph{potential epochs} and nodes can now only issue operations from these epochs or one of their not yet known descendants.
-% As nodes need to maintain the path between \epoch{D10} and others, ...
-\mnnote{TODO: Expliquer que \emph{required epochs} correspond à \emph{potential current epochs} dans ce cas}
+Node A then proceed to compute \emph{required epochs}.
+To this end, it determines the \ac{LCA} of \emph{potential current epochs} : \epoch{B2}.
+It then generates \emph{required epochs} by adding every epochs forming the paths between \epoch{B2} and \emph{potential current epochs}.
+Epochs \epoch{B2} and \epoch{A9} thus form the set of \emph{required epochs}.
 Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely garbage collected.
 
-\mnnote{TODO: Présenter le cas du point de vue de B}
-% On the other hand, upon the reception of the \emph{rename} operation introducing \epoch{A1}, node B can not garbage collect any epochs despite \epoch{A1} being causally stable.
-% Indeed, from its point of view, other nodes may still issue operations from epoch \epoch{A1}.
-% Since in that case node B would have to transform operations to apply them to \epoch{B8}, node B has to retain all epochs forming the path between \epoch{A1} and \epoch{B8} and their corresponding \emph{rename} operations.
+On the other hand, the delivery of the \emph{rename} operation introducing \epoch{A1} to node B does not enable it to garbage collect any data.
+From its knowledge, node B computes that \epoch{A1}, \epoch{B2}, \epoch{B7} and \epoch{B9} form the \emph{potentiel current epochs}.
+From this, nodes B derives that these epochs and their \ac{LCA} \epoch{e0} constitute \emph{required epochs}.
+Every known epochs thus belong to the set of \emph{required epochs}, preventing their garbage collection.
 
 \mnnote{QUESTION:
     Exemple vraiment pertinent ?
@@ -1263,7 +1248,7 @@ Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely gar
 }
 
 Eventually, once the system becomes idle, nodes reach the same epoch and the corresponding \emph{rename} operation becomes causally stable.
-Nodes can then to garbage collect all other epochs and associated metadata, effectively suppressing the overhead of the renaming mechanism.
+Nodes can then garbage collect all other epochs and associated metadata, effectively suppressing the overhead of the renaming mechanism.
 
 Causal stability may take some time to be achieved.
 Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
