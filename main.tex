@@ -1231,7 +1231,7 @@ Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely gar
 
 On the other hand, the delivery of the \emph{rename} operation introducing \epoch{A1} to node B does not enable it to garbage collect any data.
 From its knowledge, node B computes that \epoch{A1}, \epoch{B2}, \epoch{B7} and \epoch{B9} form the \emph{potentiel current epochs}.
-From this, nodes B derives that these epochs and their \ac{LCA} \epoch{e0} constitute \emph{required epochs}.
+From this, nodes B derives that these epochs and their \ac{LCA} \epoch{0} constitute \emph{required epochs}.
 Every known epochs thus belong to the set of \emph{required epochs}, preventing their garbage collection.
 
 \mnnote{QUESTION:
@@ -1242,6 +1242,11 @@ Every known epochs thus belong to the set of \emph{required epochs}, preventing 
 
 Eventually, once the system becomes idle, nodes reach the same epoch and the corresponding \emph{rename} operation becomes causally stable.
 Nodes can then garbage collect all other epochs and associated metadata, effectively suppressing the overhead of the renaming mechanism.
+
+Note that the garbage collection mechanism can be simplified in systems preventing concurrent \emph{rename} operations.
+Since epochs form a chain in such systems, the latest epoch introduced by a causally stable \emph{rename} operation becomes the \ac{LCA} of \emph{potential current epochs}.
+It follows that this epoch and its descendants constitute the \emph{required epochs}, and that its ancestors may be garbage collected.
+Nodes thus only need to track causally stable \emph{rename} operations to determine which epochs to garbage collect in systems without concurrent \emph{rename} operations.
 
 Causal stability may take some time to be achieved.
 Meanwhile, nodes can actually offload former states onto the disk since they are only required to handle concurrent operations to \emph{rename} ones.
@@ -1264,7 +1269,7 @@ This allows them to retrieve whole identifiers and to reconstruct the original \
 Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
 
 \mnnote{QUESTION:
-    Ajouter un paragraphe sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
+    Ajouter une sous-section sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
     Permettrait de réduire sa complexité.
 }
 
@@ -1564,7 +1569,8 @@ Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} ope
 It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
 
 However, systems can actually adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
-The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \Cref{alg:revertRenameId} and \Cref{rule:gc-concurrent-primary-epoch}.
+The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \Cref{alg:revertRenameId}.
+It also simplifies the implementation of the garbage collection mechanism of epochs and \emph{former states}.
 
 \subsection{The LSEQ approach}
 
