@@ -1461,7 +1461,7 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 \end{table}
 
 The main outcome of these measures shows that \emph{rename} operations are expensive when compared to others.
-Local \emph{rename} operations take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones may last seconds if delayed for too long.
+Local \emph{rename} operations take hundreds of milliseconds while \emph{simple remote} ones and \emph{concurrent with higher priority} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
 Another interesting result from this benchmark is that \emph{concurrent with lower priority rename} operations are cheap to apply, since their application actually consists of storing their embedded \emph{former states}.
