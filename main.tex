@@ -1462,6 +1462,8 @@ Another interesting result from this benchmark is that concurrent \emph{secondar
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
 We will discuss further this topic in \Cref{sec:postponing-transition-to-new-epoch}.
 
+\mnnote{TODO: Éliminer mention de \emph{primary}/\emph{secondary} epoch}
+
 \section{Discussion}
 
 \label{sec:discussion}
@@ -1526,6 +1528,8 @@ Another solution is to propose an alternative implementation of the renaming mec
 
 \subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
+
+\mnnote{TODO: Eliminer mention de \emph{primary}/\emph{secondary} epoch}
 
 As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
 This process can introduce a signification computational overhead in some cases.
