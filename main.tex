@@ -654,7 +654,7 @@ Nodes use the function \textsc{renameId}, described in \Cref{alg:renameId}, to t
 This algorithm maps identifiers from a \emph{parent} epoch to corresponding ones in the \emph{child} epoch.
 The main idea of this algorithm is to rename unknown identifiers at the time of the \emph{rename} operation generation using their predecessor.
 An example of its usage is illustrated in \Cref{fig:concurrent-insert-rename-fixed}.
-This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \Cref{alg:renameId} to rename the concurrently generated id before inserting it in its state.
+This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \textsc{renameId} to rename the concurrently generated id before inserting it in its state.
 
 The algorithm proceeds as follows.
 First, node A retrieves the predecessor of the given id \id{i}{B0}{0}\id{m}{B1}{0} in the former state: \id{i}{B0}{0}\id{f}{A0}{0}.
@@ -738,13 +738,13 @@ By reassigning this id to the concurrently added element, node A is able to inse
         \draw[dashed, ->, thick, shorten >= 3] (S1B-right.east) -- node[below right, align=center]{\emph{insert "l" at} {\color{mylightorange}\id{i}{B0}{0}\id{m}{B1}{0}}} (S2A-left.west);
 
     \end{tikzpicture}
-    \caption{Renaming concurrent update using \Cref{alg:renameId} before applying it to maintain intended order}
+    \caption{Renaming concurrent update using \textsc{renameId} before applying it to maintain intended order}
     \label{fig:concurrent-insert-rename-fixed}
 \end{figure*}
 
-\Cref{alg:renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local state while they have previously applied concurrent updates.
+\textsc{renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local state while they have previously applied concurrent updates.
 This case corresponds to node B's one in \Cref{fig:concurrent-insert-rename-fixed}.
-Upon the delivery of node A's \emph{rename} operation, applying \Cref{alg:renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
+Upon the delivery of node A's \emph{rename} operation, applying \textsc{renameId} to every identifiers of its state would enable node B to reach an equivalent state to node A's one.
 
 \Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
@@ -1070,7 +1070,7 @@ To this end, it applies \textsc{revertRenameId} to every identifiers of its curr
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
 To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
 
-For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \Cref{alg:revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \textsc{revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
@@ -1078,9 +1078,9 @@ The algorithm can thus return the tail as the resulting identifier while preserv
 
 Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
 As no corresponding identifier exists yet at the \emph{parent} epoch, \textsc{revertRenameId} can return any identifier as long as it preserves the intended order.
-To this end, \Cref{alg:revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
+To this end, \textsc{revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
 
-Once node A mapped its state to the equivalent one at \epoch{0} using \Cref{alg:revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
+Once node A mapped its state to the equivalent one at \epoch{0} using \textsc{revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
 
 As with \Cref{alg:renameId}, \Cref{alg:revertRenameId} only features the main case of \textsc{revertRenameId}.
 It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
@@ -1398,10 +1398,10 @@ This improvement is explained by the fact that \emph{rename} operations optimise
 
 Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit: integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \Cref{fig:evolution-integration-time-remote-insert}.
 Operations from previous epochs are operations generated concurrently to the \emph{rename} operation but applied after it.
-Since the operation has to be transformed beforehand using \Cref{alg:renameId}, we observe a computational overhead compared to other operations.
+Since the operation has to be transformed beforehand using \textsc{renameId}, we observe a computational overhead compared to other operations.
 But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
 
-Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \Cref{alg:revertRenameId}.
+Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \textsc{revertRenameId}.
 Because of this overhead, RenamableLogootSplit's performances for these operations are comparable to LogootSplit ones.
 
 To summarise, transformation functions introduce an overhead with regard to integration times of concurrent operations to \emph{rename} ones.
@@ -1573,7 +1573,7 @@ Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} ope
 It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
 
 However, systems can actually adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
-The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \Cref{alg:revertRenameId}.
+The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \textsc{revertRenameId}.
 It also simplifies the implementation of the garbage collection mechanism of epochs and \emph{former states}.
 
 \subsection{The LSEQ approach}
