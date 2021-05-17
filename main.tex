@@ -1413,6 +1413,12 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 %
 Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
 As before, we distinguish performances of \emph{local} and \emph{remote} updates.
+The case of \emph{remote rename} operations is subdivided into three categories :
+\begin{enumerate*}
+    \item \emph{simple remote} denotes the remote \emph{rename} operations that introduce children epochs of the node's current one
+    \item \emph{concurrent with higher priority} the remote \emph{rename} operations that introduce sibling epochs with higher priorities than the node's current one
+    \item \emph{concurrent with lower priority} the remote \emph{rename} operations that introduce sibling epochs with lower priorities than the node's current one.
+\end{enumerate*}
 The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 
 \begin{table}[!ht]
@@ -1432,19 +1438,19 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
                                     & 120 &   143.75 &   143.57 &     148.59 &   2.16 \\
                                     & 150 &   158.04 &   157.95 &     164.38 &   2.49 \\
             \cmidrule(lr){1-6}
-            Remote & 30  &   481.32 &   477.13 &     537.30 &  17.11 \\
+            Simple remote & 30  &   481.32 &   477.13 &     537.30 &  17.11 \\
                                     & 60  &   981.62 &   978.24 &    1072.83 &  31.54 \\
                                     & 90  &  1491.28 &  1481.83 &    1657.58 &  51.10 \\
                                     & 120 &  1670.00 &  1663.85 &    1814.38 &  50.29 \\
                                     & 150 &  1694.17 &  1675.95 &    1852.55 &  59.94 \\
             \cmidrule(lr){1-6}
-            Prim. Remote & 30  &   643.53 &   643.57 &     682.80 &  13.42 \\
+            Cc. with higher priority  & 30  &   643.53 &   643.57 &     682.80 &  13.42 \\
                                     & 60  &  1317.66 &  1316.39 &    1399.55 &  28.67 \\
                                     & 90  &  1998.23 &  1994.08 &    2111.98 &  45.37 \\
                                     & 120 &  2239.71 &  2233.22 &    2368.45 &  50.06 \\
                                     & 150 &  2241.92 &  2233.61 &    2351.02 &  52.20 \\
             \cmidrule(lr){1-6}
-            Sec. Remote & 30  &     1.36 &     1.30 &       3.53 &   0.37 \\
+            Cc. with lower priority  & 30  &     1.36 &     1.30 &       3.53 &   0.37 \\
                                     & 60  &     2.82 &     2.69 &       4.85 &   0.45 \\
                                     & 90  &     4.45 &     4.23 &       5.81 &   0.71 \\
                                     & 120 &     5.33 &     5.10 &       8.78 &   0.90 \\
@@ -1458,11 +1464,9 @@ The main outcome of these measures shows that \emph{rename} operations are expen
 Local \emph{rename} operations take hundreds of milliseconds while remote ones and concurrent \emph{primary} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
-Another interesting result from this benchmark is that concurrent \emph{secondary rename} operations are cheap to apply, as they only consist in storage of corresponding \emph{former states}.
+Another interesting result from this benchmark is that \emph{concurrent with lower priority rename} operations are cheap to apply, since their application actually consists of storing their embedded \emph{former states}.
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
 We will discuss further this topic in \Cref{sec:postponing-transition-to-new-epoch}.
-
-\mnnote{TODO: Éliminer mention de \emph{primary}/\emph{secondary} epoch}
 
 \section{Discussion}
 
