@@ -1530,25 +1530,23 @@ To enable greater flexibility in the design of the \emph{priority} relation, it 
 This can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
 Another solution is to propose an alternative implementation of the renaming mechanism that use the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
-\subsection{Postponing transition to \emph{primary} epoch in case of high concurrency}
+\subsection{Postponing transition to new target epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
 
-\mnnote{TODO: Eliminer mention de \emph{primary}/\emph{secondary} epoch}
-
-As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{primary rename} operations is expensive as nodes have to browse and rename their whole current state.
+As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{concurrent with higher priority rename} operations is expensive as nodes have to browse and rename their whole current state.
 This process can introduce a signification computational overhead in some cases.
-Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation.
-In this scenario, the node would successively consider every \emph{rename} operation as the \emph{primary} one and would rename its state each time.
-On the other hand \emph{secondary rename} operations are cheap to integrate, as nodes simply add to their state a reference to the corresponding \emph{former state}.
+Especially, a node may receive concurrent \emph{rename} operations in the reverse order to the one defined by the \emph{priority} relation over their introduced epochs .
+In this scenario, the node would successively consider each introduced epoch as the new target one and would rename its state accordingly each time.
+On the other hand \emph{concurrent with lower priority rename} operations are cheap to integrate, as nodes simply add to their state a reference to the corresponding \emph{former state}.
 
 To mitigate the negative impact of this scenario, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection.
-First, nodes process \emph{rename} operations as secondary ones.
+First, nodes process \emph{rename} operations as \emph{concurrent with lower priority} ones.
 It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them.
-Then each node keeps track of a level of confidence in the current \emph{primary} operation, computed for example from the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes still known as using the \emph{parent} epoch.
-Once the level of confidence reaches a given threshold, the node renames its state according to the operation.
+Then each node keeps track of a level of confidence in the current target epoch, computed for example from the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes still known as using the \emph{parent} epoch.
+Once the level of confidence reaches a given threshold, the node renames its state to the target epoch.
 
 This strategy introduces a slight computational overhead for each \emph{insert} or \emph{remove} operations received during the period of uncertainty, as nodes may issue operations from different epochs during that time.
-In return, the strategy reduces the probability of erroneously integrating \emph{rename} operations as \emph{primary} ones.
+In return, the strategy reduces the probability of erroneously integrating \emph{rename} operations as \emph{concurrent with higher priority} ones.
 
 \section{Related work}
 \label{sec:related-work}
