@@ -1112,6 +1112,7 @@ Using this knowledge, nodes determine the \emph{potential current epochs}, the s
 To handle next operations, nodes have to maintain the paths between every epoch of \emph{potential current epochs}.
 We denote as \emph{required epochs} the set of epochs that form the paths between every \emph{potential current epochs} and their \ac{LCA}.
 It follows that any epoch that does not belong to the set of \emph{required epochs} can be garbage collected by nodes.
+\Cref{fig:GC-epochs} illustrates a use case of the proposed garbage collection mechanism.
 
 \begin{figure}[!ht]
     \subfloat[Execution]{
@@ -1202,9 +1203,19 @@ It follows that any epoch that does not belong to the set of \emph{required epoc
     \label{fig:GC-epochs}
 \end{figure}
 
-\Cref{fig:GC-epochs} illustrates a use case of the proposed garbage collection mechanism.
-In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue two \emph{rename} operation.
-Then they each receive each other's first \emph{rename} operation before issuing their own third \emph{rename} operation.
+In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue several \emph{rename} operations.
+Node A first generates a \emph{rename} operation to \epoch{A1} and later a \emph{rename} operation to \epoch{A8}.
+It thereafter receives from node B a \emph{rename} operation that introduces \epoch{B2}.
+Since \epoch{B2} is greater than its current epoch (\epoch{e0}\epoch{A1}\epoch{A8} < \epoch{e0}\epoch{B2}), node A selects it as its new current epoch and proceeds to rename its state accordingly.
+Finally, node A issues a third \emph{rename} operation to \epoch{A9}.
+
+Meanwhile, node B issues the \emph{rename} operation to \epoch{B2}.
+It then receives from node A the \emph{rename} operation to \epoch{A1}.
+However, node B keeps \epoch{B2} as its current epoch (since \epoch{e0}\epoch{A1} < \epoch{e0}\epoch{B2}).
+Afterwards, node B issues another \emph{rename} operation to \epoch{B7}.
+
+\mnnote{NOTE: Un peu de mal à identifier si je dois parler au présent ou passé dans le paragraphe précédent vu que ça se passe en parallèle du paragraphe décrivant l'exécution du point de vue de A. Pareil pour si je dois utiliser "a" ou "the" pour parler des opérations \emph{rename} que j'ai déjà mentionné précédemment.}
+
 In \Cref{fig:GC-epoch-trees}, we represent nodes' respective \emph{epoch trees}.
 Epochs introduced by causally stable \emph{rename} operations are displayed using double circles.
 The set of \emph{potential current epochs} is shown as a dashed black rectangle while the set of \emph{required epochs} is represented as a dotted green rectangle.
@@ -1219,7 +1230,7 @@ Epochs \epoch{B2} and \epoch{A9} thus form the set of \emph{required epochs}.
 Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely garbage collected.
 
 On the other hand, the delivery of the \emph{rename} operation introducing \epoch{A1} to node B does not enable it to garbage collect any data.
-From its knowledge, node B computes that \epoch{A1}, \epoch{B2}, \epoch{B7} and \epoch{B9} form the \emph{potentiel current epochs}.
+From its knowledge, node B computes that \epoch{A1}, \epoch{B2} and \epoch{B7} form the \emph{potentiel current epochs}.
 From this, nodes B derives that these epochs and their \ac{LCA} \epoch{0} constitute \emph{required epochs}.
 Every known epochs thus belong to the set of \emph{required epochs}, preventing their garbage collection.
 
