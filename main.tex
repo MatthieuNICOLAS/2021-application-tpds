@@ -653,8 +653,8 @@ Nodes use the function \textsc{renameId}, described in \Cref{alg:renameId}, to t
 % The main idea of this algorithm is to use the predecessor of the given identifier to do so.
 This algorithm maps identifiers from a \emph{parent} epoch to corresponding ones in the \emph{child} epoch.
 The main idea of this algorithm is to rename unknown identifiers at the time of the \emph{rename} operation generation using their predecessor.
-An example of its usage is illustrated in \Cref{fig:concurrent-insert-rename-fixed}.
-This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that this time node A uses \textsc{renameId} to rename the concurrently generated id before inserting it in its state.
+An example is provided in \Cref{fig:concurrent-insert-rename-fixed}.
+This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that node A uses \textsc{renameId} to rename the concurrently generated id before inserting it in its state.
 
 The algorithm proceeds as follows.
 First, node A retrieves the predecessor of the given id \id{i}{B0}{0}\id{m}{B1}{0} in the former state: \id{i}{B0}{0}\id{f}{A0}{0}.
@@ -756,7 +756,7 @@ Functions to deal with other cases, \ie when the identifier to rename is out of 
 \subsection{Concurrent \emph{rename} operations}
 
 We now consider scenarios with concurrent \emph{rename} operations.
-\Cref{fig:conflicting-rename-operations} expands the scenario previously described in \Cref{fig:concurrent-insert-rename-fixed} to depicts such one.
+\Cref{fig:conflicting-rename-operations} expands the scenario previously described in \Cref{fig:concurrent-insert-rename-fixed}.
 
 \begin{figure*}[!ht]
     \centering
@@ -841,10 +841,10 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
 At the end of the scenario described in \Cref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
 In order to converge, every node should eventually reach the same epoch.
 However, the function \textsc{renameId} described in \Cref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
-Nodes A and B are thus unable to progress towards the epoch of the other.
+Nodes A (resp. B) is then unable to progress towards the epoch of node B (resp. A).
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
-First, nodes have to agree on one epoch from the \emph{epoch tree} as the target epoch.
+First, nodes have to agree on a common epoch from the \emph{epoch tree} as the target epoch.
 In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
 We propose such a mechanism in \Cref{sec:priority}.
 
@@ -863,7 +863,7 @@ Nodes then select the maximum epoch according to this relation as the target epo
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
-\Cref{fig:priority-example} provides an example of its use.
+\Cref{fig:priority-example} provides an example.
 
 \begin{figure}[!ht]
     \subfloat[Example of execution with concurrent \emph{rename} operations]{
@@ -1071,7 +1071,7 @@ To this end, it applies \textsc{revertRenameId} to every identifiers of its curr
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
 To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
 
-For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \textsc{revertRenameId} removes its prefix (\id{i}{A1}{1}) to isolate its tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \textsc{revertRenameId} removes the prefix (\id{i}{A1}{1}) to isolate the tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
@@ -1085,13 +1085,13 @@ Once node A mapped its state to the equivalent one at \epoch{0} using \textsc{re
 
 As with \Cref{alg:renameId}, \Cref{alg:revertRenameId} only features the main case of \textsc{revertRenameId}.
 It corresponds to the case where the identifier to revert is in the range of renamed identifiers ($\trm{newFirstId} \leq \trm{id} \leq \trm{newLastId}$).
-Functions to handle the rest of cases are featured in \Cref{app:revert-rename-id}.
+Functions to handle remaining cases are featured in \Cref{app:revert-rename-id}.
 
 Note that \textsc{renameId} and \textsc{revertRenameId} are not inverse functions.
 \textsc{revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
-But on the other hand, \textsc{renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
+On the other hand, \textsc{renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
 Thus redoing a previously undone \emph{rename} operation alter these identifiers.
-This alteration may cause a divergence between nodes, as the same element will be referred to using different identifiers.
+This modification may cause a divergence between nodes, as the same element will be referred to using different identifiers.
 
 This issue is however prevented in our system by the proposed \emph{priority} relation.
 Since the \emph{priority} relation is defined using the lexicographical order on the path of epochs in the \emph{epoch tree}, nodes only move towards the rightmost epoch of the \emph{epoch tree} when switching epochs.
