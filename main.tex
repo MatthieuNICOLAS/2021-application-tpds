@@ -1524,29 +1524,21 @@ Another solution is to propose an alternative implementation of the renaming mec
 \subsection{Postponing transition to new target epoch in case of high concurrency}
 \label{sec:postponing-transition-to-new-epoch}
 
-As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{concurrent with higher priority rename} operations is expensive as nodes have to browse and rename their whole current state.
-This process can introduce a signification computational overhead in some cases.
+As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{remote rename} operations is generally expensive.
+This process can introduce a significant computational overhead in case of concurrent \emph{rename} operations.
 Especially, a node may receive concurrent \emph{rename} operations in the reverse order of epoch \emph{priority}.
 In this scenario, the node would successively consider each introduced epoch as the new target one and would rename its state accordingly each time.
-On the other hand \emph{concurrent with lower priority rename} operations are cheap to integrate, as nodes simply add to their state a reference to the corresponding \emph{former state}.
 
-To mitigate the negative impact of this scenario, we can decompose the integration of \emph{rename} operations into two parts in case of concurrency detection.
-First, nodes process \emph{rename} operations as \emph{concurrent with lower priority} ones.
+In case of highly concurrent \emph{rename} operations, we propose that nodes postpone the renaming of their state to the target epoch until they obtain a given confidence level in the target epoch.
+This deferment reduces the likelihood of nodes performing unnecessary work.
+Several strategies can be proposed to compute the confidence level of a target epoch.
+These strategies could rely on various metrics to output the confidence level, such as the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes that have not yet received the \emph{rename} operation.
 
-\mnnote{TODO:
-    Retravailler section avec plan suivant.
-    Indiquer que passe son temps à sauter d'une epoch à l'autre.
-    On va postpone le renommage de l'état vers l'epoch target en attendant d'avoir une haute confiance envers l'epoch.
-    Mais pour ne pas être bloqué, on s'autorise de rename les opérations vers mon epoch courante.
-    Ajouter argumentaire pour montrer que le coût de transformation des opérations est négligeable par rapport au coût d'un mauvais rename.
-}
+During the uncertainty period introduced by the postponement, nodes may receive operations from different epochs including the target epoch.
+Nonetheless, nodes would still be able to integrate \emph{insert} and \emph{remove} operations to their state using \textsc{renameId} and \textsc{revertRenameId}, at the cost of a computational overhead for each identifier.
+However, this overhead is negligible (hundreds of microseconds per identifier according to \Cref{fig:evolution-integration-time-remote-insert}) compared to the cost of an unnecessary rename of the whole state (hundreds of milliseconds to seconds according to \Cref{tab:evolution-integration-time-rename}).
 
-It enables nodes to integrate remote \emph{insert} and \emph{remove} operations, even from concurrent epochs, by transforming them.
-Then each node keeps track of a level of confidence in the current target epoch, computed for example from the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes still known as using the \emph{parent} epoch.
-Once the level of confidence reaches a given threshold, the node renames its state to the target epoch.
-
-This strategy introduces a slight computational overhead for each \emph{insert} or \emph{remove} operations received during the period of uncertainty, as nodes may issue operations from different epochs during that time.
-In return, the strategy reduces the probability of erroneously integrating \emph{rename} operations as \emph{concurrent with higher priority} ones.
+\mnnote{TODO: Indiquer que besoin de pouvoir redo les opérations}
 
 \section{Related work}
 \label{sec:related-work}
