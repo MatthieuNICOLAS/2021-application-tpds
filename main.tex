@@ -29,6 +29,7 @@
 \definecolor{mydarkpurpleid}{RGB}{136,86,167}
 }
 
+\usepackage{amssymb}
 \usepackage{amsmath}
 \interdisplaylinepenalty=2500
 \newtheorem{definition}{Definition}
@@ -858,8 +859,24 @@ We propose an algorithm that fulfills this purpose in \Cref{sec:reverting-rename
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a total order relation between epochs.
+To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a strict total order relation on epochs.
+%
+% \begin{definition}[Priority relation]
+%     A strict total order $<$ on the set of epochs $E$.
+%     It enables nodes to compare any pair of epochs $e$ and $e'$.
+%     \[
+%         \forall e, e' \in E \cdot e \neq e' \implies e < e' \lor e' < e
+%     \]
+% \end{definition}
+%
 Nodes then select the maximum epoch according to this relation as the target epoch.
+
+% \begin{definition}[Target epoch]
+%     The epoch $e_{target}$ from the set of epochs $E$ towards which nodes should progress.
+%     \[
+%         e = e_{target} \implies e \in E \land \nexists e' \in E \cdot e < e'
+%     \]
+% \end{definition}
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
@@ -1108,6 +1125,12 @@ To propose such a mechanism, we rely on the notion of \emph{causal stability of 
 An operation is causally stable once it was delivered to every nodes.
 In the context of a \emph{rename} operation, it implies that every node progressed to the epoch introduced by this operation or to a greater one according to the \emph{priority} relation.
 Using this knowledge, nodes determine the \emph{potential current epochs}, the set of epochs on which nodes may currently be.
+
+% \begin{definition}[Potential current epochs]
+%     \[
+%         E' = \{ e \in E | e = e_{max\_cs} \lor e_{max\_cs} < e \}
+%     \]
+% \end{definition}
 
 To handle next operations, nodes have to maintain the paths between every epoch of \emph{potential current epochs}.
 We denote as \emph{required epochs} the set of epochs that form the paths between every \emph{potential current epochs} and their \ac{LCA}.
@@ -1433,12 +1456,18 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
     }
 \end{table}
 
-The main outcome of these measures shows that \emph{rename} operations are expensive when compared to others as nodes have to browse and rename their whole current state.
+The main outcome of these measures shows that \emph{rename} operations are generally expensive when compared to others, since nodes have to browse and rename their whole current state.
+\mnnote{QUESTION:
+    Dans le paragraphe d'après, j'explique que les noeuds ne renomment en fait pas leur état dans tous les cas.
+    Transformer le "have to browse and rename..." en "may have to browse..." plutôt ?
+    Ou ça serait plus confusant qu'autre chose ?
+}
 Local \emph{rename} operations take hundreds of milliseconds while \emph{direct remote} ones and \emph{concurrent with higher priority} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
 Another interesting result from this benchmark is that \emph{concurrent with lower priority rename} operations are cheap to apply.
-Since these operations introduce epochs that are not selected as the new current epoch, their application solely consists of storing their embedded \emph{former states}.
+Since these operations introduce epochs that are not selected as the new target epoch, nodes does not actually proceed to rename their state.
+The application of \emph{concurrent with lower priority rename} operations hence solely consists of adding the introduced epoch and the corresponding \emph{former state} into the epoch tree.
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
 We will discuss further this topic in \Cref{sec:postponing-transition-to-new-epoch}.
 
@@ -1538,7 +1567,10 @@ During the uncertainty period introduced by the postponement, nodes may receive 
 Nonetheless, nodes would still be able to integrate \emph{insert} and \emph{remove} operations to their state using \textsc{renameId} and \textsc{revertRenameId}, at the cost of a computational overhead for each identifier.
 However, this overhead is negligible (hundreds of microseconds per identifier according to \Cref{fig:evolution-integration-time-remote-insert}) compared to the cost of an unnecessary rename of the whole state (hundreds of milliseconds to seconds according to \Cref{tab:evolution-integration-time-rename}).
 
-\mnnote{TODO: Indiquer que besoin de pouvoir redo les opérations}
+Note that this mechanism requires \textsc{renameId} and \textsc{revertRenameId} to be inverse functions.
+Indeed, during the uncertainty period, a node would use \textsc{revertRenameId} to integrate identifiers from remote \emph{insert} operations issued at the target epoch.
+Then, the node would proceed to rename its state towards the target epoch once the corresponding confidence level has reached the given threshold.
+It follows that \textsc{renameId} must restore identifiers previously transformed using \textsc{revertRenameId} to their original value to ensure convergence.
 
 \section{Related work}
 \label{sec:related-work}
