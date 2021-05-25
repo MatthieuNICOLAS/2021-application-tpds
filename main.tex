@@ -954,7 +954,6 @@ Therefore every node selects \epoch{B7} as the target epoch in a coordination-fr
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
-This topic will be further discussed in \Cref{sec:designing-more-effective-priority-relation}.
 
 \subsection{Reverting \emph{rename} operations}
 
@@ -1232,12 +1231,10 @@ It thereafter receives from node B a \emph{rename} operation that introduces \ep
 Since \epoch{B2} is greater than its current epoch (\epoch{e0}\epoch{A1}\epoch{A8} < \epoch{e0}\epoch{B2}), node A selects it as its new current epoch and proceeds to rename its state accordingly.
 Finally, node A issues a third \emph{rename} operation to \epoch{A9}.
 
-Meanwhile, node B issues the \emph{rename} operation to \epoch{B2}.
+Concurrently, node B issues the \emph{rename} operation to \epoch{B2}.
 It then receives from node A the \emph{rename} operation to \epoch{A1}.
 However, node B keeps \epoch{B2} as its current epoch (since \epoch{e0}\epoch{A1} < \epoch{e0}\epoch{B2}).
 Afterwards, node B issues another \emph{rename} operation to \epoch{B7}.
-
-\mnnote{NOTE: Un peu de mal à identifier si je dois parler au présent ou passé dans le paragraphe précédent vu que ça se passe en parallèle du paragraphe décrivant l'exécution du point de vue de A. Pareil pour si je dois utiliser "a" ou "the" pour parler des opérations \emph{rename} que j'ai déjà mentionné précédemment.}
 
 In \Cref{fig:GC-epoch-trees}, we represent nodes' respective \emph{epoch trees}.
 Epochs introduced by causally stable \emph{rename} operations are displayed using double circles.
@@ -1457,19 +1454,13 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 \end{table}
 
 The main outcome of these measures shows that \emph{rename} operations are generally expensive when compared to others, since nodes have to browse and rename their whole current state.
-\mnnote{QUESTION:
-    Dans le paragraphe d'après, j'explique que les noeuds ne renomment en fait pas leur état dans tous les cas.
-    Transformer le "have to browse and rename..." en "may have to browse..." plutôt ?
-    Ou ça serait plus confusant qu'autre chose ?
-}
 Local \emph{rename} operations take hundreds of milliseconds while \emph{direct remote} ones and \emph{concurrent with higher priority} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
 
 Another interesting result from this benchmark is that \emph{concurrent with lower priority rename} operations are cheap to apply.
-Since these operations introduce epochs that are not selected as the new target epoch, nodes does not actually proceed to rename their state.
+Since these operations introduce epochs that are not selected as the new target epoch, nodes do not actually proceed to rename their state.
 The application of \emph{concurrent with lower priority rename} operations hence solely consists of adding the introduced epoch and the corresponding \emph{former state} into the epoch tree.
-Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in a specific order.
-We will discuss further this topic in \Cref{sec:postponing-transition-to-new-epoch}.
+Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in the most suitable order given the context.
 
 \section{Discussion}
 
@@ -1531,46 +1522,41 @@ To decompress the received operation, nodes browse their current state and log o
 This allows them to retrieve whole identifiers and to reconstruct the original \emph{rename} operation.
 Additionally, we can set an upper-bound to the size of \emph{rename} operations by issuing them as soon as the state reaches a given number of blocks.
 
-\mnnote{QUESTION:
-    Ajouter une sous-section sur une version améliorée de \emph{renameId()} permettant de renommer par bloc plutôt que par id ?
-    Permettrait de réduire sa complexité.
-}
+% \subsection{Designing a more effective \emph{priority} relation}
+% \label{sec:designing-more-effective-priority-relation}
 
-\subsection{Designing a more effective \emph{priority} relation}
-\label{sec:designing-more-effective-priority-relation}
+% Although the \emph{priority} relation proposed in \Cref{sec:priority} is simple and ensures that nodes designate the same epoch as the target one, it introduces a significant computational overhead in some cases.
+% Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is considered as the new target one.
 
-Although the \emph{priority} relation proposed in \Cref{sec:priority} is simple and ensures that nodes designate the same epoch as the target one, it introduces a significant computational overhead in some cases.
-Notably it allows a single node, disjoined from the collaboration since a long time, to force every other nodes to revert \emph{rename} operations they performed meanwhile because its own \emph{rename} operation is considered as the new target one.
+% The \emph{priority} relation should thus be designed to ensure convergence, but also to minimise the overall amount of computations performed by nodes of the system.
+% In order to design an efficient \emph{priority} relation, we could embed into \emph{rename} operations metrics that represent the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
+% This way, we can favour the branch from the \emph{epoch tree} with the more and most active collaborators and prevent isolated nodes from overthrowing the existing order.
 
-The \emph{priority} relation should thus be designed to ensure convergence, but also to minimise the overall amount of computations performed by nodes of the system.
-In order to design an efficient \emph{priority} relation, we could embed into \emph{rename} operations metrics that represent the state of the system and the accumulated work on the document (number of nodes currently at the \emph{parent} epoch, number of operations generated at the \emph{parent epoch}, length of the document...).
-This way, we can favour the branch from the \emph{epoch tree} with the more and most active collaborators and prevent isolated nodes from overthrowing the existing order.
+% To enable greater flexibility in the design of the \emph{priority} relation, it could be necessary to remove the constraint that prohibits nodes from redoing \emph{rename} operations.
+% This can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
+% Another solution is to propose an alternative implementation of the renaming mechanism that uses the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
 
-To enable greater flexibility in the design of the \emph{priority} relation, it could be necessary to remove the constraint that prohibits nodes from redoing \emph{rename} operations.
-This can be achieved by designing a set of inverse functions for \textsc{renameId} and \textsc{revertRenameId}.
-Another solution is to propose an alternative implementation of the renaming mechanism that uses the original identifiers instead of transformed ones, for example by relying on an \emph{operation log}.
+% \subsection{Postponing transition to new target epoch in case of high concurrency}
+% \label{sec:postponing-transition-to-new-epoch}
 
-\subsection{Postponing transition to new target epoch in case of high concurrency}
-\label{sec:postponing-transition-to-new-epoch}
+% As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{remote rename} operations is generally expensive.
+% This process can introduce a significant computational overhead in case of concurrent \emph{rename} operations.
+% Especially, a node may receive concurrent \emph{rename} operations in the reverse order of epoch \emph{priority}.
+% In this scenario, the node would successively consider each introduced epoch as the new target one and would rename its state accordingly each time.
 
-As shown in \Cref{tab:evolution-integration-time-rename}, integrating \emph{remote rename} operations is generally expensive.
-This process can introduce a significant computational overhead in case of concurrent \emph{rename} operations.
-Especially, a node may receive concurrent \emph{rename} operations in the reverse order of epoch \emph{priority}.
-In this scenario, the node would successively consider each introduced epoch as the new target one and would rename its state accordingly each time.
+% In case of highly concurrent \emph{rename} operations, we propose that nodes postpone the renaming of their state to the target epoch until they obtain a given confidence level in the target epoch.
+% This report reduces the likelihood of nodes performing unnecessary work.
+% Several strategies can be proposed to compute the confidence level of a target epoch.
+% These strategies could rely on various metrics to output the confidence level, such as the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes that have not yet received the \emph{rename} operation.
 
-In case of highly concurrent \emph{rename} operations, we propose that nodes postpone the renaming of their state to the target epoch until they obtain a given confidence level in the target epoch.
-This deferment reduces the likelihood of nodes performing unnecessary work.
-Several strategies can be proposed to compute the confidence level of a target epoch.
-These strategies could rely on various metrics to output the confidence level, such as the time elapsed since the node received a concurrent \emph{rename} operation and the number of online nodes that have not yet received the \emph{rename} operation.
+% During the uncertainty period introduced by the postponement, nodes may receive operations from different epochs including the target epoch.
+% Nonetheless, nodes would still be able to integrate \emph{insert} and \emph{remove} operations to their state using \textsc{renameId} and \textsc{revertRenameId}, at the cost of a computational overhead for each identifier.
+% However, this overhead is negligible (hundreds of microseconds per identifier according to \Cref{fig:evolution-integration-time-remote-insert}) when compared to an unnecessary rename of the whole state (hundreds of milliseconds to seconds according to \Cref{tab:evolution-integration-time-rename}).
 
-During the uncertainty period introduced by the postponement, nodes may receive operations from different epochs including the target epoch.
-Nonetheless, nodes would still be able to integrate \emph{insert} and \emph{remove} operations to their state using \textsc{renameId} and \textsc{revertRenameId}, at the cost of a computational overhead for each identifier.
-However, this overhead is negligible (hundreds of microseconds per identifier according to \Cref{fig:evolution-integration-time-remote-insert}) compared to the cost of an unnecessary rename of the whole state (hundreds of milliseconds to seconds according to \Cref{tab:evolution-integration-time-rename}).
-
-Note that this mechanism requires \textsc{renameId} and \textsc{revertRenameId} to be inverse functions.
-Indeed, during the uncertainty period, a node would use \textsc{revertRenameId} to integrate identifiers from remote \emph{insert} operations issued at the target epoch.
-Then, the node would proceed to rename its state towards the target epoch once the corresponding confidence level has reached the given threshold.
-It follows that \textsc{renameId} must restore identifiers previously transformed using \textsc{revertRenameId} to their original value to ensure convergence.
+% Note that this mechanism requires \textsc{renameId} and \textsc{revertRenameId} to be inverse functions.
+% Indeed, during the uncertainty period, a node would use \textsc{revertRenameId} to integrate identifiers from remote \emph{insert} operations issued at the target epoch.
+% Then, the node would proceed to rename its state towards the target epoch once the corresponding confidence level has reached the given threshold.
+% It follows that \textsc{renameId} must restore identifiers previously transformed using \textsc{revertRenameId} to their original value to ensure convergence.
 
 \section{Related work}
 \label{sec:related-work}
@@ -1635,8 +1621,7 @@ However, the proposed \emph{rename} operation is not commutative with \emph{inse
 Conflicts hence occur when operations are issued concurrently to \emph{rename} ones.
 We thus described how RenamableLogootSplit adopts and uses \ac{OT} techniques to solve resulting conflicts.
 
-We then presented the results of our empirical validation of RenamableLogootSplit through experiments.
-Experiment results show that the renaming mechanism itself may temporary increase the metadata of the data structure, notably in case of concurrent \emph{rename} operations.
+Experiments show that the renaming mechanism itself may temporary increase the metadata of the data structure, notably in case of concurrent \emph{rename} operations.
 However the renaming mechanism enables nodes to garbage collect its own metadata eventually.
 Nodes are thus able to reduce the size of their data structure by several hundred times compared to previous work eventually.
 
