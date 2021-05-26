@@ -859,24 +859,19 @@ We propose an algorithm that fulfills this purpose in \Cref{sec:reverting-rename
 \subsection{Breaking tie between concurrent \emph{rename} operations}
 \label{sec:priority}
 
-To enable every nodes to select in a coordination-free manner the same target epoch, we define \emph{priority}, a strict total order relation on epochs.
-%
-% \begin{definition}[Priority relation]
-%     A strict total order $<$ on the set of epochs $E$.
-%     It enables nodes to compare any pair of epochs $e$ and $e'$.
-%     \[
-%         \forall e, e' \in E \cdot e \neq e' \implies e < e' \lor e' < e
-%     \]
-% \end{definition}
-%
-Nodes then select the maximum epoch according to this relation as the target epoch.
+To enable every nodes to select in a coordination-free manner the same target epoch, we define the \emph{priority} relation.
 
-% \begin{definition}[Target epoch]
-%     The epoch $e_{target}$ from the set of epochs $E$ towards which nodes should progress.
-%     \[
-%         e = e_{target} \implies e \in E \land \nexists e' \in E \cdot e < e'
-%     \]
-% \end{definition}
+\begin{definition}[Priority relation]
+    The \emph{priority} relation is a strict total order on the set of epochs.
+    It enables nodes to compare any pair of epochs.
+\end{definition}
+
+Using the \emph{priority} relation, we define the target epoch as follows:
+
+\begin{definition}[Target epoch]
+    The epoch from the set of epochs towards which nodes should progress.
+    Nodes select the maximum epoch according to the \emph{priority} relation as the target epoch.
+\end{definition}
 
 To define the \emph{priority} relation, we may actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
@@ -1123,16 +1118,21 @@ In this section, we present a mechanism enabling nodes to identify obsolete epoc
 To propose such a mechanism, we rely on the notion of \emph{causal stability of operations} \cite{10.1007/978-3-662-43352-2_11}.
 An operation is causally stable once it was delivered to every nodes.
 In the context of a \emph{rename} operation, it implies that every node progressed to the epoch introduced by this operation or to a greater one according to the \emph{priority} relation.
-Using this knowledge, nodes determine the \emph{potential current epochs}, the set of epochs on which nodes may currently be.
+Using this knowledge, nodes determine the \emph{potential current epochs}:
 
-% \begin{definition}[Potential current epochs]
-%     \[
-%         E' = \{ e \in E | e = e_{max\_cs} \lor e_{max\_cs} < e \}
-%     \]
-% \end{definition}
+\begin{definition}[Potential current epochs]
+    The set of epochs on which nodes may currently be and from which they could issue operations, according to a node's own knowledge.
+    It is a subset of the set of epochs, made of the maximum epoch introduced by a causally stable \emph{rename} operation and of every epoch that is greater according to the \emph{priority} relation.
+\end{definition}
 
 To handle next operations, nodes have to maintain the paths between every epoch of \emph{potential current epochs}.
-We denote as \emph{required epochs} the set of epochs that form the paths between every \emph{potential current epochs} and their \ac{LCA}.
+We denote as \emph{required epochs} the corresponding set of epochs:
+
+\begin{definition}[Required epochs]
+    The set of epochs that a node has to maintain to handle potential next operations.
+    It is the set of epochs that form the paths between every \emph{potential current epochs} and their \ac{LCA}.
+\end{definition}
+
 It follows that any epoch that does not belong to the set of \emph{required epochs} can be garbage collected by nodes.
 \Cref{fig:GC-epochs} illustrates a use case of the proposed garbage collection mechanism.
 
@@ -1226,6 +1226,10 @@ It follows that any epoch that does not belong to the set of \emph{required epoc
 \end{figure}
 
 In \Cref{fig:GC-execution}, we represent an execution in which two nodes A and B respectively issue several \emph{rename} operations.
+In \Cref{fig:GC-epoch-trees}, we represent nodes' respective \emph{epoch trees}.
+Epochs introduced by causally stable \emph{rename} operations are displayed using double circles.
+The set of \emph{potential current epochs} is shown as a dashed black rectangle while the set of \emph{required epochs} is represented as a dotted green rectangle.
+
 Node A first generates a \emph{rename} operation to \epoch{A1} and later a \emph{rename} operation to \epoch{A8}.
 It thereafter receives from node B a \emph{rename} operation that introduces \epoch{B2}.
 Since \epoch{B2} is greater than its current epoch (\epoch{e0}\epoch{A1}\epoch{A8} < \epoch{e0}\epoch{B2}), node A selects it as its new current epoch and proceeds to rename its state accordingly.
@@ -1235,10 +1239,6 @@ Concurrently, node B issues the \emph{rename} operation to \epoch{B2}.
 It then receives from node A the \emph{rename} operation to \epoch{A1}.
 However, node B keeps \epoch{B2} as its current epoch (since \epoch{e0}\epoch{A1} < \epoch{e0}\epoch{B2}).
 Afterwards, node B issues another \emph{rename} operation to \epoch{B7}.
-
-In \Cref{fig:GC-epoch-trees}, we represent nodes' respective \emph{epoch trees}.
-Epochs introduced by causally stable \emph{rename} operations are displayed using double circles.
-The set of \emph{potential current epochs} is shown as a dashed black rectangle while the set of \emph{required epochs} is represented as a dotted green rectangle.
 
 Upon the delivery of the \emph{rename} operation introducing epoch \epoch{B2} to node A, this operation becomes causally stable.
 From this point, node A knows that every node progressed to this epoch or a greater one according to the \emph{priority} relation.
