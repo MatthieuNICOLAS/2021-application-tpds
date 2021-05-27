@@ -1082,11 +1082,12 @@ To this end, it applies \textsc{revertRenameId} to every identifiers of its curr
 For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
 To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
 
-For other identifiers such as \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, \textsc{revertRenameId} removes the prefix (\id{i}{A1}{1}) to isolate the tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+Identifiers of the form \id{pos}{nId~nSeq}{offset}$\trm{tail}$ (\eg \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) correspond to identifiers either inserted concurrently to the \emph{rename} operation or causally after.
+To process these identifiers, \textsc{revertRenameId} first removes the prefix (\id{i}{A1}{1}) to isolate the tail (\id{i}{B0}{0}\id{m}{B1}{0}).
+By doing so, \textsc{revertRenameId} effectively undoes the transformation applied to the identifier by \textsc{renIdFromPredId} if it was inserted concurrently.
 The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
-\mnnote{TODO: Indiquer que retirer le préfixe permet d'inverser la transformation appliquée à l'identifiant par $\trm{renIdFromPredId}$ dans le cas où celui-ci a été inséré en concurrence du renommage}
 
 Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
 As no corresponding identifier exists yet at the \emph{parent} epoch, \textsc{revertRenameId} can return any identifier as long as it preserves the intended order.
