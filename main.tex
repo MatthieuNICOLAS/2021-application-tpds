@@ -262,7 +262,7 @@ However, the particularity of \acp{CRDT} is that they are designed to natively s
 \acp{CRDT} embed a conflict resolution mechanism directly in their specification.
 It enables them to respect the \ac{SEC} model \cite{shapiro_2011_crdt}.
 This consistency model defines that replicas reach equivalent states as soon as they observe the same set of updates, without any further communications required and in spite of possible different reception orders.
-This property makes \acp{CRDT} particularly suitable for the design of highly-available large-scale distributed systems.
+This property makes \acp{CRDT} particularly suitable for the design of highly available large-scale distributed systems.
 
 \acp{CRDT} have been widely adopted by literature and industry since their conceptualisation.
 \acp{CRDT} corresponding to more powerful data types were designed and made available as libraries to developers \cite{Nicolaescu2016YATA,yjsimplem, jsoncrdt2017, automerge};
@@ -816,7 +816,6 @@ This operation reassigns new identifiers to every element based on the id of the
 This operation also introduces a new epoch: \epoch{B2}.
 Since node A's \emph{rename} operation was not yet delivered to node B at that moment, both \emph{rename} operations are concurrent.
 
-% - Expliquer l'arbre des epochs
 As concurrent epochs are generated, epochs now form the \emph{epoch tree}.
 We represent in \Cref{fig:epoch-tree} the \emph{epoch tree} that nodes obtain once they eventually synchronise.
 Epochs are displayed as nodes of the tree and the \emph{parent-child} relation between them displayed as black arrows.
@@ -1611,6 +1610,9 @@ This would also enable to reduce the frequency of \emph{rename} operations, decr
 
 \section{Conclusions and future work}
 \label{sec:conclusion}
+
+\acp{CRDT} enable the design of highly available large-scale distributed systems while ensuring the \ac{SEC} model.
+Still, some of these data structures, notably Sequence \acp{CRDT}, suffer from a continuous growth of their metadata.
 
 In this paper, we introduced a novel Sequence \ac{CRDT} belonging to the variable-size identifiers approach: RenamableLogootSplit.
 This new data structure embeds a renaming mechanism in its specification.
