@@ -292,14 +292,15 @@ Therefore, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66
 In this paper, we present experimental results that assess that metadata overhead in RenamableLogootSplit is significantly lower than other state-of-the-art Sequence \acp{CRDT}.
 
 This paper is organised as follows:
-Section \ref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their ever-growing overhead.
-Section \ref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
-Section \ref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
-Then Section \ref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
-Section \ref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit.
-Section \ref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations offer.
-Section \ref{sec:related-work} compares our approach to related work.
-Finally Section \ref{sec:conclusion} summarises our work and introduces future work.
+\Cref{sec:background} introduces in more details Sequence \acp{CRDT} and the elements leading to their ever-growing overhead.
+\Cref{sec:overview} provides an overview of the renaming mechanism and of the properties it must respect.
+\Cref{sec:centralised-rls} presents the inner working of the renaming mechanism and how it interacts with concurrent \emph{insert} and \emph{remove} updates.
+Then \Cref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
+\Cref{sec:gc-former-states} explains how to garbage collect metadata introduced by the renaming mechanism itself.
+\Cref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit.
+\Cref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations offer.
+\Cref{sec:related-work} compares our approach to related work.
+Finally \Cref{sec:conclusion} summarises our work and introduces future work.
 
 % needed in second column of first page if using \IEEEpubid
 %\IEEEpubidadjcol
@@ -1108,6 +1109,8 @@ Since the \emph{priority} relation is defined using the lexicographical order on
 Nodes thus avoid going back and forth between different epochs and undoing then redoing corresponding \emph{rename} operations.
 
 \section{Garbage collection of \emph{former states}}
+
+\label{sec:gc-former-states}
 
 Nodes store epochs and corresponding \emph{former states} to transform identifiers through different epochs.
 But as the system progresses, some epochs and associated metadata become unnecessary since no more operations are issued from these epochs.
