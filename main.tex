@@ -667,6 +667,10 @@ By reassigning this id to the concurrently added element, node A is able to inse
 \begin{myalgorithm}[!ht]
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
+            % \State \Comment{$id$ is the id to rename}
+            % \State \Comment{$renamedIds$ is the list of ids of the \emph{former state}}
+            % \State \Comment{$nId$ is $node~id$ of the node that issued the \emph{rename} op}
+            % \State \Comment{$nSeq$ is $node~seq$ of the node that issued the \emph{rename} op}
             \State length $\gets$ renamedIds.length
             \State firstId $\gets$ renamedIds[0]
             \State lastId $\gets$ renamedIds[length - 1]
@@ -949,6 +953,7 @@ Therefore every node selects \epoch{B7} as the target epoch in a coordination-fr
 
 Other strategies could be proposed to define the \emph{priority} relation.
 For example, \emph{priority} could rely on metrics embedded in \emph{rename} operations representing the accumulated work on the document.
+It would enable to favour the branch from the \emph{epoch tree} with the more and most active collaborators to minimise the overall amount of computations performed by nodes of the system.
 
 \subsection{Reverting \emph{rename} operations}
 
@@ -969,7 +974,7 @@ To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoc
             \State length $\gets$ renamedIds.length
             \State firstId $\gets$ renamedIds[0]
             \State lastId $\gets$ renamedIds[length - 1]
-            \State pos $\gets$ getPosition(firstId)
+            \State pos $\gets$ position(firstId)
             \\
             \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
             \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
@@ -1085,7 +1090,7 @@ To retrieve the original identifiers, \textsc{revertRenameId} simply uses their 
 Identifiers of the form \id{pos}{nId~nSeq}{offset}$\trm{tail}$ (\eg \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) correspond to identifiers either inserted concurrently to the \emph{rename} operation or causally after.
 To process these identifiers, \textsc{revertRenameId} first removes the prefix (\id{i}{A1}{1}) to isolate the tail (\id{i}{B0}{0}\id{m}{B1}{0}).
 By doing so, \textsc{revertRenameId} effectively undoes the transformation applied to the identifier by \textsc{renIdFromPredId} if it was inserted concurrently.
-The algorithm then compare the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
+The algorithm then compares the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
 In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
 The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
 
@@ -1615,7 +1620,7 @@ This would also enable to reduce the frequency of \emph{rename} operations, decr
 \section{Conclusions and future work}
 \label{sec:conclusion}
 
-\acp{CRDT} enable the design of highly available large-scale distributed systems while ensuring the \ac{SEC} model.
+\acfp{CRDT} enable the design of highly available large-scale distributed systems while ensuring the \acf{SEC} model.
 Still, some of these data structures, notably Sequence \acp{CRDT}, suffer from a continuous growth of their metadata.
 
 In this paper, we introduced a novel Sequence \ac{CRDT} belonging to the variable-size identifiers approach: RenamableLogootSplit.
