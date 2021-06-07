@@ -665,6 +665,7 @@ Finally, node A prepends it to the given id to generate the renamed id: \id{i}{A
 By reassigning this id to the concurrently added element, node A is able to insert it in its state while preserving the intended order.
 
 \begin{myalgorithm}[!ht]
+    \footnotesize
     \begin{algorithmic}
         \Function {renameId}{id, renamedIds, nId, nSeq}
             % \State \Comment{$id$ is the id to rename}
@@ -964,6 +965,7 @@ Described in \Cref{alg:revertRenameId}, this function enables nodes to revert a 
 To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoch to equivalent ones in its \emph{parent} epoch.
 
 \begin{myalgorithm}[!ht]
+    \footnotesize
     \begin{algorithmic}
         \Function{revertRenameId}{id, renamedIds, nId, nSeq}
             % \Statex \LeftComment{$id}$ is the identifier to reverse rename}
@@ -1657,6 +1659,7 @@ The use of these strategies would then reduce the overall computations of the sy
 \label[appendix]{app:rename-id}
 
 \begin{myalgorithm}[!ht]
+    \footnotesize
     \begin{algorithmic}
         \Function{renIdLessThanFirstId}{id, newFirstId}
         \If{id < newFirstId}
@@ -1689,6 +1692,7 @@ The use of these strategies would then reduce the overall computations of the sy
 \label[appendix]{app:revert-rename-id}
 
 \begin{myalgorithm}[!ht]
+    \footnotesize
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
             \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
