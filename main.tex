@@ -1343,7 +1343,7 @@ We present the obtained results in \Cref{fig:evolution-document-size}.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.8\columnwidth]{img/snapshot-sizes-alt-legende-v2.png}
+    \includegraphics[width=\columnwidth]{img/snapshot-sizes-alt-legende-v2.png}
     \caption{Evolution of the size of the document}
     \label{fig:evolution-document-size}
 \end{figure}
@@ -1627,24 +1627,14 @@ In this paper, we introduced a novel Sequence \ac{CRDT} belonging to the variabl
 This new data structure embeds a renaming mechanism in its specification.
 This mechanism enables nodes to reassign shorter identifiers to elements and to group them into one block to minimise metadata.
 The renaming mechanism takes the form of \emph{rename} operations, system operations that are triggered automatically by nodes when deemed necessary.
-However, the proposed \emph{rename} operation is not commutative with \emph{insert} and \emph{remove} operations, nor with itself.
-Conflicts hence occur when operations are issued concurrently to \emph{rename} ones.
-We thus described how RenamableLogootSplit adopts and uses \ac{OT} techniques to solve resulting conflicts.
+Since the proposed \emph{rename} operation is not commutative with \emph{insert} and \emph{remove} operations, we use \ac{OT} techniques to solve resulting conflicts.
 
-Experiments show that the renaming mechanism itself may temporary increase the metadata of the data structure, notably in case of concurrent \emph{rename} operations.
-However the renaming mechanism enables nodes to garbage collect its own metadata eventually.
-Nodes are thus able to reduce the size of their data structure by several hundred times compared to previous work eventually.
+Experiments show that the renaming mechanism enables nodes to reduce the size of their data structure by several hundred times compared to previous work.
+RenamableLogootSplit achieves this result even in the case where several concurrent \emph{rename} operations are issued, since the introduced overhead is but temporary and is eventually removed.
 
-As future work, we will now focus on the design of strategies to manage the generation of \emph{rename} operations.
-These strategies have to meet two different goals.
-First, they have to minimise the impact of \emph{rename} operations on the user experience.
-User behaviour studies, inspired by \cite{ignat:hal-01088815,ignat:hal-01238831}, could be led in the context of real-time collaborative writing to set an acceptable upper-bound to their integration times.
-Strategies should then issue \emph{rename} operations accordingly to keep integration times below the defined threshold.
-Secondly, strategies have to minimise the likelihood of issuing concurrent \emph{rename} operations without relying on consensus protocols.
-Strategies should then use nodes' local knowledge to determine whether a node should issue a \emph{rename} operation or trust another node to do so.
-
-Additionally, we would like to present a formal proof of the correctness of RenamableLogootSplit's algorithms.
-Another research trail to explore is to study data types to determine which ones could benefit from a combination of \ac{OT} techniques and \ac{CRDT} ones for the design or improvement of their replicated counterpart.
+In future work, we plan to propose other strategies than the lexicographical one to define \emph{priority}, the strict total order relation on the set of epochs.
+These new strategies could for example favour the branch of the epoch tree with the most nodes and work.
+The use of these strategies would then reduce the overall computations of the system.
 
 % if have a single appendix:
 %\appendix[Proof of the Zonklar Equations]
@@ -1727,9 +1717,9 @@ Another research trail to explore is to study data types to determine which ones
     \caption{Remaining functions to revert an identifier renaming}
 \end{myalgorithm}
 
-\section*{Acknowledgments}
+% \section*{Acknowledgments}
 
-The authors would like to thank...
+% The authors would like to thank...
 
 
 % Can use something like this to put references on a page
@@ -1764,22 +1754,22 @@ The authors would like to thank...
 %\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
 % or if you just want to reserve a space for a photo:
 
-\begin{IEEEbiography}{Michael Shell}
-Biography text here.
-\end{IEEEbiography}
+% \begin{IEEEbiography}{Michael Shell}
+% Biography text here.
+% \end{IEEEbiography}
 
 % if you will not have a photo at all:
-\begin{IEEEbiographynophoto}{John Doe}
-Biography text here.
-\end{IEEEbiographynophoto}
+% \begin{IEEEbiographynophoto}{John Doe}
+% Biography text here.
+% \end{IEEEbiographynophoto}
 
 % insert where needed to balance the two columns on the last page with
 % biographies
 %\newpage
 
-\begin{IEEEbiographynophoto}{Jane Doe}
-Biography text here.
-\end{IEEEbiographynophoto}
+% \begin{IEEEbiographynophoto}{Jane Doe}
+% Biography text here.
+% \end{IEEEbiographynophoto}
 
 % You can push biographies down or up by placing
 % a \vfill before or after them. The appropriate
