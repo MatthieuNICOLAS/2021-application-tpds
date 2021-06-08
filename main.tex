@@ -698,7 +698,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
             \State \Return concat(newPredId, id)
         \EndFunction
     \end{algorithmic}
-    \caption{Rename concurrently generated identifier}
+    \caption{Main functions to rename an identifier}
     \label{alg:renameId}
 \end{myalgorithm}
 
@@ -1014,7 +1014,7 @@ To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoc
             \EndIf
         \EndFunction
     \end{algorithmic}
-    \caption{Revert rename identifier}
+    \caption{Main functions to revert an identifier renaming}
     \label{alg:revertRenameId}
 \end{myalgorithm}
 
@@ -1654,9 +1654,12 @@ The use of these strategies would then reduce the overall computations of the sy
 
 
 \appendices
-\section{Algorithms for centralised settings}
+\section{Remaining functions of \textsc{renameId}}
 
 \label[appendix]{app:rename-id}
+
+In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \textsc{renameId}.
+\textsc{renIdLessThanFirstId} (resp. \textsc{renIdGreaterThanLastId}) enables to rename identifiers with $\trm{id}$ such as $\trm{id} < \trm{firstId}$ (resp. $\trm{lastId} < \trm{id}$).
 
 \begin{myalgorithm}[!ht]
     \footnotesize
@@ -1682,12 +1685,17 @@ The use of these strategies would then reduce the overall computations of the sy
             \EndIf
         \EndFunction
     \end{algorithmic}
-    \caption{Remaining algorithms to rename an identifier}
+    \caption{Remaining functions to rename an identifier}
+    \label{alg:appendix-rename-id}
 \end{myalgorithm}
+
+The main insight of these functions is that it is not necessary to modify identifiers out of the range of renamed identifiers and of resulting identifiers ($[\trm{min}(\trm{firstId}, \trm{newFirstId}), \trm{max}(\trm{lastId}, \trm{newLastId})]$)
+
+In other cases, as \textsc{renIdFromPredId}, these functions prepend a suitable prefix to the given $\trm{id}$ to preserve the intended order (the predecessor of $\trm{newFirstId}$ for \textsc{renIdLessThanFirstId}, $\trm{newLastId}$ for \textsc{renIdGreaterThanLastId}).
 
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
-\section{Algorithms for distributed settings}
+\section{Remaining functions of \textsc{revertRenameId}}
 
 \label[appendix]{app:revert-rename-id}
 
@@ -1701,6 +1709,7 @@ The use of these strategies would then reduce the overall computations of the sy
                 \If{tail < firstId}
                     \State \Return tail
                 \Else
+                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                     \State offset $\gets$ getLastOffset(firstId)
                     \State predFirstId $\gets$ createIdFromBase(firstId, offset)
                     \State \Return concat(predFirstId, MAX\_TUPLE, tail)
@@ -1712,6 +1721,7 @@ The use of these strategies would then reduce the overall computations of the sy
         \\
         \Function{revRenIdGreaterThanNewLastId}{id, lastId}
             \If{id < lastId}
+                \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                 \State \Return concat(lastId, MIN\_TUPLE, id)
             \Else
                 \State \Return id
