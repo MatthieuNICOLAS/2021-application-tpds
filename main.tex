@@ -1688,7 +1688,7 @@ In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \
     \label{alg:appendix-rename-id}
 \end{myalgorithm}
 
-The main insight of these functions is that it is not necessary to modify identifiers out of the range of renamed identifiers and of resulting identifiers ($[\trm{min}(\trm{firstId}, \trm{newFirstId}), \trm{max}(\trm{lastId}, \trm{newLastId})]$)
+The main insight of these functions is that it is not necessary to modify identifiers out of the range of renamed identifiers and of resulting identifiers ($[\trm{min}(\trm{firstId}, \trm{predNewFirstId}), \trm{max}(\trm{lastId}, \trm{succNewLastId})]$)
 
 In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitable prefix to the given $\trm{id}$ to preserve the intended order (the predecessor of $\trm{newFirstId}$ for \textsc{renIdLessThanFirstId}, $\trm{newLastId}$ for \textsc{renIdGreaterThanLastId}).
 
@@ -1698,12 +1698,15 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
 
 \label[appendix]{app:revert-rename-id}
 
+\Cref{alg:appendix-revert-rename-id} features the remaining functions composing \textsc{revertRenameId}.
+\textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) enables to revert the effects of a previously applied \emph{rename} operation on identifiers with $\trm{id}$ such as $\trm{id} < \trm{newFirstId}$ (resp. $\trm{newLastId}$ < $\trm{id}$).
+
 \begin{myalgorithm}[!ht]
     \footnotesize
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
             \State predNewFirstId $\gets$ createIdFromBase(newFirstId, -1)
-            \If{predNewFirstId < id}
+            \If{isPrefix(predNewFirstId, id)}
                 \State tail $\gets$ getTail(id, 1)
                 \If{tail < firstId}
                     \State \Return tail
@@ -1739,7 +1742,15 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
         \EndFunction
     \end{algorithmic}
     \caption{Remaining functions to revert an identifier renaming}
+    \label{alg:appendix-revert-rename-id}
 \end{myalgorithm}
+
+Like \textsc{renIdLessThanFirstId} and \textsc{renIdGreaterThanFirstId}, these functions does not modify identifiers out of the range of renamed identifiers and of resulting identifiers.
+
+To process other cases, the functions study the pattern of the given identifier.
+If \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) infers from the value of the identifier that it may come from a concurrent \emph{insert} operation to the \emph{rename} one, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) simply removes the prefix added by \textsc{renIdLessThanFirstId} (resp. \textsc{renIdGreaterThanLastId}).
+
+If the value of an identifier instead indicates that it was inserted causally after the \emph{rename} operation, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) generates a corresponding identifier at the parent epoch preserving the intended order using $\trm{predFirstId}$ and $\trm{MAX\_TUPLE}$ (resp. $\trm{lastId}$ and $\trm{MIN\_TUPLE}$).
 
 % \section*{Acknowledgments}
 
