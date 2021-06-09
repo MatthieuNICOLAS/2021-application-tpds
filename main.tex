@@ -978,7 +978,6 @@ To this end, \textsc{revertRenameId} maps identifiers from the \emph{child} epoc
             \State lastId $\gets$ renamedIds[length - 1]
             \State pos $\gets$ position(firstId)
             \\
-            \State predOfNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
             \State newFirstId $\gets$ \new~Id(pos, nId, nSeq, 0)
             \State newLastId $\gets$ \new~Id(pos, nId, nSeq, length - 1)
             \\
@@ -1691,7 +1690,7 @@ In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \
 
 The main insight of these functions is that it is not necessary to modify identifiers out of the range of renamed identifiers and of resulting identifiers ($[\trm{min}(\trm{firstId}, \trm{newFirstId}), \trm{max}(\trm{lastId}, \trm{newLastId})]$)
 
-In other cases, as \textsc{renIdFromPredId}, these functions prepend a suitable prefix to the given $\trm{id}$ to preserve the intended order (the predecessor of $\trm{newFirstId}$ for \textsc{renIdLessThanFirstId}, $\trm{newLastId}$ for \textsc{renIdGreaterThanLastId}).
+In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitable prefix to the given $\trm{id}$ to preserve the intended order (the predecessor of $\trm{newFirstId}$ for \textsc{renIdLessThanFirstId}, $\trm{newLastId}$ for \textsc{renIdGreaterThanLastId}).
 
 % you can choose not to have a title for an appendix
 % if you want by leaving the argument blank
@@ -1723,6 +1722,17 @@ In other cases, as \textsc{renIdFromPredId}, these functions prepend a suitable 
             \If{id < lastId}
                 \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                 \State \Return concat(lastId, MIN\_TUPLE, id)
+            \ElsIf{isPrefix(newLastId, id)}
+                \State tail $\gets$ getTail(id, 1)
+                \If{tail < lastId}
+                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+                    \State \Return concat(lastId, MIN\_TUPLE, tail)
+                \ElsIf{tail < newLastId}
+                    \State \Return tail
+                \Else
+                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+                    \State \Return id
+                \EndIf
             \Else
                 \State \Return id
             \EndIf
