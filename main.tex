@@ -204,8 +204,8 @@ To this end, \acp{CRDT} embed in their specification conflict resolution mechani
 These mechanisms usually rely on identifiers attached to elements of the data structure to resolve conflicts in a deterministic and coordination-free manner.
 Identifiers have to comply with several constraints, such as being unique or belonging to a dense total order.
 These constraints may hinder the identifier size from being bounded.
-As a result, identifiers tend to grow as the system progresses, which deepens the overhead of \acp{CRDT} over time and leads to performance issues.
-To address this issue in the context of real-time collaborative editing, we propose a novel Sequence \ac{CRDT} which embeds a renaming mechanism.
+Identifiers hence tend to grow as the system progresses, which deepens the overhead of \acp{CRDT} over time and leads to performance issues.
+To address this issue, we propose a novel Sequence \ac{CRDT} which embeds a renaming mechanism.
 It enables nodes to reassign shorter identifiers to elements in an uncoordinated manner.
 Experimental results demonstrate that this mechanism decreases the overhead of the replicated data structure and eventually minimises it.
 \end{abstract}
