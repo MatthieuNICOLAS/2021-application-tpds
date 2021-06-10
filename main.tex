@@ -405,7 +405,7 @@ This also increases the bandwidth consumption as nodes have to broadcast identif
 
 Additionally, during the lifetime of the replicated sequence, the number of blocks increases.
 Indeed, several constraints on identifier generation prevent nodes from adding new elements to existing blocks.
-For example, only the node that generated the block can append or prepend elements to it.
+For example, only the node that generated the block can append elements to it.
 These limitations cause the generation of new blocks.
 The sequence ends up fragmented into many blocks of only few characters each.
 However no mechanism to merge blocks a posteriori is provided.
@@ -755,6 +755,11 @@ Upon the delivery of node A's \emph{rename} operation, applying \textsc{renameId
 
 \Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
+
+The algorithm we present here enables nodes to rename their state identifier by identifier.
+A possible extension is to design \textsc{renameBlock}, an improved version that renames the state block by block.
+\textsc{renameBlock} would reduce the integration time of \emph{rename} operations, since its time complexity would no longer depends from the number of identifiers (\ie the number of elements) but from the number of blocks.
+Additionally, its execution would reduce the integration time of future \emph{rename} operations since the renaming mechanism groups elements into fewer blocks.
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
