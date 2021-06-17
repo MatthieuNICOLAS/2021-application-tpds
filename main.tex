@@ -850,7 +850,7 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
 At the end of the scenario described in \Cref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
 In order to converge, every node should eventually reach the same epoch.
 However, the function \textsc{renameId} described in \Cref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
-Nodes A (resp. B) is then unable to progress towards the epoch of node B (resp. A).
+Node A (resp. B) is then unable to progress towards the epoch of node B (resp. A).
 It is therefore necessary to extend our renaming mechanism to break this deadlock.
 
 First, nodes have to agree on a common epoch from the \emph{epoch tree} as the target epoch.
@@ -1088,7 +1088,7 @@ It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{
 To this end, it applies \textsc{revertRenameId} to every identifiers of its current state.
 
 \textsc{revertRenameId} determines which strategy to apply to revert the given identifier using patterns.
-For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new values of the identifiers which compose the \emph{former state}.
+For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) correspond to the new values of the identifiers which compose the \emph{former state}.
 To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
 
 Identifiers of the form \id{pos}{nId~nSeq}{offset}$\trm{tail}$ (\eg \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) correspond to identifiers either inserted concurrently to the \emph{rename} operation or causally after.
@@ -1792,7 +1792,7 @@ If the value of an identifier instead indicates that it was inserted causally af
 %\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
 % or if you just want to reserve a space for a photo:
 
-\begin{IEEEbiography}{Matthieu Nicolas}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{matthieu.jpg}}]{Matthieu Nicolas}
 received a diplôme d'ingénieur from TELECOM Nancy in 2014.
 He is currently a PhD student at the Université de Lorraine.
 His research interests include \acfp{CRDT} and collaborative P2P systems.
