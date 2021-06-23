@@ -324,7 +324,7 @@ As explained previously, it uses identifiers from a dense total order to positio
 
 To this end, LogootSplit assigns identifiers made of a list of tuples to elements.
 These tuples have four components:
-\begin{enumerate*}
+\begin{enumerate*}[label=(\roman*)]
     \item a \emph{position}, which embodies the intended position of the element
     \item a \emph{node identifier},
     \item a \emph{node sequence number} and
@@ -378,7 +378,7 @@ As stated previously, the size of identifiers from a dense total order is variab
 When nodes insert new elements between two others with the same \emph{position} value, LogootSplit has no other option but to increase the size of the resulting identifiers.
 \Cref{fig:example-split} illustrates such cases.
 In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit can not generate a proper identifier of the same size.
-To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor : \id{i}{B0}{0}\id{f}{A0}{0}.
+To comply with the intended order, LogootSplit generates a new identifier by appending a new tuple to the identifier of the predecessor: \id{i}{B0}{0}\id{f}{A0}{0}.
 
 \begin{figure}[!ht]
     \centering
@@ -1403,6 +1403,7 @@ While both are initially equivalent, integration times on RenamableLogootSplit d
 This improvement is explained by the fact that \emph{rename} operations optimise the internal representation of the sequence.
 
 Additionally, in the case of remote operations, we measured specific integration times for RenamableLogootSplit: integration times of remote operations from previous epochs and from concurrent epochs, respectively displayed as white and red boxplots in \Cref{fig:evolution-integration-time-remote-insert}.
+
 Operations from previous epochs are operations generated concurrently to the \emph{rename} operation but applied after it.
 Since the operation has to be transformed beforehand using \textsc{renameId}, we observe a computational overhead compared to other operations.
 But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
@@ -1410,7 +1411,7 @@ But this overhead is actually compensated by the optimisation of the internal re
 Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \textsc{revertRenameId}.
 Because of this overhead, RenamableLogootSplit's performances for these operations are comparable to LogootSplit ones.
 
-To summarise, transformation functions introduce an overhead with regard to integration times of concurrent operations to \emph{rename} ones.
+To summarise, transformation functions introduce an overhead to integration times of concurrent operations to \emph{rename} ones.
 Despite this overhead, RenamableLogootSplit achieves better performances than LogootSplit as long as the distance between the epoch of generation of the operation and the current epoch of the node remains limited.
 As the distance between both epochs increases, it leads to cases presenting worse performances than LogootSplit ones since the overhead is multiplied.
 Nonetheless, the renaming mechanism reduces the integration times of the majority of operations, \ie the operations issued between two rounds of \emph{rename} operations.
@@ -1799,8 +1800,16 @@ If the value of an identifier instead indicates that it was inserted causally af
     His research interests include \acfp{CRDT} and distributed collaborative systems.
 \end{IEEEbiography}
 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{gerald.png}}]{Gérald Oster}
+    is an Associate Professor at LORIA, Inria Nancy - Grand Est, University of Lorraine.
+    His research work explores distributed collaborative systems with a focus on optimistic content replication mechanisms and their applicability.
+    He is one of the pioneers of the CRDT approach as he participated in the design of the WOOT algorithm that initiated researches on these distinctive data structures.
+    He is currently investigating the limitations and the applicability in diverse domains of these novel replicated data structures.
+\end{IEEEbiography}
+
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{olivier.jpg}}]{Olivier Perrin}
-    is full professor at University of Lorraine, and works at LORIA in the COAST project. His research interests always been related to data and service management, and include various topics about collaborative systems, services composition, and distributed systems.
+    is full professor at University of Lorraine, and works at LORIA in the Coast project.
+    His research interests always been related to data and service management, and include various topics about collaborative systems, services composition, and distributed systems.
     He has published several articles in international journals and conferences, and he was involved in many international and European projects.
     His current work deals with trust and privacy in distributed collaborative applications.
 \end{IEEEbiography}
