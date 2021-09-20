@@ -1655,6 +1655,65 @@ The use of these strategies would then reduce the overall computations of the sy
 % starts a section numbered zero.)
 %
 
+% \section*{Acknowledgments}
+
+% The authors would like to thank...
+
+
+% Can use something like this to put references on a page
+% by themselves when using endfloat and the captionsoff option.
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+
+
+% trigger a \newpage just before the given reference
+% number - used to balance the columns on the last page
+% adjust value as needed - may need to be readjusted if
+% the document is modified later
+%\IEEEtriggeratref{8}
+% The "triggered" command can be changed if desired:
+%\IEEEtriggercmd{\enlargethispage{-5in}}
+
+% references section
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+% biography section
+%
+% If you have an EPS/PDF photo (graphicx package needed) extra braces are
+% needed around the contents of the optional argument to biography to prevent
+% the LaTeX parser from getting confused when it sees the complicated
+% \includegraphics command within an optional argument. (You could create
+% your own custom macro containing the \includegraphics command to make things
+% simpler here.)
+%\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
+% or if you just want to reserve a space for a photo:
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{matthieu.jpg}}]{Matthieu Nicolas}
+    received a diplôme d'ingénieur from TELECOM Nancy in 2014.
+    He worked several years as a R\&D software engineer in the Inria Coast project-team.
+    He is now a PhD student at the University of Lorraine.
+    His research interests include \acfp{CRDT} and distributed collaborative systems.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{gerald.png}}]{Gérald Oster}
+    is an Associate Professor at LORIA, Inria Nancy - Grand Est, University of Lorraine.
+    His research work explores distributed collaborative systems with a focus on optimistic content replication mechanisms and their applicability.
+    He is one of the pioneers of the CRDT approach as he participated in the design of the WOOT algorithm that initiated researches on these distinctive data structures.
+    He is currently investigating the applicability in diverse domains of these novel replicated data structures.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{olivier.jpg}}]{Olivier Perrin}
+    is full professor at University of Lorraine, and works at LORIA in the Coast project.
+    His research interests always been related to data and service management, and include various topics about collaborative systems, services composition, and distributed systems.
+    He has published several articles in international journals and conferences, and he was involved in many international and European projects.
+    His current work deals with trust and privacy in distributed collaborative applications.
+\end{IEEEbiography}
+
+\vfill
 
 \appendices
 \section{Remaining functions of \textsc{renameId}}
@@ -1755,64 +1814,6 @@ To process other cases, the functions study the pattern of the given identifier.
 If \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) infers from the value of the identifier that it may come from a concurrent \emph{insert} operation to the \emph{rename} one, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) simply removes the prefix added by \textsc{renIdLessThanFirstId} (resp. \textsc{renIdGreaterThanLastId}).
 
 If the value of an identifier instead indicates that it was inserted causally after the \emph{rename} operation, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) generates a corresponding identifier at the parent epoch preserving the intended order using $\trm{predFirstId}$ and $\trm{MAX\_TUPLE}$ (resp. $\trm{lastId}$ and $\trm{MIN\_TUPLE}$).
-
-% \section*{Acknowledgments}
-
-% The authors would like to thank...
-
-
-% Can use something like this to put references on a page
-% by themselves when using endfloat and the captionsoff option.
-\ifCLASSOPTIONcaptionsoff
-  \newpage
-\fi
-
-
-
-% trigger a \newpage just before the given reference
-% number - used to balance the columns on the last page
-% adjust value as needed - may need to be readjusted if
-% the document is modified later
-%\IEEEtriggeratref{8}
-% The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
-
-% references section
-
-\bibliographystyle{IEEEtran}
-\bibliography{ref}
-
-% biography section
-%
-% If you have an EPS/PDF photo (graphicx package needed) extra braces are
-% needed around the contents of the optional argument to biography to prevent
-% the LaTeX parser from getting confused when it sees the complicated
-% \includegraphics command within an optional argument. (You could create
-% your own custom macro containing the \includegraphics command to make things
-% simpler here.)
-%\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
-% or if you just want to reserve a space for a photo:
-
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{matthieu.jpg}}]{Matthieu Nicolas}
-    received a diplôme d'ingénieur from TELECOM Nancy in 2014.
-    He worked several years as a R\&D software engineer in the Inria Coast project-team.
-    He is now a PhD student at the University of Lorraine.
-    His research interests include \acfp{CRDT} and distributed collaborative systems.
-\end{IEEEbiography}
-
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{gerald.png}}]{Gérald Oster}
-    is an Associate Professor at LORIA, Inria Nancy - Grand Est, University of Lorraine.
-    His research work explores distributed collaborative systems with a focus on optimistic content replication mechanisms and their applicability.
-    He is one of the pioneers of the CRDT approach as he participated in the design of the WOOT algorithm that initiated researches on these distinctive data structures.
-    He is currently investigating the applicability in diverse domains of these novel replicated data structures.
-\end{IEEEbiography}
-
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{olivier.jpg}}]{Olivier Perrin}
-    is full professor at University of Lorraine, and works at LORIA in the Coast project.
-    His research interests always been related to data and service management, and include various topics about collaborative systems, services composition, and distributed systems.
-    He has published several articles in international journals and conferences, and he was involved in many international and European projects.
-    His current work deals with trust and privacy in distributed collaborative applications.
-\end{IEEEbiography}
 
 % if you will not have a photo at all:
 % \begin{IEEEbiographynophoto}{John Doe}
