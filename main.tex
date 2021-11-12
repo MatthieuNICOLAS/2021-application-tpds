@@ -1363,7 +1363,7 @@ In doing so, nodes are able to minimise periodically the metadata overhead of th
 On the other hand, the orange dotted line represents the size of the RenamableLogootSplit document in the worst case scenario.
 In this scenario, nodes assume that \emph{rename} operations never become causally stable and can thus never be garbage-collected.
 Nodes have to permanently store the metadata introduced by the renaming mechanism.
-The performance of RenamableLogootSplit thus decrease as the number of \emph{renaming bots} and \emph{rename} operations issued increases.
+The performance of RenamableLogootSplit thus decreases as the number of \emph{renaming bots} and \emph{rename} operations issued increases.
 Nonetheless, we observe that RenamableLogootSplit can outperform LogootSplit even in this worst case scenario while the number of \emph{renaming bots} remains low (1 or 2).
 This result is explained by the fact that the renaming mechanism enables nodes to scrap the overhead of the internal data structure used to represent the document.
 
@@ -1374,6 +1374,7 @@ In \Cref{sec:offloading-former-states}, we discuss that \emph{former states} may
 \headerparagraph{Integration times of standard operations}
 %
 Next, we compared the evolution of integration times of standard operations, \ie \emph{insert} and \emph{remove} operations, on LogootSplit and RenamableLogootSplit documents.
+% The benchmark thus consists in generating random operations and to measure their integration times on.
 Since both types of operation share the same time complexity, we used solely \emph{insert} ones in our benchmarks.
 We do however distinguish \emph{local} and \emph{remote} updates.
 Conceptually, local updates can be decomposed as presented in \cite{baquero2017pure} in the two following steps:
@@ -1384,6 +1385,9 @@ Conceptually, local updates can be decomposed as presented in \cite{baquero2017p
 However, for performance reasons, we merged these two steps in our implementation.
 We thus make a distinction between \emph{local} and \emph{remote} updates in our benchmarks.
 \Cref{fig:evolution-integration-time-insert} displays the results.
+% Additionaly, we note that past \emph{rename} operations have no impact on the integration times of operations in the case of RenamableLogootSplit.
+% Only the distance between the current epoch of the sequence and the epoch of generation of the operation influence its integration time.
+% As explained later, we have at most a distance of 2 in our benchmark.
 
 \begin{figure}[!ht]
     \centering
@@ -1409,7 +1413,7 @@ Since the operation has to be transformed beforehand using \textsc{renameId}, we
 But this overhead is actually compensated by the optimisation of the internal representation of the sequence performed by \emph{rename} operations.
 
 Regarding operations from concurrent epochs, we observe an additional overhead as nodes have first to reverse the effect of the concurrent \emph{rename} operation using \textsc{revertRenameId}.
-Because of this overhead, RenamableLogootSplit's performance for these operations are comparable to LogootSplit ones.
+Because of this overhead, RenamableLogootSplit's performance for these operations is comparable to LogootSplit ones.
 
 To summarise, transformation functions introduce an overhead to integration times of concurrent operations to \emph{rename} ones.
 Despite this overhead, RenamableLogootSplit achieves better performance than LogootSplit as long as the distance between the epoch of generation of the operation and the current epoch of the node remains limited.
@@ -1716,6 +1720,31 @@ The use of these strategies would then reduce the overall computations of the sy
 \vfill
 
 \appendices
+
+\section{Helper functions}
+
+\label[appendix]{app:helper-functions}
+
+\begin{itemize}
+    \item \textsc{position} : Retrieves the value of the position of the first tuple of the given id.
+        For example, \textsc{position}(\id{\color{red}i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns {\color{red}i}.
+    \item \textsc{findIndex} : Retrieves the index of the given id in the given list of ids renamedIds.
+    \item \textsc{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
+    \item \textsc{concat} : Returns a new id made of the tuples of given ids.
+        For example, \textsc{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
+    \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with pos corresponding to the position of the first renamed id, nId to the node id of the author of the \emph{rename} operation and nSeq to its sequence number at the time.
+    \item \textsc{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
+        For example, \textsc{getFirstOffset}(\id{i}{A1}{\color{red}1}\id{i}{B0}{0}\id{m}{B1}{0}) returns {\color{red}1}.
+    \item \textsc{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
+        For example, \textsc{getTail}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 1) returns \id{i}{B0}{0}\id{m}{B1}{0}.
+    \item \textsc{getLastOffset} : Retrieves the value of the offset of the last tuple of the given id.
+        For example, \textsc{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{\color{red}0}) returns {\color{red}0}.
+    \item \textsc{createIdFromBase} : Returns a new id by copying the given id and replacing its last offset with the given one.
+        For example, \textsc{createIdFromBase}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 5) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{5}.
+    \item \textsc{isPrefix} : Indicates if the given id is a prefix of the other given id.
+        For example, \textsc{isPrefix}(\id{i}{A1}{1}\id{i}{B0}{0}, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns true.
+\end{itemize}
+
 \section{Remaining functions of \textsc{renameId}}
 
 \label[appendix]{app:rename-id}
