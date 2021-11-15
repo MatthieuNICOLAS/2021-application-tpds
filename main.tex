@@ -82,6 +82,7 @@
 \crefname{myalgorithm}{algorithm}{algorithms}
 \crefname{myrule}{rule}{rules}
 \crefname{property}{property}{properties}
+\crefname{subproperty}{property}{properties}
 
 \usepackage[draft,inline,nomargin,index]{fixme}
 \fxsetup{theme=colorsig,mode=multiuser,inlineface=\itshape,envface=\itshape}
@@ -471,6 +472,7 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
         \end{subproperty}
         \item[~]
         \begin{subproperty}(Order Preservation)
+            \label{prop:order}
             The elements of the sequence must be sorted according to their identifiers.
             Therefore, the existing order between initial identifiers must be preserved by the \emph{rename} operation.
         \end{subproperty}
@@ -1088,19 +1090,44 @@ It thus proceeds to revert its state to an equivalent one at \epoch{0}, the \ac{
 To this end, it applies \textsc{revertRenameId} to every identifier of its current state.
 
 \textsc{revertRenameId} determines which strategy to apply to revert the given identifier using patterns.
-For example, identifiers of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) correspond to the new values of the identifiers which compose the \emph{former state}.
-To retrieve the original identifiers, \textsc{revertRenameId} simply uses their offset since it is their index in the \emph{former state}.
+Before going into detail, we add the following notation : we name $\trm{newX}$ identifiers in the resulting epoch of the \emph{rename} operation, while $\trm{X}$ refer to their counterpart in the preceding epoch.
 
-Identifiers of the form \id{pos}{nId~nSeq}{offset}$\trm{tail}$ (\eg \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) correspond to identifiers either inserted concurrently to the \emph{rename} operation or causally after.
-To process these identifiers, \textsc{revertRenameId} first removes the prefix (\id{i}{A1}{1}) to isolate the tail (\id{i}{B0}{0}\id{m}{B1}{0}).
-By doing so, \textsc{revertRenameId} effectively undoes the transformation applied to the identifier by \textsc{renIdFromPredId} if it was inserted concurrently.
-The algorithm then compares the tail to the identifiers of its predecessor and successor at the \emph{parent} epoch.
-In this example, we have \id{i}{B0}{0}\id{f}{A0}{0} < \id{i}{B0}{0}\id{m}{B1}{0} < \id{i}{B0}{1}.
-The algorithm can thus return the tail as the resulting identifier while preserving the intended order, since its value is between the identifiers of its predecessor and successor.
+An identifier $\trm{newId_1}$ of the form \id{pos}{nId~nSeq}{offset} (\id{i}{A1}{offset} in the current example) corresponds to the new value of an identifier directly renamed by the \emph{rename} operation.
+To retrieve $\trm{id_1}$, \textsc{revertRenameId} simply uses the offset of $\trm{newId_1}$ since it corresponds to the index of $\trm{id_1}$ in the \emph{former state} (\ie renamedIds[offset] = id).
 
-Otherwise, it would mean that the given identifier has been inserted causally after the \emph{rename} operation.
-As no corresponding identifier exists yet at the \emph{parent} epoch, \textsc{revertRenameId} can return any identifier as long as it preserves the intended order.
-To this end, \textsc{revertRenameId} generates the resulting identifier from the identifier of the predecessor or by derivating the successor one, and exclusive tuples of the renaming mechanism, $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
+Case of identifiers $\trm{newId_Y}$ of the form \id{pos}{nId~nSeq}{offset}$\trm{tail}$ (\eg \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) is divided into several sub-cases.
+In every of these subcases, we have \[\trm{newId_Y} \in ]\trm{newPredId}, \trm{newSuccId}[\]
+As thus, according to \Cref{prop:order}, we must have \[\trm{id_Y} \in ]\trm{predId}, \trm{succId}[\]
+
+The first subcase is identifiers $\trm{newId_2} \in ]\trm{newPredId~predId}, \trm{newPredId~succId}[$.
+For these identifiers, we note that :
+\begin{enumerate*}[label=(\roman*)]
+    \item we have $\trm{tail} \in ]\trm{predId}, \trm{succId}[$
+    \item $\trm{newId_2}$ may be the result of an \emph{insert} operation concurrent to the \emph{rename} one.
+        In such case, $\trm{newId_2}$ has been obtained using \textsc{renIdFromPredId} and we have $\trm{id_2} = \trm{tail}$.
+\end{enumerate*}
+We thus note that by returning $\trm{tail}$, \textsc{revertRenameId} meets the two constraints, \ie preserving the intended order and restoring to its original value the identifier.
+
+The second subcase is identifiers $\trm{newId_3} \in ]\trm{newPredId}, \trm{newPredId~predId}[$.
+In order to comply with \Cref{prop:order}, we must have $\trm{id_3} \in ]\trm{predId}, \trm{id_2}[$.
+For these identifiers, we note that :
+\begin{enumerate*}[label=(\roman*)]
+    \item $\trm{newId_3}$ is of the form $\trm{newPredId~tail}$ with $\trm{tail} < \trm{predId}$.
+        We cannot thus simply return $\trm{tail}$ in this case.
+    \item $\trm{newId_3}$ may have only been inserted causally after the \emph{rename} operation.
+        Therefore, there is no existing contraint on the returned identifier except the \Cref{prop:order}.
+\end{enumerate*}
+To handle this case, we introduce two new tuples exclusive to the renaming mechanism : $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
+They are respectively the minimal tuple and the maximal one available to generate identifiers.
+Thanks to $\trm{MIN\_TUPLE}$, \textsc{revertRenameId} is able to return $\trm{id_3}$ fitting the intended order (with $\trm{id_3} = \trm{predId~MIN\_TUPLE~tail}$).
+
+The last subcase is identifiers $\trm{newId_4} \in ]\trm{newPredId~succId}, \trm{newSuccId}[$.
+Here, we must have $\trm{id_4} \in ]\trm{id_2}, \trm{succId}[$.
+Note that this subcase is the counterpart of the previous one.
+The logic to handle it is thus the same : adding a prefix enforcing the intended order.
+To generate this prefix, \textsc{revertRenameId} uses $\trm{predOfSuccId}$ and $MAX\_TUPLE$.
+$\trm{predOfSuccId}$ is obtained by decrementing the last offset of $\trm{succId}$.
+Hence, to preserve the intended order, \textsc{revertRenameId} returns $\trm{id_4}$ with $\trm{id_4} = \trm{predOfSuccId~MAX\_TUPLE~tail}$.
 
 Once node A mapped its state to the equivalent one at \epoch{0} using \textsc{revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
 
