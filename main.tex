@@ -89,6 +89,8 @@
 \FXRegisterAuthor{go}{ago}{Gerald}
 \FXRegisterAuthor{mn}{amn}{Matthieu}
 
+\usepackage{caption}
+
 % Commands
 %---------
 \newcommand{\eg}{e.g. }
@@ -101,6 +103,8 @@
 \newcommand{\new}{\textbf{new}}
 \newcommand{\trm}[1]{\mathit{#1}}
 \newcommand{\set}[1]{\left\{#1\right\}} % set brace notation
+
+\newcommand{\bigO}[1]{$\mathcal{O}(#1)$}
 
 \newcommand{\id}[3]{$\trm{#1}^{\trm{#2}}_{\trm{#3}}$}
 \newcommand{\epoch}[1]{$\varepsilon_{#1}$}
@@ -1505,6 +1509,82 @@ Since these operations introduce epochs that are not selected as the new target 
 The application of \emph{concurrent introducing lesser epoch} operations hence solely consists of adding the introduced epoch and the corresponding \emph{former state} into the epoch tree.
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in the most suitable order given the context.
 
+\subsection{Complexity analysis of the epochs garbage collection mechanism}
+
+% Dans sections précédentes, nous avons évalué de manière expérimentale notre implémentation de RLS et avons comparé ses performances à celles de LS.
+% La version que nous avons évalué n'implémente pas le mécanisme de garbage collection des epochs.
+% Afin que notre évaluation soit complète, nous proposons une analyse en complexité de ce dernier.
+
+In previous sections, we evaluated in an experimental manner our implementation of RenamableLogootSplit and compared its performance to LogootSplit's one.
+However, our implementation of RenamableLogootSplit does not provide an implementation of the garbage collection mechanism of epochs.
+To complete our evaluation, we propose a complexity analysis of it.
+
+% L'algorithme du mécanisme de GC se décompose en les étapes suivantes
+% Tout d'abord, il établit le vecteur de version des opérations causalement stables.
+% Pour cela, nécessite de conserver un vecteur de version pour chacun des noeuds du système et de générer un vecteur des valeurs minimales pour chaque entrée
+% Cette étape consiste donc à fusionner n vecteurs de version de n entrées, elle s'exécute donc en O(n^2)
+The algorithm of the garbage collection mechanism consists of the following steps.
+First, it establishes the version vector of causally stable operations.
+To this end, each node has to maintain a matrice of version vectors of every nodes.
+The algorithm computes the version vector of causally stable operations by keeping the minimal value for each entry of the vectors.
+This step consists thus in merging $n$ version vectors of $n$ entries, it is thus executed in \bigO{n^2}.
+\mnnote{TODO: Ajouter ref vers algo pour calculer ce vecteur de version des opérations causalement stables}
+
+% L'étape suivante consiste à parcourir l'arbre des epochs dans l'ordre inverse à celui défini par la relation priority, jusqu'à trouver l'epoch maximale dont l'opération rename est causalement stable.
+% Pour chaque epoch parcourue, calcule et stocke le chemin entre elle et la racine
+% Cette étape se déroule donc O(e * h) où e est le nombre d'epochs de l'arbre, h sa hauteur
+The second step consists in browsing the epoch tree in the reverse order of the one set by the \emph{priority} relation until it finds the maximal epoch with the corresponding \emph{rename} operation being causally stable.
+For each epoch browsed, the garbage collection mechanism computes and stores its path to the root of the epoch tree.
+This step is thus executed in \bigO{e \cdot h}, with $e$ being the number of epochs in the tree and $h$ the height of the tree.
+
+% Puis à partir de ces chemins, calcule leur LCA
+% Pour cela, calcule de manière successive la dernière intersection entre le chemin avec le LCA courant et un chemin restant
+% Le LCA est la dernière epoch composant le chemin final
+% Cette étape se déroule aussi en O(e * h)
+From these paths, the mechanism computes the \ac{LCA}.
+To do so, the algorithm computes in a successive manner the last intersection between the path from the root to the current \ac{LCA} and the paths computed previously.
+The \ac{LCA} is the last epoch composing the resulting path.
+This step is executed in \bigO{e \cdot h} too.
+
+% Peut dorénavant calculer les required epochs
+% Pour cela, parcourt les chemins calculés lors de la 2nd étape et ajoute chaque epoch se trouvant après le LCA à l'ensemble des required epochs
+% De nouveau, cette étape s'exécute en O(e * h)
+The algorithm is now able to compute the set of \emph{required epochs}.
+To this end, it browses the paths computed during the second step.
+For each path, it adds epochs that are after the \ac{LCA} to the set of \emph{required epochs}.
+Again, this step is executed in \bigO{e \cdot h}.
+
+% Enfin, parcourt l'arbre et supprime chaque epoch n'appartenant pas aux required epochs.
+% S'exécute en O(e)
+Having determined the \emph{required epochs}, the mechanism can now remove obsolete epochs.
+It browses the epoch tree and delete every epoch that is not contained in the set.
+This final step is executed in \bigO{e}.
+
+Thus, we obtain that the time complexity of the garbage collection mechanism of epochs is \bigO{n^2 + 3 (e \cdot h) + e}.
+We summarise this result in \Cref{tab:time-complexity-gc-mechanism-epochs}.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Time complexity of the garbage collection mechanism of epochs}
+    \label{tab:time-complexity-gc-mechanism-epochs}
+    \resizebox{\columnwidth}{!}{
+        \begin{tabular}{lc}
+            \toprule
+            Step & Time \\
+            \midrule
+            \emph{computing stable version vector} & $n^2$ \\
+            \emph{computing paths from root to \emph{potential current epochs}} & $e \cdot h$ \\
+            \emph{identifying \ac{LCA}} & $e \cdot h$ \\
+            \emph{computing \emph{required epochs}} & $e \cdot h$ \\
+            \emph{deleting obsolete epochs} & $e$ \\
+            \midrule
+            \emph{total} & $n^2 + 3 (e \cdot h) + e$ \\
+            \bottomrule
+        \end{tabular}
+    }
+    \caption*{$n$: number of nodes of the system, $e$: number of epochs in the \emph{epoch tree}, $h$: height of the \emph{epoch tree}}
+\end{table}
+
 \section{Discussion}
 
 \label{sec:discussion}
@@ -1744,7 +1824,7 @@ The use of these strategies would then reduce the overall computations of the sy
     His current work deals with trust and privacy in distributed collaborative applications.
 \end{IEEEbiography}
 
-\vfill
+\clearpage
 
 \appendices
 
