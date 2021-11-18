@@ -247,7 +247,7 @@ CRDTs, replication, real-time collaborative editing, eventual consistency, memor
 %
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{W}{hen} creating distributed systems, designers have to make a tradeoff between \emph{consistency} and \emph{latency} \cite{pacelc2012}.
+\IEEEPARstart{W}{hen} creating distributed systems, designers have to make a trade-off between \emph{consistency} and \emph{latency} \cite{pacelc2012}.
 Many systems choose to favour latency and thus adopt \emph{optimistic replication} techniques \cite{10.1145/1057977.1057980}.
 This approach ensures the high \emph{availability} of the system, even in case of network partitions.
 To this end, it relaxes consistency constraints and minimises coordination between nodes.
@@ -301,7 +301,7 @@ This paper is organised as follows:
 Then \Cref{sec:distributed-rls} describes how RenamableLogootSplit handles concurrent executions of the renaming mechanism.
 \Cref{sec:gc-former-states} explains how to garbage collect metadata introduced by the renaming mechanism itself.
 \Cref{sec:evaluation} presents the experimental evaluation of RenamableLogootSplit.
-\Cref{sec:discussion} discusses several tradeoffs that RenamableLogootSplit implementations offer.
+\Cref{sec:discussion} discusses several trade-offs that RenamableLogootSplit implementations offer.
 \Cref{sec:related-work} compares our approach to related work.
 Finally \Cref{sec:conclusion} summarises our work and introduces future work.
 
@@ -1616,6 +1616,12 @@ The proposed strategy must then aim to minimise the number of concurrent \emph{r
 However, it should avoid relying on synchronous coordination between nodes to do so.
 To reduce the likelihood of issuing concurrent \emph{rename} operations, several techniques can be proposed.
 For example, nodes can monitor to which other nodes they are currently connected and delegate to the one with the highest \emph{node identifier} the duty to issue \emph{rename} operations.
+
+To recap, we can propose strategies aiming to minimise each of these parameters individually.
+And while some of these goals converge (to minimise the size of the data structure and to minimise the integration time of \emph{rename} operations), others conflict (to issue a \emph{rename} operation as soon as a threshold is reached vs. to minimise the amount of concurrent \emph{rename} operations).
+System designers have thus to propose a trade-off between parameters according to the constraints of the system (real-time application or not, nodes' hardware limitations...).
+To provide an example, in our use case which is real-time collaborative editing, we would prioritise the integration times of \emph{rename} operations to limit their impact on user experiences.
+We would thus issue \emph{rename} operations frequently, even if it means issuing concurrent \emph{rename} operations.
 
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
