@@ -1442,7 +1442,7 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 
 \headerparagraph{Integration time of \emph{rename} operation}
 %
-Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations since the last \emph{rename} one.
+Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations, which relates to the number of elements in the sequence.
 As before, we distinguish performance of \emph{local} and \emph{remote} updates.
 The case of \emph{remote rename} operations is subdivided into three categories.
 \emph{Direct remote} denotes a remote \emph{rename} operation that introduces a new epoch child of the current node epoch.
@@ -1492,6 +1492,14 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 The main outcome of these measures shows that \emph{rename} operations are generally expensive when compared to others, since nodes have to browse and rename their whole current state.
 Local \emph{rename} operations take hundreds of milliseconds while \emph{direct remote} ones and \emph{concurrent introducing greater epoch} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
+In parallel, several improvements may be made to reduce these integration times :
+\begin{enumerate*}[label=(\roman*)]
+    \item instead of using \textsc{renameId}, which renames the state identifier by identifier, one could design and use \textsc{renameBlock}.
+        This function would rename the state block per block, achieving a better time complexity.
+        Additionally, since \emph{rename} operations merge existing blocks into one, this would set up a virtuous circle, where each \emph{rename} operation reduces the cost of the next one.
+    \item since each call to \textsc{renameId} or \textsc{revertRenameId} is independant from others, these functions are well-suited for parallel programming.
+        Instead of renaming identifiers (or blocks) sequentially, one could slice the sequence into chunks and rename them in parallel.
+\end{enumerate*}
 
 Another interesting result from this benchmark is that \emph{concurrent introducing lesser epoch} operations are cheap to apply.
 Since these operations introduce epochs that are not selected as the new target epoch, nodes do not actually proceed to rename their states.
