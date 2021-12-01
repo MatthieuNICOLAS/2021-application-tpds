@@ -331,7 +331,7 @@ To this end, LogootSplit assigns identifiers made of a list of tuples to element
 These tuples have four components:
 \begin{enumerate*}[label=(\roman*)]
     \item a \emph{position}, which embodies the intended position of the element
-    \item a \emph{node identifier},
+    \item a \emph{node identifier}
     \item a \emph{node sequence number} and
     \item an \emph{offset}, which are combined to make identifiers unique.
 \end{enumerate*}
@@ -1573,6 +1573,19 @@ We summarise this result in \Cref{tab:time-complexity-gc-mechanism-epochs}.
     }
     \caption*{$n$: number of nodes of the system, $e$: number of epochs in the \emph{epoch tree}, $h$: height of the \emph{epoch tree}}
 \end{table}
+
+Despite its time complexity, the garbage collection mechanism should have a limited impact on the performance of the application.
+Indeed, this mechanism does not belong to the critical path of the application, \ie the integration of updates.
+It may be triggered rarely, in the background and we may even target specific windows to do so, \eg during idle times.
+As such, we thus did not delve on this part of RenamableLogootSplit in this work.
+
+The algorithm we describe here thus corresponds to a naive and simple approach of the epochs garbage collection mechanism.
+There is room for improvement on several aspects :
+\begin{enumerate*}[label=(\roman*)]
+    \item to determine the maximal epoch with the corresponding \emph{rename} operation causally stable, one could track the current epochs of every node instead of entire version vectors and pick the minimal one
+    \item to compute the set of \emph{required epochs}, one could merge the steps looking for the \ac{LCA} and adding browsed epochs to \emph{required epochs}.
+\end{enumerate*}
+Further work should thus be undertaken on these leads to improve the epochs garbage collection mechanism.
 
 \section{Discussion}
 
