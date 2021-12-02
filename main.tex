@@ -455,11 +455,13 @@ In order to ensure the \ac{SEC} property of the replicated sequence, we define s
 These properties are mainly inspired by those presented in \cite{zawirski:hal-01248197}.
 
 \begin{property}(Determinism)
+    \label{prop:determinism}
     \emph{Rename} operations are applied by each node without any coordination.
     To ensure that each node reaches eventually the same state, a given \emph{rename} operation must always output the same new identifier from the current identifier.
 \end{property}
 
 \begin{property}(User-intention Preservation)
+    \label{prop:intention}
     Although the \emph{rename} operations itself has no user intention attached, it must not conflict with users actions.
     Notably, \emph{rename} operations must not cancel or alter the outcome, from users' points of view, of \emph{insert} and \emph{remove} operations.
 \end{property}
@@ -471,6 +473,7 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
     \begin{itemize}[noitemsep]
         \item[~]
         \begin{subproperty}(Uniqueness Preservation)
+            \label{prop:uniqueness}
             Each identifier must be unique.
             Thus, for a given \emph{rename} operation, each identifier should be mapped to a distinct new identifier.
         \end{subproperty}
@@ -577,12 +580,15 @@ Node A reassigns the resulting id (\id{i}{A1}{0}) to the first element of the se
 Then, node A derives contiguous identifiers for all remaining elements by successively incrementing the offset (\id{i}{A1}{1}, \id{i}{A1}{2} and \id{i}{A1}{3}), as shown in \Cref{fig:renaming-second-id}.
 As we assign contiguous identifiers to all elements of the sequence, we eventually group them into one block as illustrated in \Cref{fig:renaming-final-state}.
 It allows nodes to benefit the most from the block feature and to minimise the overhead of the resulting state.
+Proceeding this way also enables us to assign an unique triplet $\langle nodeId, nodeSeq, offset \rangle$ to every identifier, thus ensuring their uniqueness as required by \Cref{prop:uniqueness}.
 
 To converge, other nodes have to rename their states identically.
 However, they cannot simply replace their current state with the new renamed one.
 Indeed, they may have performed concurrent updates on their states.
-In order not to discard these updates, nodes have to process the \emph{rename} operation themselves.
-To this end, the node issuing the \emph{rename} operation broadcasts its \emph{former state} to others.
+In order not to discard these updates (with regard to \Cref{prop:intention} and \Cref{prop:commutativity}), nodes have to process the \emph{rename} operation themselves.
+However, the applied renaming depends on the state\footnote{More precisely, the intervals of identifiers composing the sequence.} of the node at the moment of generation of the \emph{rename} operation, that we call \emph{former state}.
+Other nodes need this input to be able to apply the same renaming.
+The \emph{rename} operation thus embeds the \emph{former state}.
 Using this state, other nodes compute the new identifier of each renamed identifier.
 As for concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
 
@@ -597,7 +603,7 @@ Figure \ref{fig:concurrent-insert-rename-inconsistent} illustrates such cases.
 In this example node B inserts the new element "L", assigns the id \id{i}{B0}{0}\id{m}{B1}{0} to it and broadcasts its update, concurrently to the \emph{rename} operation described in \Cref{fig:renaming}.
 Upon reception of the \emph{insert} operation, node A adds the inserted element into its sequence, using the element id to determine its position.
 However, since identifiers were modified by the concurrent \emph{rename} operation, node A inserts the new element at the end of its sequence (since \id{i}{A1}{3} < \id{i}{B0}{0}\id{m}{B1}{0}) instead of at the intended position.
-As described by this example, applying naively concurrent updates would result in inconsistencies.
+As described by this example, applying naively concurrent updates would result in inconsistencies and conflict with \Cref{prop:intention}.
 It is thus necessary to handle concurrent operations to \emph{rename} operations in a particular manner.
 
 \begin{figure*}[!ht]
@@ -658,7 +664,7 @@ Nodes use the function \textsc{renameId}, described in \Cref{alg:renameId}, to t
 % Upon the reception of an operation, nodes compare the operation epoch to their current one.
 % The main idea of this algorithm is to use the predecessor of the given identifier to do so.
 This algorithm maps identifiers from a \emph{parent} epoch to corresponding ones in the \emph{child} epoch.
-The main idea of this algorithm is to rename unknown identifiers at the time of the \emph{rename} operation generation using their predecessor.
+The main idea of this algorithm is to deterministically rename unknown identifiers at the time of the \emph{rename} operation generation using their predecessor.
 An example is provided in \Cref{fig:concurrent-insert-rename-fixed}.
 This figure depicts the same scenario as in \Cref{fig:concurrent-insert-rename-inconsistent}, except that node A uses \textsc{renameId} to rename the concurrently generated id before inserting it in its state.
 
@@ -756,6 +762,7 @@ By reassigning this id to the concurrently added element, node A is able to inse
 \textsc{renameId} also enables nodes to handle the opposite case : to integrate remote \emph{rename} operations on their local states while they have previously applied concurrent updates.
 This case corresponds to node B's one in \Cref{fig:concurrent-insert-rename-fixed}.
 Upon the delivery of node A's \emph{rename} operation, applying \textsc{renameId} to every identifier of its state would enable node B to reach an equivalent state to node A's one.
+\textsc{renameId} thus makes \emph{rename} operations commutative with \emph{insert} and \emph{remove} ones.
 
 \Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
@@ -763,7 +770,7 @@ Functions to deal with other cases, \ie when the identifier to rename is out of 
 The algorithm we present here enables nodes to rename their states identifier by identifier.
 A possible extension is to design \textsc{renameBlock}, an improved version that renames the state block by block.
 \textsc{renameBlock} would reduce the integration time of \emph{rename} operations, since its time complexity would no longer depends on the number of identifiers (\ie the number of elements) but from the number of blocks.
-Additionally, its execution would reduce the integration time of future \emph{rename} operations since the renaming mechanism groups elements into fewer blocks.
+Additionally, its execution would reduce the integration time of the next \emph{rename} operation since the renaming mechanism merges existing blocks into one.
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
 
@@ -857,7 +864,7 @@ At the end of the scenario described in \Cref{fig:conflicting-rename-operations}
 In order to converge, every node should eventually reach the same epoch.
 However, the function \textsc{renameId} described in \Cref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
 Node A (resp. B) is then unable to progress towards the epoch of node B (resp. A).
-It is therefore necessary to extend our renaming mechanism to break this deadlock.
+It is therefore necessary to extend our renaming mechanism to break this deadlock and to make \emph{rename} operations commutative.
 
 First, nodes have to agree on a common epoch from the \emph{epoch tree} as the target epoch.
 In order to avoid performance issues due to coordination, nodes should select this epoch in a coordination-free manner, \ie solely using data from the \emph{epoch tree}.
