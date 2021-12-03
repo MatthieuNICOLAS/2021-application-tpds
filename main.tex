@@ -287,7 +287,7 @@ However, these mechanisms require synchronous coordination.
 
 In this work, we propose a new Sequence \ac{CRDT}: RenamableLogootSplit (RLS).
 This data structure allows nodes to insert or remove elements into a replicated sequence.
-It embeds a renaming mechanism to minimise the memory overhead induced by metadata periodically.
+It embeds a renaming mechanism to periodically minimise the memory overhead induced by metadata.
 To avoid costly and blocking consensus algorithms, we instead adopt an optimistic approach : nodes perform renaming without any coordination.
 This new feature is designed as an additional type of operation: the \emph{rename} one.
 Since this operation is not intrinsically commutative with others, conflicts may arise.
@@ -341,8 +341,8 @@ These tuples have four components:
 By comparing identifiers using the lexicographical order, LogootSplit is able to determine the position of the element relatively to others.
 In this paper, we represent identifiers using the following notation: \id{position}{node\_id~node\_seq}{offset} where $\trm{position}$ is a lowercase letter, $\trm{node\_id}$ an uppercase one and both $\trm{node\_seq}$ and $\trm{offset}$ integers.
 
-Instead of storing an identifier for each element of the sequence, the main insight of LogootSplit is to aggregate dynamically elements into blocks.
-Grouping elements into blocks enables LogootSplit to assign logically an identifier to each element, using intervals of identifiers, while effectively storing only the block length and the identifier of its first element.
+Instead of storing an identifier for each element of the sequence, the main insight of LogootSplit is to dynamically aggregate elements into blocks.
+Grouping elements into blocks enables LogootSplit to logically assign an identifier to each element, using intervals of identifiers, while effectively storing only the block length and the identifier of its first element.
 LogootSplit gathers elements with \emph{contiguous} identifiers into a block.
 We call \emph{contiguous} two identifiers that are identical except for their last offset, and with both offsets being consecutive.
 We denote the interval of identifiers corresponding to a block using the following notation: \id{position}{node\_id~node\_seq}{begin..end} where $\trm{begin}$ is the offset of the first identifier of the block and $\trm{end}$ the offset of its last identifier.
@@ -378,11 +378,11 @@ LogootSplit is then able to group them into one block \id{i}{B0}{0..2} to minimi
 \end{figure}
 
 This feature reduces the number of identifiers stored in the data structure, since identifiers are kept at the level of blocks rather than on every individual element.
-It enables to reduce significantly the memory overhead of the data structure.
+It enables to significantly reduce the memory overhead of the data structure.
 
 \subsection{Limits}
 
-As stated previously, the size of identifiers from a dense total order is variable.
+As previously stated, the size of identifiers from a dense total order is variable.
 When nodes insert new elements between two others with the same \emph{position} value, LogootSplit has no other option but to increase the size of the resulting identifiers.
 \Cref{fig:example-split} illustrates such cases.
 In this example, since node A inserts a new element between the contiguous identifiers \id{i}{B0}{0} and \id{i}{B0}{1}, LogootSplit cannot generate a proper identifier of the same size.
@@ -405,7 +405,7 @@ To comply with the intended order, LogootSplit generates a new identifier by app
 \end{figure}
 
 As a result, the size of identifiers tends to grow as the system progresses.
-This growth impacts negatively the performance of the data structure on several aspects.
+This growth reduces the performance of the data structure on several aspects.
 Since identifiers attached to values become longer, the memory overhead of the data structure increases accordingly.
 This also increases the bandwidth consumption as nodes have to broadcast identifiers to others.
 
@@ -430,11 +430,11 @@ We introduce a \emph{rename} operation to reassign shorter identifiers to elemen
 
 \subsection{System Model}
 
-The system is composed of a dynamic set of nodes, as nodes join and leave dynamically the collaboration during its lifetime.
+The system is composed of a dynamic set of nodes, as nodes dynamically join and leave the collaboration during its lifetime.
 Nodes collaborate to build and maintain a sequence using RenamableLogootSplit.
 Each node owns a copy of the sequence and edits it without any coordination.
 Nodes' updates take the form of operations that are immediately applied to nodes' replicas.
-Operations are then broadcast asynchronously to other nodes so that they also integrate updates.
+Operations are then asynchronously broadcast to other nodes so that they also integrate updates.
 
 Nodes communicate through a \ac{P2P} network, which is unreliable.
 Messages can be lost, re-ordered or delivered multiple times.
@@ -460,7 +460,7 @@ These properties are mainly inspired by those presented in \cite{zawirski:hal-01
 \begin{property}(Determinism)
     \label{prop:determinism}
     \emph{Rename} operations are applied by each node without any coordination.
-    To ensure that each node reaches eventually the same state, a given \emph{rename} operation must always output the same new identifier from the current identifier.
+    To ensure that each node eventually reaches the same state, a given \emph{rename} operation must always output the same new identifier from the current identifier.
 \end{property}
 
 \begin{property}(User-intention Preservation)
@@ -583,7 +583,7 @@ Node A reassigns the resulting id (\id{i}{A1}{0}) to the first element of the se
 Then, node A derives contiguous identifiers for all remaining elements by successively incrementing the offset (\id{i}{A1}{1}, \id{i}{A1}{2} and \id{i}{A1}{3}), as shown in \Cref{fig:renaming-second-id}.
 As we assign contiguous identifiers to all elements of the sequence, we eventually group them into one block as illustrated in \Cref{fig:renaming-final-state}.
 It allows nodes to benefit the most from the block feature and to minimise the overhead of the resulting state.
-Proceeding this way also enables us to assign an unique triplet $\langle nodeId, nodeSeq, offset \rangle$ to every identifier, thus ensuring their uniqueness as required by \Cref{prop:uniqueness}.
+Proceeding this way also enables us to assign an unique triplet $\langle \trm{node~id}, \trm{~seq}, \trm{offset} \rangle$ to every identifier, thus ensuring their uniqueness as required by \Cref{prop:uniqueness}.
 
 To converge, other nodes have to rename their states identically.
 However, they cannot simply replace their current state with the new renamed one.
@@ -606,7 +606,7 @@ Figure \ref{fig:concurrent-insert-rename-inconsistent} illustrates such cases.
 In this example node B inserts the new element "L", assigns the id \id{i}{B0}{0}\id{m}{B1}{0} to it and broadcasts its update, concurrently to the \emph{rename} operation described in \Cref{fig:renaming}.
 Upon reception of the \emph{insert} operation, node A adds the inserted element into its sequence, using the element id to determine its position.
 However, since identifiers were modified by the concurrent \emph{rename} operation, node A inserts the new element at the end of its sequence (since \id{i}{A1}{3} < \id{i}{B0}{0}\id{m}{B1}{0}) instead of at the intended position.
-As described by this example, applying naively concurrent updates would result in inconsistencies and conflict with \Cref{prop:intention}.
+As described by this example, naively applying concurrent updates would result in inconsistencies and conflict with \Cref{prop:intention}.
 It is thus necessary to handle concurrent operations to \emph{rename} operations in a particular manner.
 
 \begin{figure*}[!ht]
@@ -863,7 +863,7 @@ Epochs are displayed as nodes of the tree and the \emph{parent-child} relation b
     \label{fig:epoch-tree}
 \end{figure}
 
-At the end of the scenario described in \Cref{fig:conflicting-rename-operations}, nodes A and B are respectively at epochs \epoch{A1} and \epoch{B2}.
+At the end of the scenario described in \Cref{fig:conflicting-rename-operations}, nodes A and B are at epochs \epoch{A1} and \epoch{B2} respectively.
 In order to converge, every node should eventually reach the same epoch.
 However, the function \textsc{renameId} described in \Cref{alg:renameId} only enables nodes to move from a \emph{parent} epoch to one of its \emph{children} epoch.
 Node A (resp. B) is then unable to progress towards the epoch of node B (resp. A).
@@ -875,7 +875,7 @@ We propose such a mechanism in \Cref{sec:priority}.
 
 Second, nodes have to move through the \emph{epoch tree} to reach the target epoch.
 The function \textsc{renameId} already enables nodes to move down the tree.
-Remaining cases to be handled are the ones in which nodes are currently at \emph{sibling} or \emph{cousin} epochs of the target one.
+Remaining cases to be handled are the ones in which nodes currently are on another branch of the \emph{epoch tree}.
 In these cases, nodes have to be able to move up the \emph{epoch tree} to return to the \ac{LCA} of the current epoch and the target one.
 This move is actually akin to reverting the effect of previously applied \emph{rename} operations.
 We propose an algorithm that fulfills this purpose in \Cref{sec:reverting-rename-ops}.
@@ -897,7 +897,7 @@ Using the \emph{priority} relation, we define the target epoch as follows:
     Nodes select the maximum epoch according to the \emph{priority} relation as the target epoch.
 \end{definition}
 
-To define the \emph{priority} relation, we may actually select different strategies.
+To define the \emph{priority} relation, we can actually select different strategies.
 In this work, we use the lexicographical order on the path of epochs in the \emph{epoch tree}.
 \Cref{fig:priority-example} provides an example.
 
@@ -1097,40 +1097,43 @@ The function is described in \autoref{alg:revertRenameId}.
 
 The goals of \textsc{revertRenameId} are the following:
 \begin{enumerate*}[label=(\roman*)]
-    \item To revert identifiers generated causally before the reverted \emph{rename} operation to their former value
-    \item To revert identifiers generated concurrently to the reverted \emph{rename} operation to their former value
-    \item To assign new identifiers complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
+    \item \label{item:revert-rename-1}
+        To revert identifiers generated causally before the reverted \emph{rename} operation to their former value
+    \item \label{item:revert-rename-2}
+        To revert identifiers generated concurrently to the reverted \emph{rename} operation to their former value
+    \item \label{item:revert-rename-3}
+        To assign new identifiers complying with the intended order to elements inserted causally after the reverted \emph{rename} operation.
 \end{enumerate*}
 
-The first case is the most trivial one.
-To retrieve the value of $\trm{id_1}$, \textsc{revertRenameId} simply uses the offset of $\trm{newId_1}$\footnote{We name $\trm{newX}$ identifiers in the resulting epoch of the \emph{rename} operation, while $\trm{X}$ refer to their counterpart in the preceding epoch.} since it corresponds to the index of $\trm{id_1}$ in the \emph{former state} (\ie renamedIds[offset] = id).
+Case \ref{item:revert-rename-1} is the most trivial one.
+To retrieve the value of $\trm{id}$, \textsc{revertRenameId} simply uses the offset of $\trm{newId}$\footnote{We name $\trm{newX}$ identifiers in the resulting epoch of the \emph{rename} operation, while $\trm{X}$ refer to their counterpart in the preceding epoch.} since it corresponds to the index of $\trm{id}$ in the \emph{former state} (\ie $\trm{renamedIds[offset]} = \trm{id}$).
 
-The 3 other cases are handled given the following strategies.
-The generic pattern for the identifier $\trm{newId_Y}$ is of the form $\trm{newPredId} + \trm{tail}$.
+Cases \ref{item:revert-rename-2} and \ref{item:revert-rename-3} are handled given the following strategies.
+The generic pattern for the identifier $\trm{newId}$ is of the form $\trm{newPredId~tail}$.
 Associated with this pattern are two invariants.
 According to \Cref{prop:order}, we have:
-\[\trm{newId_Y} \in ]\trm{newPredId}, \trm{newSuccId}[\]
+\[\trm{newId} \in ]\trm{newPredId}, \trm{newSuccId}[\]
 and we must have:
-\[\trm{id_Y} \in ]\trm{predId}, \trm{succId}[\]
+\[\trm{id} \in ]\trm{predId}, \trm{succId}[\]
 
 The first subcase is when we have $\trm{tail} \in ]\trm{predId}, \trm{succId}[$.
-In this context, $\trm{newId_2}$ may be the result of a concurrent \emph{insert} operation to the \emph{rename} one, and we have $\trm{newId_2} \in ]\trm{newPredId~predId}, \trm{newPredId~succId}[$.
-In such case, $\trm{newId_2}$ has been obtained using \textsc{renIdFromPredId} and we have $\trm{id2} = \trm{tail}$.
+In this context, $\trm{newId}$ may be the result of a concurrent \emph{insert} operation to the \emph{rename} one (\ie Case \ref{item:revert-rename-2}), and we have $\trm{newId} \in ]\trm{newPredId~predId}, \trm{newPredId~succId}[$.
+In such case, $\trm{newId}$ has been obtained using \textsc{renIdFromPredId} and we have $\trm{id} = \trm{tail}$.
 We thus note that by returning $\trm{tail}$, \textsc{revertRenameId} meets the two constraints, \ie preserving the intended order and restoring to its original value the identifier.
 
 The second subcase is when $\trm{tail} < \trm{predId}$.
-$\trm{newId_3}$ may have only been inserted causally after the \emph{rename} operation, and we have $\trm{newId_3} \in ]\trm{newPredId}, \trm{newPredId~predId}[$.
-Since $\trm{newId_3}$ has been inserted after the \emph{rename} operation, there is no existing contraint on the returned identifier except the \Cref{prop:order}.
+$\trm{newId}$ could only been inserted causally after the \emph{rename} operation (\ie Case \ref{item:revert-rename-3}), and we have $\trm{newId} \in ]\trm{newPredId}, \trm{newPredId~predId}[$.
+Since $\trm{newId}$ has been inserted after the \emph{rename} operation, there is no existing contraint on the returned identifier except the \Cref{prop:order}.
 To handle this case, we introduce two new tuples exclusive to the renaming mechanism : $\trm{MIN\_TUPLE}$ and $\trm{MAX\_TUPLE}$.
 They are respectively the minimal tuple and the maximal one available to generate identifiers.
-Thanks to $\trm{MIN\_TUPLE}$, \textsc{revertRenameId} is able to return $\trm{id_3}$ fitting the intended order (with $\trm{id_3} = \trm{predId~MIN\_TUPLE~tail}$).
+Thanks to $\trm{MIN\_TUPLE}$, \textsc{revertRenameId} is able to return $\trm{id}$ fitting the intended order (with $\trm{id} = \trm{predId~MIN\_TUPLE~tail}$).
 
 The last subcase is the counterpart of the previous subcase and occurs when $\trm{succId} < \trm{tail}$.
-We have $\trm{newId_4} \in ]\trm{newPredId~succId}, \trm{newSuccId}[$.
+We have $\trm{newId} \in ]\trm{newPredId~succId}, \trm{newSuccId}[$.
 The strategy is the same and consists in adding a prefix to enforce the intended order.
 To generate this prefix, \textsc{revertRenameId} uses $\trm{predOfSuccId}$ and $MAX\_TUPLE$.
 $\trm{predOfSuccId}$ is obtained by decrementing the last offset of $\trm{succId}$.
-Hence, to preserve the intended order, \textsc{revertRenameId} returns $\trm{id_4}$ with $\trm{id_4} = \trm{predOfSuccId~MAX\_TUPLE~tail}$.
+Hence, to preserve the intended order, \textsc{revertRenameId} returns $\trm{id}$ with $\trm{id} = \trm{predOfSuccId~MAX\_TUPLE~tail}$.
 
 Once node A mapped its state to the equivalent one at \epoch{0} using \textsc{revertRenameId}, it can now apply \textsc{renameId} to compute the corresponding state at \epoch{B2}.
 
@@ -1141,8 +1144,8 @@ Functions to handle remaining cases are featured in \Cref{app:revert-rename-id}.
 Note that \textsc{renameId} and \textsc{revertRenameId} are not inverse functions.
 \textsc{revertRenameId} reverts to their original value identifiers inserted causally before or concurrently to the \emph{rename} operation.
 On the other hand, \textsc{renameId} does not do the same for identifiers inserted causally after the \emph{rename} operation.
-Thus redoing a previously undone \emph{rename} operation alter these identifiers.
-This modification may cause a divergence between nodes, as the same element will be referred to using different identifiers.
+Thus redoing a previously undone \emph{rename} operation alters these identifiers.
+This modification can cause a divergence between nodes, as the same element will be referred to using different identifiers.
 
 This issue is however prevented in our system by the proposed \emph{priority} relation.
 Since the \emph{priority} relation is defined using the lexicographical order on the path of epochs in the \emph{epoch tree}, nodes only move towards the rightmost epoch of the \emph{epoch tree} when switching epochs.
@@ -1289,7 +1292,7 @@ Node A then proceeds to compute \emph{required epochs}.
 To this end, it determines the \ac{LCA} of \emph{potential current epochs} : \epoch{B2}.
 It then generates \emph{required epochs} by adding every epoch forming the paths between \epoch{B2} and \emph{potential current epochs}.
 Epochs \epoch{B2} and \epoch{A9} thus form the set of \emph{required epochs}.
-Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can be safely garbage collected.
+Node A infers that epochs \epoch{0}, \epoch{A1} and \epoch{A8} can safely be garbage collected.
 
 On the other hand, the delivery of the \emph{rename} operation introducing \epoch{A1} to node B does not enable it to garbage collect any data.
 From its knowledge, node B computes that \epoch{A1}, \epoch{B2} and \epoch{B7} form the \emph{potential current epochs}.
@@ -1340,8 +1343,8 @@ During the simulation, we take snapshots of the replicas' state at given steps t
 
 We ran simulations with the following experimental settings: we deployed 10 bots as separate Docker containers on a single workstation.
 Each container corresponds to a single mono-threaded Node.js process simulating an author.
-Bots share and edit collaboratively the document using either LogootSplit or RenamableLogootSplit according to the session.
-In both cases, each bot performs an \emph{insert} or a \emph{remove} operation locally every 200 $\pm$ 50ms and broadcasts it immediately to other nodes using a \ac{P2P} full mesh network.
+Bots share and collaboratively edit the document using either LogootSplit or RenamableLogootSplit according to the session.
+In both cases, each bot locally performs an \emph{insert} or a \emph{remove} operation every 200 $\pm$ 50ms and immediately broadcasts it to other nodes using a \ac{P2P} full mesh network.
 During the first phase, the probability of issuing \emph{insert} (resp. \emph{remove}) operations is of 80\% (resp. 20\%).
 Once the document reaches 60k characters (around 15 pages), bots switch to the second phase and set both probabilities to 50\%.
 After each local operation, the bot may move its cursor to another random position in the document with a probability of 5\%.
@@ -1357,7 +1360,7 @@ For the purpose of reproducibility, we make the code, benchmarks and results ava
 \subsection{Results}
 
 Using generated snapshots, we performed several benchmarks.
-These benchmarks evaluate RenamableLogootSplit's performance and compare them to LogootSplit's ones.
+These benchmarks evaluate RenamableLogootSplit's performance and compare it to LogootSplit's ones.
 Results are presented and analysed below.
 
 \headerparagraph{Convergence}
@@ -1388,7 +1391,7 @@ The blue dashed line illustrates the size of the actual content of the document,
 The green dashed-dotted line represents the size of the RenamableLogootSplit document in the best case scenario.
 In this scenario, nodes assume that \emph{rename} operations are garbage-collectable as soon as they receive them.
 Nodes are thus able to benefit the effects of the renaming mechanism while removing its own metadata, such as \emph{former states} and epochs.
-In doing so, nodes are able to minimise periodically the metadata overhead of the data structure, independently of the number of \emph{renaming bots} and concurrent \emph{rename} operations issued.
+In doing so, nodes are able to periodically minimise the metadata overhead of the data structure, independently of the number of \emph{renaming bots} and concurrent \emph{rename} operations issued.
 
 On the other hand, the orange dotted line represents the size of the RenamableLogootSplit document in the worst case scenario.
 In this scenario, nodes assume that \emph{rename} operations never become causally stable and can thus never be garbage-collected.
@@ -1501,7 +1504,7 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
 
 The main outcome of these measures shows that \emph{rename} operations are generally expensive when compared to others, since nodes have to browse and rename their whole current state.
 Local \emph{rename} operations take hundreds of milliseconds while \emph{direct remote} ones and \emph{concurrent introducing greater epoch} ones may last seconds if delayed for too long.
-It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from impacting negatively user experiences.
+It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from negatively impacting user experiences.
 In parallel, several improvements may be made to reduce these integration times :
 \begin{enumerate*}[label=(\roman*)]
     \item instead of using \textsc{renameId}, which renames the state identifier by identifier, one could design and use \textsc{renameBlock}.
@@ -1624,11 +1627,11 @@ To determine when to issue \emph{rename} operations, nodes may monitor the numbe
 
 A second aspect to take into account is the integration time of \emph{rename} operations.
 As reported in \Cref{tab:evolution-integration-time-rename}, integrating remote \emph{rename} operations takes up to seconds if delayed for too long.
-Although \emph{rename} operations work behind the scenes, they can still impact negatively the user experience.
+Although \emph{rename} operations work behind the scenes, they can still negatively impact the user experience.
 Indeed, nodes cannot integrate operations from others while they are processing \emph{rename} operations
 From users' points of view, \emph{rename} operations can thus be perceived as latency peaks.
 In the domain of real-time collaborative editing, user experiments have shown that delay degrades the quality of collaborations \cite{ignat:hal-01088815,ignat:hal-01238831}.
-It thus important to issue \emph{rename} operations frequently to keep their integration times below the perceptible limit.
+It thus important to frequently issue \emph{rename} operations to keep their integration times below the perceptible limit.
 
 Finally, the last aspect to consider is the amount of concurrent \emph{rename} operations.
 \Cref{fig:evolution-document-size} shows that concurrent \emph{rename} operations decrease RenamableLogootSplit's performance.
@@ -1637,11 +1640,11 @@ However, it should avoid relying on synchronous coordination between nodes to do
 To reduce the likelihood of issuing concurrent \emph{rename} operations, several techniques can be proposed.
 For example, nodes can monitor to which other nodes they are currently connected and delegate to the one with the highest \emph{node identifier} the duty to issue \emph{rename} operations.
 
-To recap, we can propose strategies aiming to minimise each of these parameters individually.
+To recap, we can propose strategies aiming to individually minimise each of these parameters.
 And while some of these goals converge (to minimise the size of the data structure and to minimise the integration time of \emph{rename} operations), others conflict (to issue a \emph{rename} operation as soon as a threshold is reached vs. to minimise the amount of concurrent \emph{rename} operations).
 System designers have thus to propose a trade-off between parameters according to the constraints of the system (real-time application or not, nodes' hardware limitations...).
 To provide an example, in our use case which is real-time collaborative editing, we would prioritise the integration times of \emph{rename} operations to limit their impact on user experiences.
-We would thus issue \emph{rename} operations frequently, even if it means issuing concurrent \emph{rename} operations.
+We would thus frequently issue \emph{rename} operations, even if it means issuing concurrent \emph{rename} operations.
 
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
@@ -1649,14 +1652,14 @@ We would thus issue \emph{rename} operations frequently, even if it means issuin
 Nodes have to store \emph{former states} corresponding to \emph{rename} operations to transform operations from previous or concurrent epochs.
 Nodes may receive such operations given 2 different cases:
 \begin{enumerate*}[label=(\roman*)]
-    \item nodes have recently issued \emph{rename} operations
+    \item nodes recently have issued \emph{rename} operations
     \item nodes logged back in the collaboration.
 \end{enumerate*}
 Between these specific events, \emph{former states} are actually not needed to handle operations.
 
 We can thus propose the following trade-off: to offload \emph{former states} on the disk until their next use or until they can be garbage collected.
 It would enable nodes to mitigate the temporary memory overhead introduced by the renaming mechanism but increases integration times of operations requiring one of these \emph{former states}.
-Nodes could adopt various strategies to deem \emph{former states} offloadable and to retrieve them preemptively according to their constraints.
+Nodes could adopt various strategies to deem \emph{former states} offloadable and to preemptively retrieve them according to their constraints.
 The design of these strategies could be based on several heuristics: epochs of currently online nodes, number of nodes still able to issue concurrent operations, time elapsed since last use of the \emph{former state}...
 
 \subsection{Compression technique for \emph{rename} operations}
@@ -1739,7 +1742,7 @@ It also simplifies the implementation of the garbage collection mechanism of epo
 
 \subsection{The LSEQ approach}
 
-The LSEQ approach \cite{lseq2013, lseq2017} is another approach proposed to address the growth of identifiers in variable-size identifiers Sequence \ac{CRDT}. Instead of reducing periodically the identifier metadata using an expensive renaming mechanism, the authors define new identifier allocation strategies to reduce their growth rate.
+The LSEQ approach \cite{lseq2013, lseq2017} is another approach proposed to address the growth of identifiers in variable-size identifiers Sequence \ac{CRDT}. Instead of periodically reducing the identifier metadata using an expensive renaming mechanism, the authors define new identifier allocation strategies to reduce their growth rate.
 
 In this work, authors observe that the identifier allocation strategy proposed in Logoot\cite{WeissICDCS09} is suited to a single editing pattern: from left to right, top to bottom.
 If insertions are made according to other patterns, generated identifiers quickly saturate the space of possible identifiers for a given size.
@@ -1747,7 +1750,7 @@ Following insertions therefore trigger an increase of the identifier size.
 As a result, Logoot identifiers grow linearly with the number of insertions instead of the expected logarithmic progression.
 
 LSEQ thus defines several identifier allocation strategies fitted to different editing pattern.
-Nodes pick randomly one of these strategies for each identifier size.
+Nodes randomly pick one of these strategies for each identifier size.
 Additionally LSEQ adopts an exponential tree model for identifiers: the range of possible identifiers doubles as the identifier size increases.
 It enables LSEQ to fine-tune the size of identifiers according to needs.
 By combining the different allocation strategies to the exponential tree model, LSEQ achieves a polylogarithmic growth of identifiers according to the number of insertions.
@@ -1756,7 +1759,7 @@ While the LSEQ approach reduces the growth rate of identifiers in variable-size 
 On the other hand, RenamableLogootSplit's renaming mechanism enables to reduce metadata to a fixed amount, independently of the number of elements.
 
 These two approaches are actually orthogonal and can, as in the previous approach, be combined.
-The resulting system would reset the sequence's metadata periodically using \emph{rename} operations while LSEQ's identifier allocation strategies would reduce their growth in-between.
+The resulting system would periodically reset the sequence's metadata using \emph{rename} operations while LSEQ's identifier allocation strategies would reduce their growth in-between.
 This would also enable reducing the frequency of \emph{rename} operations, decreasing the system computations overall.
 
 \section{Conclusions and future work}
@@ -1768,7 +1771,7 @@ Still, some of these data structures, notably Sequence \acp{CRDT}, suffer from a
 In this paper, we introduced a novel Sequence \ac{CRDT} belonging to the variable-size identifiers approach: RenamableLogootSplit.
 This new data structure embeds a renaming mechanism in its specification.
 This mechanism enables nodes to reassign shorter identifiers to elements and to group them into one block to minimise metadata.
-The renaming mechanism takes the form of \emph{rename} operations, system operations that are triggered automatically by nodes when deemed necessary.
+The renaming mechanism takes the form of \emph{rename} operations, system operations that are automatically triggered by nodes when deemed necessary.
 Since the proposed \emph{rename} operation is not commutative with \emph{insert} and \emph{remove} operations, we use \ac{OT} techniques to solve resulting conflicts.
 
 Experiments show that the renaming mechanism enables nodes to reduce the size of their data structure by several hundred times compared to previous work.
