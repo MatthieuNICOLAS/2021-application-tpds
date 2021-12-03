@@ -319,8 +319,11 @@ The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom
 Elements are ordered into the sequence by comparing their respective identifiers.
 New element can always be inserted in between with a proper identifier according to the dense order.
 However this approach suffers from an ever-increasing overhead, as the size of such identifiers is unbounded and grows over time.
-In the context of this paper, we focus on the latter approach.
 
+Despite several comparisons\cite{ahmednacer:inria-00629503,briot:hal-01343941,lseq2017}, literature has provided no decisive evidence of the superiority of one approach on the other, but simply trade-offs.
+The tombstone approach offers a smaller network footprint since its identifier are of fixed size, while the variable-size identifiers approach offers a better reactivity since updates can be delivered out of order.
+What should be taken from the literature is that it is the implementation choices that determines the performance of a \ac{CRDT}, \ie the data structures used and their corresponding trade-offs between space and time complexity.
+As such, we decided to focus only on the latter approach in the context of this paper.
 
 \subsection{LogootSplit}
 
