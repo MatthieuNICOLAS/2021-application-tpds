@@ -1455,7 +1455,7 @@ Nonetheless, the renaming mechanism reduces the integration times of the majorit
 
 \headerparagraph{Integration time of \emph{rename} operation}
 %
-Finally, we measured the evolution of integration times of \emph{rename} operation according to the number of operations, which relates to the number of elements in the sequence.
+Afterward, we measured the evolution of integration times of \emph{rename} operation according to the number of operations, which relates to the number of elements in the sequence.
 As before, we distinguish performance of \emph{local} and \emph{remote} updates.
 The case of \emph{remote rename} operations is subdivided into three categories.
 \emph{Direct remote} denotes a remote \emph{rename} operation that introduces a new epoch child of the current node epoch.
@@ -1518,6 +1518,25 @@ Another interesting result from this benchmark is that \emph{concurrent introduc
 Since these operations introduce epochs that are not selected as the new target epoch, nodes do not actually proceed to rename their states.
 The application of \emph{concurrent introducing lesser epoch} operations hence solely consists of adding the introduced epoch and the corresponding \emph{former state} into the epoch tree.
 Thus nodes can significantly reduce the overall computations of a set of concurrent \emph{rename} operations by applying them in the most suitable order given the context.
+
+\headerparagraph{Time to replay operation log}
+%
+Finally, in order to compare the performance of RenamableLogootSplit to LogootSplit on a whole, we measured the time needed by both to replay a log of operations.
+Obtained results are shown in \Cref{fig:time-to-replay-log}.
+\mnnote{TODO: Figure est un placeholder, la remplacer une fois les résultats des benchmarks obtenus}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\columnwidth]{img/replay-log-30k.png}
+    \caption{Evolution of time needed to replay operation log}
+    \label{fig:time-to-replay-log}
+\end{figure}
+
+We observe that gains on integration times of \emph{insert} and \emph{remove} operations thanks to the renaming mechanism initially help to counterbalance the integration time \emph{rename} operations.
+But as the collaboration progresses, \emph{rename} operations become more and more costly since more elements are involved.
+This cost is multiplied in scenarios with concurrent \emph{rename} operations.
+In such scenarios, RenamableLogootSplit becomes slower than LogootSplit to replay the log of operations.
+It is thus necessary to improve the integration time of \emph{rename} operations.
 
 \subsection{Complexity analysis of the epochs garbage collection mechanism}
 
