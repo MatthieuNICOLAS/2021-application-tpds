@@ -321,9 +321,10 @@ New element can always be inserted in between with a proper identifier according
 However this approach suffers from an ever-increasing overhead, as the size of such identifiers is unbounded and grows over time.
 
 Despite several comparisons\cite{ahmednacer:inria-00629503,briot:hal-01343941,lseq2017}, literature has provided no decisive evidence of the superiority of one approach on the other, but simply trade-offs.
-The tombstone approach offers a smaller network footprint since its identifier are of fixed size, while the variable-size identifiers approach offers a better reactivity since updates can be delivered out of order.
-What should be taken from the literature is that it is the implementation choices that determines the performance of a \ac{CRDT}, \ie the data structures used and their corresponding trade-offs between space and time complexity.
-As such, we decided to focus only on the latter approach in the context of this paper.
+The tombstone approach offers a smaller network footprint since its identifiers are of fixed size, while the variable-size identifiers approach offers a better latency since updates can be delivered out of order.
+In this paper, we focus on the variable-size identifiers approaches and more specifically on the LogootSplit algorithm.
+The general idea of the presented work is not specific to any technical aspects of this approach.
+As so, it might be applied on the other approach with some additional research work.
 
 \subsection{LogootSplit}
 
@@ -589,11 +590,9 @@ To converge, other nodes have to rename their states identically.
 However, they cannot simply replace their current state with the new renamed one.
 Indeed, they may have performed concurrent updates on their states.
 In order not to discard these updates (with regard to \Cref{prop:intention} and \Cref{prop:commutativity}), nodes have to process the \emph{rename} operation themselves.
-However, the applied renaming depends on the state\footnote{More precisely, the intervals of identifiers composing the sequence.} of the node at the moment of generation of the \emph{rename} operation, that we call \emph{former state}.
-Other nodes need this input to be able to apply the same renaming.
-The \emph{rename} operation thus embeds the \emph{former state}.
-Using this state, other nodes compute the new identifier of each renamed identifier.
-As for concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
+However, the applied renaming depends on the state\footnote{More precisely, the intervals of identifiers composing the sequence.} -- called \emph{former state} -- of the node when the \emph{rename} operation was generated.
+Other nodes need this information to compute the new renamed identifiers.
+For concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
 
 \subsection{Dealing with concurrent updates}
 
@@ -1506,13 +1505,13 @@ The main outcome of these measures shows that \emph{rename} operations are gener
 Local \emph{rename} operations take hundreds of milliseconds while \emph{direct remote} ones and \emph{concurrent introducing greater epoch} ones may last seconds if delayed for too long.
 It is thus necessary to take this result into account when designing strategies to trigger \emph{rename} operations to prevent them from negatively impacting user experiences.
 In parallel, several improvements may be made to reduce these integration times :
-\begin{enumerate*}[label=(\roman*)]
-    \item instead of using \textsc{renameId}, which renames the state identifier by identifier, one could design and use \textsc{renameBlock}.
+\begin{itemize}
+    \item Instead of using \textsc{renameId}, which renames the state identifier by identifier, one could design and use \textsc{renameBlock}.
         This function would rename the state block per block, achieving a better time complexity.
         Additionally, since \emph{rename} operations merge existing blocks into one, this would set up a virtuous circle, where each \emph{rename} operation reduces the cost of the next one.
-    \item since each call to \textsc{renameId} or \textsc{revertRenameId} is independant from others, these functions are well-suited for parallel programming.
+    \item Since each call to \textsc{renameId} or \textsc{revertRenameId} is independant from others, these functions are well-suited for parallel programming.
         Instead of renaming identifiers (or blocks) sequentially, one could slice the sequence into chunks and rename them in parallel.
-\end{enumerate*}
+\end{itemize}
 
 Another interesting result from this benchmark is that \emph{concurrent introducing lesser epoch} operations are cheap to apply.
 Since these operations introduce epochs that are not selected as the new target epoch, nodes do not actually proceed to rename their states.
@@ -1531,11 +1530,11 @@ Obtained results are shown in \Cref{fig:time-to-replay-log}.
     \label{fig:time-to-replay-log}
 \end{figure}
 
-We observe that gains on integration times of \emph{insert} and \emph{remove} operations thanks to the renaming mechanism initially help to counterbalance the integration time \emph{rename} operations.
-But as the collaboration progresses, \emph{rename} operations become more and more costly since more elements are involved.
-This cost is multiplied in scenarios with concurrent \emph{rename} operations.
-In such scenarios, RenamableLogootSplit becomes slower than LogootSplit to replay the log of operations.
-It is thus necessary to improve the integration time of \emph{rename} operations.
+We observe that gains on integration times of \emph{insert} and \emph{remove} operations thanks to the renaming mechanism initially help to counterbalance the integration times of \emph{rename} operations.
+But as the collaboration progresses, integration times of \emph{rename} operations sightly increase since more elements are involved.
+This tendency is even more pronounced in scenarios with concurrent \emph{rename} operations.
+Fortunately, in real-world applications, such a scenario (i.e., replaying the entire log) will not be the usual case and could be mitigated, for example, by using snapshot mechanisms.
+The snapshot mechanisms could even benefit from the renaming mechanism since the transferred states will be compressed.
 
 \subsection{Complexity analysis of the epochs garbage collection mechanism}
 
@@ -1618,13 +1617,13 @@ Indeed, this mechanism does not belong to the critical path of the application, 
 It may be triggered rarely, in the background and we may even target specific windows to do so, \eg during idle times.
 As such, we thus did not delve on this part of RenamableLogootSplit in this work.
 
-The algorithm we describe here thus corresponds to a naive and simple approach of the epochs garbage collection mechanism.
-There is room for improvement on several aspects :
-\begin{enumerate*}[label=(\roman*)]
-    \item to determine the maximal epoch with the corresponding \emph{rename} operation causally stable, one could track the current epochs of every node instead of entire version vectors and pick the minimal one
-    \item to compute the set of \emph{required epochs}, one could merge the steps looking for the \ac{LCA} and adding browsed epochs to \emph{required epochs}.
-\end{enumerate*}
-Further work should thus be undertaken on these leads to improve the epochs garbage collection mechanism.
+% The algorithm we describe here thus corresponds to a naive and simple approach of the epochs garbage collection mechanism.
+% There is room for improvement on several aspects :
+% \begin{enumerate*}[label=(\roman*)]
+%     \item to determine the maximal epoch with the corresponding \emph{rename} operation causally stable, one could track the current epochs of every node instead of entire version vectors and pick the minimal one
+%     \item to compute the set of \emph{required epochs}, one could merge the steps looking for the \ac{LCA} and adding browsed epochs to \emph{required epochs}.
+% \end{enumerate*}
+% Further work should thus be undertaken on these leads to improve the epochs garbage collection mechanism.
 
 \section{Discussion}
 
@@ -1660,9 +1659,9 @@ For example, nodes can monitor to which other nodes they are currently connected
 
 To recap, we can propose strategies aiming to individually minimise each of these parameters.
 And while some of these goals converge (to minimise the size of the data structure and to minimise the integration time of \emph{rename} operations), others conflict (to issue a \emph{rename} operation as soon as a threshold is reached vs. to minimise the amount of concurrent \emph{rename} operations).
-System designers have thus to propose a trade-off between parameters according to the constraints of the system (real-time application or not, nodes' hardware limitations...).
-To provide an example, in our use case which is real-time collaborative editing, we would prioritise the integration times of \emph{rename} operations to limit their impact on user experiences.
-We would thus frequently issue \emph{rename} operations, even if it means issuing concurrent \emph{rename} operations.
+System designers have thus to propose a trade-off between parameters according to the constraints of the system (real-time application or not, nodes’ hardware limitations...).
+It is hence necessary to deploy the system to evaluate its performance on each aspect, its usage and to find the right trade-off between all the parameters of the renaming strategy.
+For instance, we built a peer-to-peer real-time collaborative editing system~\cite{MUTE2017} and we constrained the integration times of operations (including \emph{rename} ones) to be kept under the bound that corresponds to their perception by users.
 
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
