@@ -322,7 +322,7 @@ However this approach suffers from an ever-increasing overhead, as the size of s
 
 Despite several comparisons\cite{ahmednacer:inria-00629503,briot:hal-01343941,lseq2017}, literature has provided no decisive evidence of the superiority of one approach on the other, but simply trade-offs.
 The tombstone approach offers a smaller network footprint since its identifiers are of fixed size, while the variable-size identifiers approach offers a better latency since updates can be delivered out of order.
-In this paper, we focus on the variable-size identifiers approaches and more specifically on the LogootSplit algorithm.
+In this paper, we focus on the variable-size identifiers approach and more specifically on the LogootSplit algorithm.
 The general idea of the presented work is not specific to any technical aspects of this approach.
 As so, it might be applied on the other approach with some additional research work.
 
@@ -592,7 +592,8 @@ Indeed, they may have performed concurrent updates on their states.
 In order not to discard these updates (with regard to \Cref{prop:intention} and \Cref{prop:commutativity}), nodes have to process the \emph{rename} operation themselves.
 However, the applied renaming depends on the state\footnote{More precisely, the intervals of identifiers composing the sequence.} -- called \emph{former state} -- of the node when the \emph{rename} operation was generated.
 Other nodes need this information to compute the new renamed identifiers.
-For concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
+The \emph{rename} operation thus embeds the \emph{former state} to propagate it.
+% As for concurrently inserted identifiers, we explain in \Cref{sec:dealing-with-concurrent-updates} how nodes rename them in a deterministic way.
 
 \subsection{Dealing with concurrent updates}
 
@@ -766,12 +767,19 @@ This case corresponds to node B's one in \Cref{fig:concurrent-insert-rename-fixe
 Upon the delivery of node A's \emph{rename} operation, applying \textsc{renameId} to every identifier of its state would enable node B to reach an equivalent state to node A's one.
 \textsc{renameId} thus makes \emph{rename} operations commutative with \emph{insert} and \emph{remove} ones.
 
+Note that nodes rely on the \emph{former state} -- called here \emph{renamedIds} -- to apply \textsc{renameId}.
+As such, nodes have to store it to be able to transform concurrent operations.
+The identifiers composing the \emph{former state} are hence tombstones.
+But unlike those of the tombstone approach, these tombstones are not kept directly in the sequence but in the epochs.
+They have thus no impact on integration times of future operations.
+Additionally, we present a mechanism to garbage collect them in \Cref{sec:gc-former-states}.
+
 \Cref{alg:renameId} features only the main case of \textsc{renameId}, \ie when the identifier to rename is in the range of renamed identifiers ($\trm{firstId} \leq \trm{id} \leq \trm{lastId}$).
 Functions to deal with other cases, \ie when the identifier to rename is out of the range of renamed identifiers ($\trm{id} < \trm{firstId}$ or $\trm{lastId} < \trm{id}$), are presented in \Cref{app:rename-id}.
 
 The algorithm we present here enables nodes to rename their states identifier by identifier.
 A possible extension is to design \textsc{renameBlock}, an improved version that renames the state block by block.
-\textsc{renameBlock} would reduce the integration time of \emph{rename} operations, since its time complexity would no longer depends on the number of identifiers (\ie the number of elements) but from the number of blocks.
+\textsc{renameBlock} would reduce the integration times of \emph{rename} operations, since its time complexity would no longer depend on the number of identifiers (\ie the number of elements) but from the number of blocks.
 Additionally, its execution would reduce the integration time of the next \emph{rename} operation since the renaming mechanism merges existing blocks into one.
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
@@ -1406,6 +1414,7 @@ In \Cref{sec:offloading-former-states}, we discuss that \emph{former states} may
 \headerparagraph{Integration times of standard operations}
 %
 Next, we compared the evolution of integration times of standard operations, \ie \emph{insert} and \emph{remove} operations, on LogootSplit and RenamableLogootSplit documents.
+% To this end, we applied randomly generated operations on snapshots taken at different points of the simulations.
 % The benchmark thus consists in generating random operations and to measure their integration times on.
 Since both types of operation share the same time complexity, we used solely \emph{insert} ones in our benchmarks.
 We do however distinguish \emph{local} and \emph{remote} updates.
@@ -1555,7 +1564,6 @@ First, it establishes the version vector of causally stable operations.
 To this end, each node has to maintain a matrice of version vectors of every nodes.
 The algorithm computes the version vector of causally stable operations by keeping the minimal value for each entry of the vectors.
 This step consists thus in merging $n$ version vectors of $n$ entries, it is thus executed in \bigO{n^2}.
-\mnnote{TODO: Ajouter ref vers algo pour calculer ce vecteur de version des opérations causalement stables}
 
 % L'étape suivante consiste à parcourir l'arbre des epochs dans l'ordre inverse à celui défini par la relation priority, jusqu'à trouver l'epoch maximale dont l'opération rename est causalement stable.
 % Pour chaque epoch parcourue, calcule et stocke le chemin entre elle et la racine
@@ -1642,7 +1650,7 @@ As displayed in \Cref{fig:evolution-document-size}, metadata progressively incre
 Using \emph{rename} operations, nodes can discard metadata and reduce the size of the data structure to an acceptable amount.
 To determine when to issue \emph{rename} operations, nodes may monitor the number of operations performed since the last \emph{rename} one, the number of blocks composing the sequence or the length of identifiers.
 
-A second aspect to take into account is the integration time of \emph{rename} operations.
+A second aspect to take into account is the integration times of \emph{rename} operations.
 As reported in \Cref{tab:evolution-integration-time-rename}, integrating remote \emph{rename} operations takes up to seconds if delayed for too long.
 Although \emph{rename} operations work behind the scenes, they can still negatively impact the user experience.
 Indeed, nodes cannot integrate operations from others while they are processing \emph{rename} operations
@@ -1658,10 +1666,11 @@ To reduce the likelihood of issuing concurrent \emph{rename} operations, several
 For example, nodes can monitor to which other nodes they are currently connected and delegate to the one with the highest \emph{node identifier} the duty to issue \emph{rename} operations.
 
 To recap, we can propose strategies aiming to individually minimise each of these parameters.
-And while some of these goals converge (to minimise the size of the data structure and to minimise the integration time of \emph{rename} operations), others conflict (to issue a \emph{rename} operation as soon as a threshold is reached vs. to minimise the amount of concurrent \emph{rename} operations).
+And while some of these goals converge (to minimise the size of the data structure and to minimise the integration times of \emph{rename} operations), others conflict (to issue a \emph{rename} operation as soon as a threshold is reached vs. to minimise the amount of concurrent \emph{rename} operations).
 System designers have thus to propose a trade-off between parameters according to the constraints of the system (real-time application or not, nodes’ hardware limitations...).
 It is hence necessary to deploy the system to evaluate its performance on each aspect, its usage and to find the right trade-off between all the parameters of the renaming strategy.
-For instance, we built a peer-to-peer real-time collaborative editing system~\cite{MUTE2017} and we constrained the integration times of operations (including \emph{rename} ones) to be kept under the bound that corresponds to their perception by users.
+For instance, in the context of real-time collaborative editing systems, \cite{ignat:hal-01088815} have shown that delay decreases the quality of the collaboration.
+In such systems, we would thus aim to keep the integration times of operations (including \emph{rename} ones) below the limit corresponding to their perception by users.
 
 \subsection{Offloading on disk unused \emph{former states}}
 \label{sec:offloading-former-states}
@@ -1885,7 +1894,7 @@ The use of these strategies would then reduce the overall computations of the sy
     \item \textsc{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
     \item \textsc{concat} : Returns a new id made of the tuples of given ids.
         For example, \textsc{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
-    \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with pos corresponding to the position of the first renamed id, nId to the node id of the author of the \emph{rename} operation and nSeq to its sequence number at the time.
+    \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with \emph{pos} corresponding to the position of the first renamed id, \emph{nId} to the node id of the author of the \emph{rename} operation and \emph{nSeq} to its sequence number at the time.
     \item \textsc{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
         For example, \textsc{getFirstOffset}(\id{i}{A1}{\color{red}1}\id{i}{B0}{0}\id{m}{B1}{0}) returns {\color{red}1}.
     \item \textsc{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
