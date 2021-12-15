@@ -770,7 +770,7 @@ Upon the delivery of node A's \emph{rename} operation, applying \textsc{renameId
 Note that nodes rely on the \emph{former state} -- called here \emph{renamedIds} -- to apply \textsc{renameId}.
 As such, nodes have to store it to be able to transform concurrent operations.
 The identifiers composing the \emph{former state} are hence tombstones.
-But unlike those of the tombstone approach, these tombstones are not kept directly in the sequence but in the epochs.
+But unlike those of the tombstone approach, these tombstones are not kept directly in the sequence but in the node of the \emph{epoch chain}.
 They have thus no impact on integration times of future operations.
 Additionally, we present a mechanism to garbage collect them in \Cref{sec:gc-former-states}.
 
@@ -1547,7 +1547,7 @@ The snapshot mechanisms could even benefit from the renaming mechanism since the
 
 \headerparagraph{Impact on performance of the frequency of \emph{rename} operations}
 %
-Finally, to evaluate the impact on performance of the frequency of \emph{rename} operations, we conducted another benchmark.
+To evaluate the impact on performance of the frequency of \emph{rename} operations, we conducted another benchmark.
 This benchmark consists in replaying operation logs from simulations using diverse settings of \ac{CRDT} : either LogootSplit, RenamableLogootSplit with \emph{rename} operations issued every 30k operations or RenamableLogootSplit with \emph{rename} operations issued every 7k5 operations.
 As the benchmark replays the operation log, it measures the integration times of operations and their sizes.
 Results are displayed in Table 2.
@@ -1557,7 +1557,7 @@ Results are displayed in Table 2.
     \label{tab:impact-frequency}
     \begin{tabular}{llrrrrrrrrr}
         \toprule
-        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time (us)}  & \multicolumn{5}{c}{Size (B)} \\
+        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time ($\trm{\mu}$s)}  & \multicolumn{5}{c}{Size (B)} \\
         \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-11}
         Type & CRDT &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std &   Mean &   Median & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. &    Std \\
         \midrule
@@ -1586,16 +1586,16 @@ This confirms our expected results since the \emph{rename} operation reduces int
 We also note that the frequency has no significant impact on the performance of the \emph{rename} operation itself.
 This was also an expected result since the time complexity of the implemented \emph{rename} operation depends on the number of elements, which is not impacted by \emph{rename} operations.
 
-Regarding the sizes of operations, we observe that \emph{insert} and \emph{remove} operations of RenamableLogootSplit are initially bigger than their counterpart in LogootSplit since they embed their epoch of generation as additional data.
+Regarding the size of operations, we observe that \emph{insert} and \emph{remove} operations of RenamableLogootSplit are initially bigger than their counterpart in LogootSplit since they embed their epoch of generation as additional data.
 But while LogootSplit's operations grow indefinitely, the frequency of \emph{rename} operations sets an upper-bound to the size of RenamableLogootSplit's ones.
 It enables RenamableLogootSplit to have a smaller footprint per operation.
 
 On the other hand, we observe that \emph{rename} operations are much bigger than other types of operation.
 It is explained by the fact that this operation embeds the \emph{former state}, \ie the list of all blocks at its time of generation.
-However, we observe the same phenomenon regarding \emph{rename} operations than for other operations : the frequency of \emph{rename} operations sets a limit to the size of the \emph{rename} operation itself.
+However, we observe the same phenomenon regarding \emph{rename} operations as for other operations : the frequency of \emph{rename} operations sets a limit to the size of the \emph{rename} operation itself.
 One can therefore choose to frequently issue \emph{rename} operations to limit their individual size.
 However, this induces additional computation for each \emph{rename} operation in the current implementation.
-Another solution, which we present in \Cref{sec:compression-rename-op}, is to implement a compression mechanism to only send the needed components to identify each block of the \emph{former state}.
+Another solution, which we present in \Cref{sec:compression-rename-op}, is to implement a compression mechanism to send only the needed components to identify each block of the \emph{former state}.
 
 \subsection{Complexity analysis of the epochs garbage collection mechanism}
 
