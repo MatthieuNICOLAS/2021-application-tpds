@@ -1943,18 +1943,18 @@ The use of these strategies would then reduce the overall computations of the sy
 
 \begin{itemize}
     \item \textsc{position} : Retrieves the value of the position of the first tuple of the given id.
-        For example, \textsc{position}(\id{\color{red}i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns {\color{red}i}.
+        For example, \textsc{position}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns i.
     \item \textsc{findIndex} : Retrieves the index of the given id in the given list of ids renamedIds.
     \item \textsc{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
     \item \textsc{concat} : Returns a new id made of the tuples of given ids.
         For example, \textsc{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
     \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with \emph{pos} corresponding to the position of the first renamed id, \emph{nId} to the node id of the author of the \emph{rename} operation and \emph{nSeq} to its sequence number at the time.
     \item \textsc{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
-        For example, \textsc{getFirstOffset}(\id{i}{A1}{\color{red}1}\id{i}{B0}{0}\id{m}{B1}{0}) returns {\color{red}1}.
+        For example, \textsc{getFirstOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 1.
     \item \textsc{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
         For example, \textsc{getTail}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 1) returns \id{i}{B0}{0}\id{m}{B1}{0}.
     \item \textsc{getLastOffset} : Retrieves the value of the offset of the last tuple of the given id.
-        For example, \textsc{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{\color{red}0}) returns {\color{red}0}.
+        For example, \textsc{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 0.
     \item \textsc{createIdFromBase} : Returns a new id by copying the given id and replacing its last offset with the given one.
         For example, \textsc{createIdFromBase}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 5) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{5}.
     \item \textsc{isPrefix} : Indicates if the given id is a prefix of the other given id.
