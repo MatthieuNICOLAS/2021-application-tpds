@@ -779,7 +779,7 @@ Functions to deal with other cases, \ie when the identifier to rename is out of 
 
 The algorithm we present here enables nodes to rename their states identifier by identifier.
 A possible extension is to design \textsc{renameBlock}, an improved version that renames the state block by block.
-\textsc{renameBlock} would reduce the integration times of \emph{rename} operations, since its time complexity would no longer depend on the number of identifiers (\ie the number of elements) but from the number of blocks.
+\textsc{renameBlock} would reduce the integration times of \emph{rename} operations, since its time complexity would no longer depend on the number of identifiers (\ie the number of elements) but on the number of blocks.
 Additionally, its execution would reduce the integration time of the next \emph{rename} operation since the renaming mechanism merges existing blocks into one.
 
 \section{RenamableLogootSplit with concurrent \emph{rename} operations}
@@ -1529,7 +1529,7 @@ Thus nodes can significantly reduce the overall computations of a set of concurr
 
 \headerparagraph{Time to replay operation log}
 %
-Finally, in order to compare the performance of RenamableLogootSplit to LogootSplit on a whole, we measured the time needed by both to replay a log of operations.
+In order to compare the performance of RenamableLogootSplit to LogootSplit on a whole, we measured the time needed by both to replay a log of operations.
 Obtained results are shown in \Cref{fig:time-to-replay-log}.
 
 \begin{figure}[!ht]
@@ -1544,6 +1544,58 @@ But as the collaboration progresses, integration times of \emph{rename} operatio
 This tendency is even more pronounced in scenarios with concurrent \emph{rename} operations.
 Fortunately, in real-world applications, such a scenario (i.e., replaying the entire log) will not be the usual case and could be mitigated, for example, by using snapshot mechanisms.
 The snapshot mechanisms could even benefit from the renaming mechanism since the transferred states will be compressed.
+
+\headerparagraph{Impact on performance of the frequency of \emph{rename} operations}
+%
+Finally, to evaluate the impact on performance of the frequency of \emph{rename} operations, we conducted another benchmark.
+This benchmark consists in replaying operation logs from simulations using diverse settings of \ac{CRDT} : either LogootSplit, RenamableLogootSplit with \emph{rename} operations issued every 30k operations or RenamableLogootSplit with \emph{rename} operations issued every 7k5 operations.
+As the benchmark replays the operation log, it measures the integration times of operations and their sizes.
+Results are displayed in Table 2.
+
+\begin{table*}[!ht]
+    \centering
+    \label{tab:impact-frequency}
+    \begin{tabular}{llrrrrrrrrr}
+        \toprule
+        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time (us)}  & \multicolumn{5}{c}{Size (B)} \\
+        \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-11}
+        Type & CRDT &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std &   Mean &   Median & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. &    Std \\
+        \midrule
+        insert & LS &     471.38 &     459.74 &     768.47 &    541.96 &     593.02 &      584 &     216 &    1136 &    198.28 \\
+        & RLS - 30k &     397.47 &     322.88 &     587.08 &   3450.17 &     441.90 &      378 &     314 &     958 &    131.05 \\
+        & RLS - 7k5 &     392.58 &     265.44 &     381.10 &   4933.45 &     388.50 &      378 &     314 &     590 &     46.02 \\
+        \cmidrule(lr){1-11}
+        remove & LS &     279.59 &     270.03 &     434.90 &    131.53 &     632.42 &      618 &     250 &    1170 &    199.84 \\
+        & RLS - 30k &     246.77 &     180.87 &     307.59 &   3551.40 &     433.70 &      412 &     320 &     900 &    113.71 \\
+        & RLS - 7k5 &     296.21 &     151.46 &     214.42 &   5555.76 &     401.02 &      412 &     320 &     596 &     51.74 \\
+        \midrule
+        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time (ms)}  & \multicolumn{5}{c}{Size (KB)} \\
+        \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-11}
+        Type & CRDT &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std &   Mean &   Median & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. &    Std \\
+        \midrule
+        rename & RLS - 30k  & 1022.46 & 1187.87 &    1276.18 & 276.47 & 1366.39 & 1258.50 &     634.72 &    3372.95 & 758.98 \\
+        & RLS - 7k5 &  860.96 &  974.38 &    1444.91 & 387.02 &  272.98 &  302.42 &     159.41 &     541.81 &  82.16 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Integration times and sizes of operations per type and frequency of \emph{rename} operations}
+\end{table*}
+
+Regarding integration times, we observe that more frequently issuing \emph{rename} operations improves integration times of \emph{insert} and \emph{remove} operations.
+This confirms our expected results since the \emph{rename} operation reduces integration times of these operations by reducing the size of identifiers and the number of blocks in the sequence.
+
+We also note that the frequency has no significant impact on the performance of the \emph{rename} operation itself.
+This was also an expected result since the time complexity of the implemented \emph{rename} operation depends on the number of elements, which is not impacted by \emph{rename} operations.
+
+Regarding the sizes of operations, we observe that \emph{insert} and \emph{remove} operations of RenamableLogootSplit are initially bigger than their counterpart in LogootSplit since they embed their epoch of generation as additional data.
+But while LogootSplit's operations grow indefinitely, the frequency of \emph{rename} operations sets an upper-bound to the size of RenamableLogootSplit's ones.
+It enables RenamableLogootSplit to have a smaller footprint per operation.
+
+On the other hand, we observe that \emph{rename} operations are much bigger than other types of operation.
+It is explained by the fact that this operation embeds the \emph{former state}, \ie the list of all blocks at its time of generation.
+However, we observe the same phenomenon regarding \emph{rename} operations than for other operations : the frequency of \emph{rename} operations sets a limit to the size of the \emph{rename} operation itself.
+One can therefore choose to frequently issue \emph{rename} operations to limit their individual size.
+However, this induces additional computation for each \emph{rename} operation in the current implementation.
+Another solution, which we present in \Cref{sec:compression-rename-op}, is to implement a compression mechanism to only send the needed components to identify each block of the \emph{former state}.
 
 \subsection{Complexity analysis of the epochs garbage collection mechanism}
 
@@ -1689,6 +1741,8 @@ Nodes could adopt various strategies to deem \emph{former states} offloadable an
 The design of these strategies could be based on several heuristics: epochs of currently online nodes, number of nodes still able to issue concurrent operations, time elapsed since last use of the \emph{former state}...
 
 \subsection{Compression technique for \emph{rename} operations}
+
+\label{sec:compression-rename-op}
 
 To limit bandwidth consumption of \emph{rename} operations, we propose the following compression technique.
 Node may broadcast only necessary components to uniquely identify blocks instead of whole identifiers.
