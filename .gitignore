@@ -1,6 +1,15 @@
 ## Do not track
 
-*-rls-tpds.pdf
+*rls-tpds*
+*response-letter*
+appendices*
+diff*
+main-efficient-renaming-sequence-crdts*
+papoc-efficient-renaming-sequence-crdts.pdf
+ScholarOne Manuscripts.pdf
+sum-diff-efficient-renaming-sequence-crdts.pdf
+Summary of Changes.pdf
+*Proof_hi.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
