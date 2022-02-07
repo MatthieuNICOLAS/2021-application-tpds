@@ -1613,7 +1613,7 @@ To complete our evaluation, we propose a complexity analysis of it.
 % Cette étape consiste donc à fusionner n vecteurs de version de n entrées, elle s'exécute donc en O(n^2)
 The algorithm of the garbage collection mechanism consists of the following steps.
 First, it establishes the version vector of causally stable operations.
-To this end, each node has to maintain a matrice of version vectors of every nodes.
+To this end, each node has to maintain a matrix of version vectors of every node.
 The algorithm computes the version vector of causally stable operations by keeping the minimal value for each entry of the vectors.
 This step consists thus in merging $n$ version vectors of $n$ entries, it is thus executed in \bigO{n^2}.
 
@@ -1644,7 +1644,7 @@ Again, this step is executed in \bigO{e \cdot h}.
 % Enfin, parcourt l'arbre et supprime chaque epoch n'appartenant pas aux required epochs.
 % S'exécute en O(e)
 Having determined the \emph{required epochs}, the mechanism can now remove obsolete epochs.
-It browses the epoch tree and delete every epoch that is not contained in the set.
+It browses the epoch tree and deletes every epoch that is not contained in the set.
 This final step is executed in \bigO{e}.
 
 Thus, we obtain that the time complexity of the garbage collection mechanism of epochs is \bigO{n^2 + 3 (e \cdot h) + e}.
