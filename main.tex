@@ -317,7 +317,7 @@ The first one \cite{oster:inria-00108523, Weiss_2007, ahmednacer:inria-00629503,
 The downside of this approach is an ever-growing overhead, as it needs to keep removed elements to deal with potential concurrent updates, effectively turning them into tombstones.
 The second one \cite{5158449,WeissICDCS09,weiss:hal-00450416,AndreCollaborateCom2013,lseq2013,lseq2017} avoids the need of tombstones by attaching identifiers from a dense total order to elements.
 Elements are ordered into the sequence by comparing their respective identifiers.
-New element can always be inserted in between with a proper identifier according to the dense order.
+A new element can always be inserted in between with a proper identifier according to the dense order.
 However this approach suffers from an ever-increasing overhead, as the size of such identifiers is unbounded and grows over time.
 
 Despite several comparisons\cite{ahmednacer:inria-00629503,briot:hal-01343941,lseq2017}, literature has provided no decisive evidence of the superiority of one approach on the other, but simply trade-offs.
@@ -1548,35 +1548,35 @@ The snapshot mechanisms could even benefit from the renaming mechanism since the
 \headerparagraph{Impact on performance of the frequency of \emph{rename} operations}
 %
 To evaluate the impact on performance of the frequency of \emph{rename} operations, we conducted another benchmark.
-This benchmark consists in replaying operation logs from simulations using diverse settings of \ac{CRDT} : either LogootSplit, RenamableLogootSplit with \emph{rename} operations issued every 30k operations or RenamableLogootSplit with \emph{rename} operations issued every 7k5 operations.
+This benchmark consists in replaying operation logs from simulations using diverse settings of \ac{CRDT} : either LogootSplit, RenamableLogootSplit with \emph{rename} operations issued every 30k operations or RenamableLogootSplit with \emph{rename} operations issued every 7.5k operations.
 As the benchmark replays the operation log, it measures the integration times of operations and their sizes.
 Results are displayed in Table 2.
 
 \begin{table*}[!ht]
     \centering
     \label{tab:impact-frequency}
-    \begin{tabular}{llrrrrrrrrr}
+    \begin{tabular}{llrrrrrrrrrr}
         \toprule
-        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time ($\trm{\mu}$s)}  & \multicolumn{5}{c}{Size (B)} \\
-        \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-11}
-        Type & CRDT &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std &   Mean &   Median & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. &    Std \\
+        \multicolumn{2}{c}{Parameters} & \multicolumn{5}{c}{Integration time ($\trm{\mu}$s)}  & \multicolumn{5}{c}{Size (B)} \\
+        \cmidrule(lr){1-2} \cmidrule(lr){3-7} \cmidrule(lr){8-12}
+        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. \\
         \midrule
-        insert & LS &     471.38 &     459.74 &     768.47 &    541.96 &     593.02 &      584 &     216 &    1136 &    198.28 \\
-        & RLS - 30k &     397.47 &     322.88 &     587.08 &   3450.17 &     441.90 &      378 &     314 &     958 &    131.05 \\
-        & RLS - 7k5 &     392.58 &     265.44 &     381.10 &   4933.45 &     388.50 &      378 &     314 &     590 &     46.02 \\
-        \cmidrule(lr){1-11}
-        remove & LS &     279.59 &     270.03 &     434.90 &    131.53 &     632.42 &      618 &     250 &    1170 &    199.84 \\
-        & RLS - 30k &     246.77 &     180.87 &     307.59 &   3551.40 &     433.70 &      412 &     320 &     900 &    113.71 \\
-        & RLS - 7k5 &     296.21 &     151.46 &     214.42 &   5555.76 &     401.02 &      412 &     320 &     596 &     51.74 \\
+        insert & LS &   471 &    460 &  130 &        224 &         768 &    593 &    584 &  184 &        216 &        1136 \\
+               & RLS - 30k &   397 &    323 &   67 &        171 &         587 &    442 &    378 &   92 &        314 &         958 \\
+               & RLS - 7.5k &   393 &    265 &   55 &        133 &         381 &    389 &    378 &    0 &        314 &         590 \\
+        remove & LS &   280 &    270 &   71 &        140 &         435 &    632 &    618 &  184 &        250 &        1170 \\
+               & RLS - 30k &   247 &    181 &   39 &         98 &         308 &    434 &    412 &    0 &        320 &         900 \\
+               & RLS - 7.5k &   296 &    151 &   35 &         75 &         214 &    401 &    412 &    0 &        320 &         596 \\
         \midrule
-        \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration time (ms)}  & \multicolumn{5}{c}{Size (KB)} \\
-        \cmidrule(lr){1-2} \cmidrule(lr){3-6} \cmidrule(lr){7-11}
-        Type & CRDT &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std &   Mean &   Median & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. &    Std \\
+        \multicolumn{2}{c}{Parameters} & \multicolumn{5}{c}{Integration time (ms)}  & \multicolumn{5}{c}{Size (KB)} \\
+        \cmidrule(lr){1-2} \cmidrule(lr){3-7} \cmidrule(lr){8-12}
+        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. \\
         \midrule
-        rename & RLS - 30k  & 1022.46 & 1187.87 &    1276.18 & 276.47 & 1366.39 & 1258.50 &     634.72 &    3372.95 & 758.98 \\
-        & RLS - 7k5 &  860.96 &  974.38 &    1444.91 & 387.02 &  272.98 &  302.42 &     159.41 &     541.81 &  82.16 \\
+        rename & RLS - 30k &  1022 &   1188 &  425 &        540 &        1276 &   1366 &   1258 &  514 &        635 &        3373 \\
+               & RLS - 7.5k &   861 &    974 &  669 &        123 &        1445 &    273 &    302 &  132 &        159 &         542 \\
         \bottomrule
-    \end{tabular}
+        \end{tabular}
+
     \caption{Integration times and sizes of operations per type and frequency of \emph{rename} operations}
 \end{table*}
 
