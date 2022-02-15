@@ -1331,8 +1331,6 @@ We discuss this topic further in \Cref{sec:offloading-former-states}.
 
 \label{sec:evaluation}
 
-\subsection{Simulations and benchmarks}
-
 In order to validate the proposed approach, we proceed to an experimental evaluation.
 The aims of this evaluation are to measure
 \begin{enumerate*}[label=(\roman*)]
@@ -1340,6 +1338,17 @@ The aims of this evaluation are to measure
     \item the computational overhead added to \emph{insert} and \emph{remove} operations by the renaming mechanism
     \item the cost of integrating \emph{rename} operations.
 \end{enumerate*}
+
+Our evaluation focuses on the comparison between RenamableLogootSplit and LogootSplit respective performance for following reasons.
+First, it highlights the impact of the renaming mechanism on the performance of the replicated sequence.
+Second, other Sequence \acp{CRDT} \cite{ROH2011354,briot:hal-01343941,lseq2017} suffer from drawbacks akin to LogootSplit's ones (tombstones, fragmentation into blocks of few elements, ever-growing identifiers).
+As such, adapted versions of the proposed mechanism would offer them the same benefits than it provides to LogootSplit.
+Since we are interested in the impact of the renaming mechanism, the baseline Sequence \ac{CRDT} used is of little importance.
+Third, a performance comparison with \cite{letia:hal-01248270,zawirski:hal-01248197} would be limiting since the main difference between both approaches lies in the systems for which they are designed.
+The former is intended for decentralised systems and therefore relies on a consensus protocol, while RenamableLogootSplit avoids this constraint since it is designed for distributed systems without central authorities.
+Thus, we instead discuss the comparison of the two approaches in more detail in \Cref{sec:core-nebula}.
+
+\subsection{Simulations and benchmarks}
 
 By means of simulations, we generated the dataset used to run our benchmarks.
 These simulations mimic the following scenario.
@@ -1803,6 +1812,7 @@ Several works were proposed to address our problem of growth of identifiers in v
 We present in this section the most relevant ones.
 
 \subsection{The core-nebula approach}
+\label{sec:core-nebula}
 
 The \emph{core-nebula} approach \cite{letia:hal-01248270, zawirski:hal-01248197} was proposed to reduce the size of identifiers in Treedoc\cite{5158449}, another variable-size identifiers Sequence \ac{CRDT}.
 
