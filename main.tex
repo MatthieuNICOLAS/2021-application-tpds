@@ -1661,7 +1661,7 @@ Having determined the \emph{required epochs}, the mechanism can now remove obsol
 It browses the epoch tree and deletes every epoch that is not contained in the set.
 This final step is executed in \bigO{e}.
 
-Thus, we obtain that the time complexity of the garbage collection mechanism of epochs is \bigO{n^2 + 3 (e \cdot h) + e}.
+Thus, we obtain that the time complexity of the garbage collection mechanism of epochs is \bigO{n^2 + e \cdot h}.
 We summarise this result in \Cref{tab:time-complexity-gc-mechanism-epochs}.
 
 \begin{table}[!ht]
@@ -1679,7 +1679,7 @@ We summarise this result in \Cref{tab:time-complexity-gc-mechanism-epochs}.
             \emph{computing \emph{required epochs}} & $e \cdot h$ \\
             \emph{deleting obsolete epochs} & $e$ \\
             \midrule
-            \emph{total} & $n^2 + 3 (e \cdot h) + e$ \\
+            \emph{total} & $n^2 + e \cdot h$ \\
             \bottomrule
         \end{tabular}
     }
