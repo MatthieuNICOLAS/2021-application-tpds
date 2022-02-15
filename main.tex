@@ -1491,35 +1491,35 @@ The results are displayed in \Cref{tab:evolution-integration-time-rename}.
     \caption{Integration time of rename operations}
     \label{tab:evolution-integration-time-rename}
     \resizebox{\columnwidth}{!}{
-        \begin{tabular}{lrrrrr}
+        \begin{tabular}{lrrrrrr}
             \toprule
-            \multicolumn{2}{c}{Parameters} & \multicolumn{4}{c}{Integration Time (ms)} \\
-            \cmidrule(lr){1-2} \cmidrule(lr){3-6}
-            Type & Nb Ops (k) &   Mean &   Median & 99\textsuperscript{th} Quant. &    Std \\
+            \multicolumn{2}{c}{Parameters} & \multicolumn{5}{c}{Integration Time (ms)} \\
+            \cmidrule(lr){1-2} \cmidrule(lr){3-7}
+            Type & Nb Ops (k) &  Mean & Median &    IQR & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. \\
             \midrule
-            Local & 30  &    41.75 &    38.74 &      71.68 &   6.84 \\
-                                    & 60  &    78.32 &    78.16 &      81.42 &   1.24 \\
-                                    & 90  &   119.19 &   118.87 &     124.22 &   2.49 \\
-                                    & 120 &   143.75 &   143.57 &     148.59 &   2.16 \\
-                                    & 150 &   158.04 &   157.95 &     164.38 &   2.49 \\
-            \cmidrule(lr){1-6}
-            Direct remote & 30  &   481.32 &   477.13 &     537.30 &  17.11 \\
-                                    & 60  &   981.62 &   978.24 &    1072.83 &  31.54 \\
-                                    & 90  &  1491.28 &  1481.83 &    1657.58 &  51.10 \\
-                                    & 120 &  1670.00 &  1663.85 &    1814.38 &  50.29 \\
-                                    & 150 &  1694.17 &  1675.95 &    1852.55 &  59.94 \\
-            \cmidrule(lr){1-6}
-            Cc. int. greater epoch & 30  &   643.53 &   643.57 &     682.80 &  13.42 \\
-                                    & 60  &  1317.66 &  1316.39 &    1399.55 &  28.67 \\
-                                    & 90  &  1998.23 &  1994.08 &    2111.98 &  45.37 \\
-                                    & 120 &  2239.71 &  2233.22 &    2368.45 &  50.06 \\
-                                    & 150 &  2241.92 &  2233.61 &    2351.02 &  52.20 \\
-            \cmidrule(lr){1-6}
-            Cc. int. lesser epoch & 30  &     1.36 &     1.30 &       3.53 &   0.37 \\
-                                    & 60  &     2.82 &     2.69 &       4.85 &   0.45 \\
-                                    & 90  &     4.45 &     4.23 &       5.81 &   0.71 \\
-                                    & 120 &     5.33 &     5.10 &       8.78 &   0.90 \\
-                                    & 150 &     5.53 &     5.26 &       8.70 &   0.79 \\
+            Local & 30  &   42 &     39 &   6 &         37 &          72 \\
+                & 60  &   78 &     78 &   2 &         76 &          81 \\
+                & 90  &  119 &    119 &   2 &        116 &         124 \\
+                & 120 &  144 &    144 &   3 &        139 &         149 \\
+                & 150 &  158 &    158 &   4 &        153 &         164 \\
+            \cmidrule{1-7}
+            Direct remote & 30  &  481 &    477 &  15 &        454 &         537 \\
+                & 60  &  982 &    978 &  29 &        926 &        1073 \\
+                & 90  & 1491 &   1482 &  59 &       1396 &        1658 \\
+                & 120 & 1670 &   1664 &  41 &       1568 &        1814 \\
+                & 150 & 1694 &   1676 &  61 &       1591 &        1853 \\
+            \cmidrule{1-7}
+            Cc. int. greater epoch & 30  &  644 &    644 &  17 &        620 &         683 \\
+                & 60  & 1318 &   1316 &  26 &       1263 &        1400 \\
+                & 90  & 1998 &   1994 &  47 &       1906 &        2112 \\
+                & 120 & 2240 &   2233 &  54 &       2144 &        2368 \\
+                & 150 & 2242 &   2234 &  63 &       2139 &        2351 \\
+            \cmidrule{1-7}
+            Cc. int. lesser epoch & 30  &    1 &      1 &   0 &          1 &           4 \\
+                & 60  &    3 &      3 &   0 &          2 &           5 \\
+                & 90  &    4 &      4 &   1 &          4 &           6 \\
+                & 120 &    5 &      5 &   1 &          4 &           9 \\
+                & 150 &    6 &      5 &   1 &          5 &           9 \\
             \bottomrule
         \end{tabular}
     }
