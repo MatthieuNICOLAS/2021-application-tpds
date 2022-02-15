@@ -291,7 +291,7 @@ It embeds a renaming mechanism to periodically minimise the memory overhead indu
 To avoid costly and blocking consensus algorithms, we instead adopt an optimistic approach : nodes perform renaming without any coordination.
 This new feature is designed as an additional type of operation: the \emph{rename} one.
 Since this operation is not intrinsically commutative with others, conflicts may arise.
-Therefore, we use \emph{Operational Transformations} (OT) \cite{10.1145/67544.66963,10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
+Therefore, we use \ac{OT} \cite{10.1145/67544.66963,10.1145/289444.289469,4668339} to enable nodes to resolve them deterministically.
 In this paper, we present experimental results that assess that metadata overhead in RenamableLogootSplit is significantly lower than other state-of-the-art Sequence \acp{CRDT}.
 
 This paper is organised as follows:
@@ -1402,7 +1402,7 @@ We present the obtained results in \Cref{fig:evolution-document-size}.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=\columnwidth]{img/snapshot-sizes-alt-legende-v2.png}
+    \includegraphics[width=0.9\columnwidth]{img/snapshot-sizes-alt-legende-v2.png}
     \caption{Evolution of the size of the document}
     \label{fig:evolution-document-size}
 \end{figure}
@@ -1574,24 +1574,23 @@ Results are displayed in Table 2.
         \toprule
         \multicolumn{2}{c}{Parameters} & \multicolumn{5}{c}{Integration time ($\trm{\mu}$s)}  & \multicolumn{5}{c}{Size (B)} \\
         \cmidrule(lr){1-2} \cmidrule(lr){3-7} \cmidrule(lr){8-12}
-        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. \\
+        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. \\
         \midrule
         insert & LS &   471 &    460 &  130 &        224 &         768 &    593 &    584 &  184 &        216 &        1136 \\
-               & RLS - 30k &   397 &    323 &   67 &        171 &         587 &    442 &    378 &   92 &        314 &         958 \\
-               & RLS - 7.5k &   393 &    265 &   55 &        133 &         381 &    389 &    378 &    0 &        314 &         590 \\
+            & RLS - 30k &   397 &    323 &   67 &        171 &         587 &    442 &    378 &   92 &        314 &         958 \\
+            & RLS - 7.5k &   393 &    265 &   55 &        133 &         381 &    389 &    378 &    0 &        314 &         590 \\
         remove & LS &   280 &    270 &   71 &        140 &         435 &    632 &    618 &  184 &        250 &        1170 \\
-               & RLS - 30k &   247 &    181 &   39 &         98 &         308 &    434 &    412 &    0 &        320 &         900 \\
-               & RLS - 7.5k &   296 &    151 &   35 &         75 &         214 &    401 &    412 &    0 &        320 &         596 \\
+            & RLS - 30k &   247 &    181 &   39 &         98 &         308 &    434 &    412 &    0 &        320 &         900 \\
+            & RLS - 7.5k &   296 &    151 &   35 &         75 &         214 &    401 &    412 &    0 &        320 &         596 \\
         \midrule
         \multicolumn{2}{c}{Parameters} & \multicolumn{5}{c}{Integration time (ms)}  & \multicolumn{5}{c}{Size (KB)} \\
         \cmidrule(lr){1-2} \cmidrule(lr){3-7} \cmidrule(lr){8-12}
-        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{rst} Quant. & 99\textsuperscript{th} Quant. \\
+        Type & CRDT & Mean & Median &  IQR & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. & Mean & Median &  IQR & 1\textsuperscript{st} Quant. & 99\textsuperscript{th} Quant. \\
         \midrule
         rename & RLS - 30k &  1022 &   1188 &  425 &        540 &        1276 &   1366 &   1258 &  514 &        635 &        3373 \\
-               & RLS - 7.5k &   861 &    974 &  669 &        123 &        1445 &    273 &    302 &  132 &        159 &         542 \\
+            & RLS - 7.5k &   861 &    974 &  669 &        123 &        1445 &    273 &    302 &  132 &        159 &         542 \\
         \bottomrule
-        \end{tabular}
-
+    \end{tabular}
     \caption{Integration times and sizes of operations per type and frequency of \emph{rename} operations}
 \end{table*}
 
@@ -1829,10 +1828,10 @@ Nodes from the \emph{nebula} can still contribute to the document by issuing \em
 
 Our work can be seen as an extension of this work.
 It adapts the \emph{rebalance} mechanism and the \emph{catch-up} protocol to LogootSplit and takes advantage of its block feature.
-Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} operations, hence removing the requirement of a consensus protocol.
+Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} operations, removing the requirement of a consensus protocol.
 It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
 
-However, systems can actually adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
+However, systems can adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
 The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \textsc{revertRenameId}.
 It also simplifies the implementation of the garbage collection mechanism of epochs and \emph{former states}.
 
@@ -1871,7 +1870,7 @@ The renaming mechanism takes the form of \emph{rename} operations, system operat
 Since the proposed \emph{rename} operation is not commutative with \emph{insert} and \emph{remove} operations, we use \ac{OT} techniques to solve resulting conflicts.
 
 Experiments show that the renaming mechanism enables nodes to reduce the size of their data structure by several hundred times compared to previous work.
-RenamableLogootSplit achieves this result even in the case where several concurrent \emph{rename} operations are issued, since the introduced overhead is but temporary and is eventually removed.
+RenamableLogootSplit achieves this result even in the case where several concurrent \emph{rename} operations are issued, since the introduced overhead is eventually removed.
 
 In future work, we plan to propose other strategies than the lexicographical one to define \emph{priority}, the strict total order relation on the set of epochs.
 These new strategies could for example favour the branch of the epoch tree with the most nodes and work.
