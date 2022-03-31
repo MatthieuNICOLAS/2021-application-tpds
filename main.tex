@@ -787,10 +787,11 @@ Additionally, its execution would reduce the integration time of the next \emph{
 \label{sec:distributed-rls}
 
 To prevent the generation of concurrent \emph{rename} operations, nodes have to rely on a consensus protocol.
-However, consensus protocols suffer from their high cost and poor scalability.
-To address these issues, previous work\cite{letia:hal-01248270,zawirski:hal-01248197} has proposed limiting the number of nodes participating in the consensus protocol by assigning this task to a small set of stable and well-connected nodes.
-But this approach relies on organisations to provide these nodes to the system.
-To make RenamableLogootSplit compatible with systems without central authorities, we present a mechanism to handle concurrent \emph{rename} operations in a coordination-free manner.
+However, consensus protocols suffer from their poor scalability and cost.
+To address these issues, previous work\cite{letia:hal-01248270,zawirski:hal-01248197} has proposed limiting the number of nodes participating in the consensus protocol.
+To do so, \cite{letia:hal-01248270,zawirski:hal-01248197} assign this task to a selected small set of stable and well-connected nodes.
+On the contrary, our goal is to design a solution suited to distributed systems with equal nodes in terms of rights and duties.
+We thus choose to handle concurrent \emph{rename} operations and present below a corresponding coordination-free conflict resolution mechanism.
 
 \subsection{Concurrent \emph{rename} operations}
 
