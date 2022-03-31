@@ -1345,9 +1345,8 @@ First, it highlights the impact of the renaming mechanism on the performance of 
 Second, other Sequence \acp{CRDT} \cite{ROH2011354,briot:hal-01343941,lseq2017} suffer from drawbacks akin to LogootSplit's ones (tombstones, fragmentation into blocks of few elements, ever-growing identifiers).
 As such, adapted versions of the proposed mechanism would offer them the same benefits than it provides to LogootSplit.
 Since we are interested in the impact of the renaming mechanism, the baseline Sequence \ac{CRDT} used is of little importance.
-Third, a performance comparison with \cite{letia:hal-01248270,zawirski:hal-01248197} would be limiting since the main difference between both approaches lies in the systems for which they are designed.
-The former is intended for decentralised systems and therefore relies on a consensus protocol, while RenamableLogootSplit avoids this constraint since it is designed for distributed systems without central authorities.
-Thus, we instead discuss the comparison of the two approaches in more detail in \Cref{sec:core-nebula}.
+Third, since the main difference between RenamableLogootSplit and consensus protocol-based approaches lies in their respective system model (\ie systems with equal nodes versus systems with privileged nodes), we do not experimentally compare them.
+We instead compare them in the form of a discussion in \Cref{sec:core-nebula}.
 
 \subsection{Simulations and benchmarks}
 
