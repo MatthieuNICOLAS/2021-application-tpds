@@ -1380,6 +1380,7 @@ These \emph{rename} operations are generated in a way ensuring that they are con
 For the purpose of reproducibility, we make the code, benchmarks and results available at: \url{https://github.com/coast-team/mute-bot-random/}.
 
 \subsection{Results}
+\label{sec:evaluation-results}
 
 Using generated snapshots, we performed several benchmarks.
 These benchmarks evaluate RenamableLogootSplit's performance and compare it to LogootSplit's ones.
@@ -1829,11 +1830,12 @@ Nodes from the \emph{nebula} can still contribute to the document by issuing \em
 Our work can be seen as an extension of this work.
 It adapts the \emph{rebalance} mechanism and the \emph{catch-up} protocol to LogootSplit and takes advantage of its block feature.
 Furthermore, it integrates a mechanism to deal with concurrent \emph{rename} operations, removing the requirement of a consensus protocol.
-It makes this approach usable in systems without existing authorities providing nodes to the \emph{core}.
+It is thus a more generic solution as one can use RenamableLogootSplit in systems composed of a \emph{core} and a \emph{nebula}, as well as in systems without stable nodes to form a \emph{core}.
 
-However, systems can adopt the \emph{core-nebula} approach to simplify the implementation of RenamableLogootSplit.
-The use of a consensus protocol to regulate \emph{rename} operations enables systems to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \textsc{revertRenameId}.
+In systems with a \emph{core}, one can still combine RenamableLogootSplit with a consensus protocol to prevent the generation of concurrent \emph{rename} operations.
+This approach provides the following benefits: it enables to discard all parts dedicated to the handling of concurrent \emph{rename} operations, \ie the design of a \emph{priority} relation and the implementation of \textsc{revertRenameId}.
 It also simplifies the implementation of the garbage collection mechanism of epochs and \emph{former states}.
+Regarding performance, this solution behaves as RenamableLogootSplit with one \emph{renaming bot} (cf. \Cref{sec:evaluation-results}), but with an additional overhead corresponding to the cost of the chosen consensus protocol.
 
 \subsection{The LSEQ approach}
 
