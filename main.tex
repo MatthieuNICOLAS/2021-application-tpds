@@ -786,12 +786,12 @@ Additionally, its execution would reduce the integration time of the next \emph{
 
 \label{sec:distributed-rls}
 
-To prevent the generation of concurrent \emph{rename} operations, nodes have to rely on a consensus protocol.
+To prevent the generation of concurrent \emph{rename} operations, nodes must achieve a consensus.
 However, consensus protocols suffer from their poor scalability and cost.
-To address these issues, previous work\cite{letia:hal-01248270,zawirski:hal-01248197} has proposed limiting the number of nodes participating in the consensus protocol.
-To do so, \cite{letia:hal-01248270,zawirski:hal-01248197} assign this task to a selected small set of stable and well-connected nodes.
-On the contrary, our goal is to design a solution suited to distributed systems with equal nodes in terms of rights and duties.
-We thus choose to handle concurrent \emph{rename} operations and present below a corresponding coordination-free conflict resolution mechanism.
+To address these issues, previous work\cite{letia:hal-01248270,zawirski:hal-01248197} proposed to limit the number of nodes involved in the consensus.
+This reponsability is therefore assigned to a selected small set of stable and well-connected nodes.
+In contrast, our goal is to design a solution suitable for distributed systems whose nodes are equal in rights and duties.
+We therefore choose to handle concurrent \emph{rename} operations and present a corresponding coordination-free conflict resolution mechanism.
 
 \subsection{Concurrent \emph{rename} operations}
 
@@ -1340,13 +1340,13 @@ The aims of this evaluation are to measure
     \item the cost of integrating \emph{rename} operations.
 \end{enumerate*}
 
-Our evaluation focuses on the comparison between RenamableLogootSplit and LogootSplit respective performance for following reasons.
+Our evaluation focuses on the comparison between the performance of RenamableLogootSplit and LogootSplit for the following reasons.
 First, it highlights the impact of the renaming mechanism on the performance of the replicated sequence.
-Second, other Sequence \acp{CRDT} \cite{ROH2011354,briot:hal-01343941,lseq2017} suffer from drawbacks akin to LogootSplit's ones (tombstones, fragmentation into blocks of few elements, ever-growing identifiers).
-As such, adapted versions of the proposed mechanism would offer them the same benefits than it provides to LogootSplit.
+Second, other Sequence \acp{CRDT} \cite{ROH2011354,briot:hal-01343941,lseq2017} suffer from similar drawbacks as LogootSplit (tombstones, fragmentation into blocks of a few elements, ever-growing identifiers).
+Thus, the mechanism proposed for LogootSplit could offer the same advantages to these approaches.
 Since we are interested in the impact of the renaming mechanism, the baseline Sequence \ac{CRDT} used is of little importance.
-Third, since the main difference between RenamableLogootSplit and consensus protocol-based approaches lies in their respective system model (\ie systems with equal nodes versus systems with privileged nodes), we do not experimentally compare them.
-We instead compare them in the form of a discussion in \Cref{sec:core-nebula}.
+Third, since the main difference between RenamableLogootSplit and consensus protocol-based approaches lies in their respective system model (\ie systems with equal nodes versus systems with privileged nodes), we do not compare them experimentally.
+Instead, we compare them in the form of a discussion in \Cref{sec:core-nebula}.
 
 \subsection{Simulations and benchmarks}
 
