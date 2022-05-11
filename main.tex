@@ -281,7 +281,7 @@ Recent work \cite{ahmednacer:inria-00629503, Nedelec2016CRATE, MUTE2017} has dem
 
 Still, Sequence \acp{CRDT} exhibit some limitations.
 In particular, Sequence \acp{CRDT} suffer from the accumulation of large amount of metadata over time due to their internal conflict resolution mechanisms.
-While the ever-growing metadata decreases the memory efficiency of these data structures, it also increases their bandwith consumption and computational overhead.
+While the ever-growing metadata decreases the memory efficiency of these data structures, it also increases their bandwidth consumption and computational overhead.
 Some previous work proposed renaming mechanisms \cite{letia:hal-01248270,zawirski:hal-01248197} to reduce periodically this overhead.
 However, these mechanisms require synchronous coordination.
 
@@ -650,7 +650,7 @@ It is thus necessary to handle concurrent operations to \emph{rename} operations
 
 First, nodes have to detect concurrent operations to \emph{rename} ones.
 To this end, we use an \emph{epoch-based} system.
-Initally, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
+Initially, the replicated sequence starts at the \emph{origin} epoch noted \epoch{0}.
 Each \emph{rename} operation introduces a new epoch and enables nodes to advance their states to it from the previous epoch.
 The generated epoch is characterised using the node id and its current sequence number upon the generation of the \emph{rename} operation.
 For example, the \emph{rename} operation described in \Cref{fig:concurrent-insert-rename-inconsistent} enables nodes to advance their states from \epoch{0} to \epoch{A1}.
@@ -1930,7 +1930,7 @@ The use of these strategies would then reduce the overall computations of the sy
 % or if you just want to reserve a space for a photo:
 
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{matthieu.jpg}}]{Matthieu Nicolas}
-    received a diplôme d'ingénieur from TELECOM Nancy in 2014.
+    received a Diplôme d'Ingénieur from TELECOM Nancy in 2014.
     He worked several years as a R\&D software engineer in the Inria Coast project-team.
     He is now a PhD student at the University of Lorraine.
     His research interests include \acfp{CRDT} and distributed collaborative systems.
@@ -1958,36 +1958,70 @@ The use of these strategies would then reduce the overall computations of the sy
 
 \label[appendix]{app:helper-functions}
 
-\begin{itemize}
-    \item \textsc{position} : Retrieves the value of the position of the first tuple of the given id.
-        For example, \textsc{position}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns i.
-    \item \textsc{findIndex} : Retrieves the index of the given id in the given list of ids renamedIds.
-    \item \textsc{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
-    \item \textsc{concat} : Returns a new id made of the tuples of given ids.
-        For example, \textsc{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
-    \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with \emph{pos} corresponding to the position of the first renamed id, \emph{nId} to the node id of the author of the \emph{rename} operation and \emph{nSeq} to its sequence number at the time.
-    \item \textsc{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
-        For example, \textsc{getFirstOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 1.
-    \item \textsc{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
-        For example, \textsc{getTail}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 1) returns \id{i}{B0}{0}\id{m}{B1}{0}.
-    \item \textsc{getLastOffset} : Retrieves the value of the offset of the last tuple of the given id.
-        For example, \textsc{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 0.
-    \item \textsc{createIdFromBase} : Returns a new id by copying the given id and replacing its last offset with the given one.
-        For example, \textsc{createIdFromBase}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 5) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{5}.
-    \item \textsc{isPrefix} : Indicates if the given id is a prefix of the other given id.
-        For example, \textsc{isPrefix}(\id{i}{A1}{1}\id{i}{B0}{0}, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns true.
-\end{itemize}
+\newcommand{\textmrm}[1]{$\mathrm{#1}$}
+
+\noindent \textmrm{position} : Retrieves the value of the position of the first tuple of the given id.
+    e.g. \textmrm{position}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns i.
+
+\noindent \textmrm{findIndex} : Retrieves the index of the given id in the given list of ids renamedIds.
+
+\noindent \textmrm{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
+
+\noindent \textmrm{concat} : Returns a new id made of the tuples of given ids.
+    e.g. \textmrm{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
+
+\noindent \textmrm{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with \emph{pos} corresponding to the position of the first renamed id, \emph{nId} to the node id of the author of the \emph{rename} operation and \emph{nSeq} to its sequence number at the time.
+
+\noindent \textmrm{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
+    e.g. \textmrm{getFirstOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 1.
+
+\noindent \textmrm{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
+    e.g. \textmrm{getTail}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 1) returns \id{i}{B0}{0}\id{m}{B1}{0}.
+
+\noindent \textmrm{getLastOffset} : Retrieves the value of the offset of the last tuple of the given id.
+    e.g. \textmrm{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 0.
+
+\noindent \textmrm{createIdFromBase} : Returns a new id by copying the given id and replacing its last offset with the given one.
+    e.g. \textmrm{createIdFromBase}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 5) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{5}.
+
+\noindent \textmrm{isPrefix} : Indicates if the given id is a prefix of the other given id.
+    e.g. \textmrm{isPrefix}(\id{i}{A1}{1}\id{i}{B0}{0}, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns true.
+
+
+% \begin{itemize}
+%     \item \textsc{position} : Retrieves the value of the position of the first tuple of the given id.
+%         For example, \textsc{position}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns i.
+%     \item \textsc{findIndex} : Retrieves the index of the given id in the given list of ids renamedIds.
+%     \item \textsc{findIndexOfPred} : Retrieves the index of the predecessor of the given id in the given list of ids renamedIds.
+%     \item \textsc{concat} : Returns a new id made of the tuples of given ids.
+%         For example, \textsc{concat}(\id{i}{A1}{1}, \id{i}{B0}{0}\id{m}{B1}{0}) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}.
+%     \item \textsc{isRenamedId} : Indicates if the given id is part of the block resulting of the \emph{rename} operation, \ie id is of the form \id{pos}{nId~nSeq}{offset} with \emph{pos} corresponding to the position of the first renamed id, \emph{nId} to the node id of the author of the \emph{rename} operation and \emph{nSeq} to its sequence number at the time.
+%     \item \textsc{getFirstOffset} : Retrieves the value of the offset of the first tuple of the given id.
+%         For example, \textsc{getFirstOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 1.
+%     \item \textsc{getTail} : Returns a new id obtained by removing the n first tuples of the given id.
+%         For example, \textsc{getTail}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 1) returns \id{i}{B0}{0}\id{m}{B1}{0}.
+%     \item \textsc{getLastOffset} : Retrieves the value of the offset of the last tuple of the given id.
+%         For example, \textsc{getLastOffset}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns 0.
+%     \item \textsc{createIdFromBase} : Returns a new id by copying the given id and replacing its last offset with the given one.
+%         For example, \textsc{createIdFromBase}(\id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}, 5) returns \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{5}.
+%     \item \textsc{isPrefix} : Indicates if the given id is a prefix of the other given id.
+%         For example, \textsc{isPrefix}(\id{i}{A1}{1}\id{i}{B0}{0}, \id{i}{A1}{1}\id{i}{B0}{0}\id{m}{B1}{0}) returns true.
+% \end{itemize}
 
 \section{Remaining functions of \textsc{renameId}}
 
 \label[appendix]{app:rename-id}
 
-In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \textsc{renameId}.
+%In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \textsc{renameId}.
+\Cref{alg:appendix-rename-id} illustrates the remaining functions composing \textsc{renameId}.
 \textsc{renIdLessThanFirstId} (resp. \textsc{renIdGreaterThanLastId}) enables to rename identifiers with $\trm{id}$ such as $\trm{id} < \trm{firstId}$ (resp. $\trm{lastId} < \trm{id}$).
 
+
+
 \begin{myalgorithm}[!ht]
+    \algrenewcommand\algorithmicindent{1em}%
     \footnotesize
-    \begin{algorithmic}
+    \begin{algorithmic}[]
         \Function{renIdLessThanFirstId}{id, newFirstId}
         \If{id < newFirstId}
             \State \Return id
@@ -1996,7 +2030,7 @@ In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \
             \State nId $\gets$ nodeId(newFirstId)
             \State nSeq $\gets$ nodeSeq(newFirstId)
             \State predNewFirstId $\gets$ \new~Id(pos, nId, nSeq, -1)
-            \\
+%            \\
             \State \Return concat(predNewFirstId, id)
             \EndIf
         \EndFunction
@@ -2014,7 +2048,7 @@ In \Cref{alg:appendix-rename-id}, we present the remaining functions composing \
 \end{myalgorithm}
 
 The main insight of these functions is that it is not necessary to modify identifiers out of the range of renamed identifiers and of resulting identifiers ($[\trm{min}(\trm{firstId}, \trm{predNewFirstId}), \trm{max}(\trm{lastId}, \trm{succNewLastId})]$)
-
+%
 In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitable prefix to the given $\trm{id}$ to preserve the intended order (the predecessor of $\trm{newFirstId}$ for \textsc{renIdLessThanFirstId}, $\trm{newLastId}$ for \textsc{renIdGreaterThanLastId}).
 
 % you can choose not to have a title for an appendix
@@ -2027,6 +2061,7 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
 \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) enables to revert the effects of a previously applied \emph{rename} operation on identifiers with $\trm{id}$ such as $\trm{id} < \trm{newFirstId}$ (resp. $\trm{newLastId}$ < $\trm{id}$).
 
 \begin{myalgorithm}[!ht]
+    \algrenewcommand\algorithmicindent{1em}%
     \footnotesize
     \begin{algorithmic}
         \Function{revRenIdLessThanNewFirstId}{id, firstId, newFirstId}
@@ -2035,8 +2070,8 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
                 \State tail $\gets$ getTail(id, 1)
                 \If{tail < firstId}
                     \State \Return tail
-                \Else
-                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+                \Else \Comment{$id$ was inserted causally after the \emph{rename} op}
+%                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                     \State offset $\gets$ getLastOffset(firstId)
                     \State predFirstId $\gets$ createIdFromBase(firstId, offset)
                     \State \Return concat(predFirstId, MAX\_TUPLE, tail)
@@ -2047,18 +2082,18 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
         \EndFunction
         \\
         \Function{revRenIdGreaterThanNewLastId}{id, lastId}
-            \If{id < lastId}
-                \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+            \If{id < lastId} \Comment{$id$ was inserted causally after the \emph{rename} op}
+%                \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                 \State \Return concat(lastId, MIN\_TUPLE, id)
             \ElsIf{isPrefix(newLastId, id)}
                 \State tail $\gets$ getTail(id, 1)
-                \If{tail < lastId}
-                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+                \If{tail < lastId} \Comment{$id$ was inserted causally after the \emph{rename} op}
+%                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                     \State \Return concat(lastId, MIN\_TUPLE, tail)
                 \ElsIf{tail < newLastId}
                     \State \Return tail
-                \Else
-                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
+                \Else \Comment{$id$ was inserted causally after the \emph{rename} op}
+%                    \State \Comment{$id$ has been inserted causally after the \emph{rename} op}
                     \State \Return id
                 \EndIf
             \Else
@@ -2070,11 +2105,11 @@ In other cases, like \textsc{renIdFromPredId}, these functions prepend a suitabl
     \label{alg:appendix-revert-rename-id}
 \end{myalgorithm}
 
-Like \textsc{renIdLessThanFirstId} and \textsc{renIdGreaterThanFirstId}, these functions does not modify identifiers out of the range of renamed identifiers and of resulting identifiers.
-
+Like \textsc{renIdLessThanFirstId} and \textsc{renIdGreaterThanFirstId}, these functions do not modify identifiers out of the range of renamed identifiers and of resulting identifiers.
+%
 To process other cases, the functions study the pattern of the given identifier.
 If \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) infers from the value of the identifier that it may come from a concurrent \emph{insert} operation to the \emph{rename} one, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) simply removes the prefix added by \textsc{renIdLessThanFirstId} (resp. \textsc{renIdGreaterThanLastId}).
-
+%
 If the value of an identifier instead indicates that it was inserted causally after the \emph{rename} operation, \textsc{revRenIdLessThanNewFirstId} (resp. \textsc{revRenIdGreaterThanNewLastId}) generates a corresponding identifier at the parent epoch preserving the intended order using $\trm{predFirstId}$ and $\trm{MAX\_TUPLE}$ (resp. $\trm{lastId}$ and $\trm{MIN\_TUPLE}$).
 
 % if you will not have a photo at all:
